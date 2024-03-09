@@ -66,7 +66,7 @@ data class Context(
                 clientName = "WEB_REMIX",
                 clientVersion = "1.20220606.03.00",
                 platform = "DESKTOP",
-                userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36",
+                userAgent = UserAgents.DESKTOP,
                 referer = "https://music.youtube.com/"
             )
         )
@@ -77,7 +77,7 @@ data class Context(
                 clientVersion = "5.28.1",
                 platform = "MOBILE",
                 androidSdkVersion = 30,
-                userAgent = "com.google.android.apps.youtube.music/5.28.1 (Linux; U; Android 11) gzip"
+                userAgent = UserAgents.ANDROID
             )
         )
 
@@ -86,7 +86,7 @@ data class Context(
                 clientName = "TVHTML5_SIMPLY_EMBEDDED_PLAYER",
                 clientVersion = "2.0",
                 platform = "TV",
-                userAgent = "Mozilla/5.0 (PlayStation 4 5.55) AppleWebKit/601.2 (KHTML, like Gecko)"
+                userAgent = UserAgents.PLAYSTATION
             )
         )
     }
@@ -101,3 +101,10 @@ val validLanguageCodes =
 val validCountryCodes =
     listOf("DZ", "AR", "AU", "AT", "AZ", "BH", "BD", "BY", "BE", "BO", "BA", "BR", "BG", "KH", "CA", "CL", "HK", "CO", "CR", "HR", "CY", "CZ", "DK", "DO", "EC", "EG", "SV", "EE", "FI", "FR", "GE", "DE", "GH", "GR", "GT", "HN", "HU", "IS", "IN", "ID", "IQ", "IE", "IL", "IT", "JM", "JP", "JO", "KZ", "KE", "KR", "KW", "LA", "LV", "LB", "LY", "LI", "LT", "LU", "MK", "MY", "MT", "MX", "ME", "MA", "NP", "NL", "NZ", "NI", "NG", "NO", "OM", "PK", "PA", "PG", "PY", "PE", "PH", "PL", "PT", "PR", "QA", "RO", "RU", "SA", "SN", "RS", "SG", "SK", "SI", "ZA", "ES", "LK", "SE", "CH", "TW", "TZ", "TH", "TN", "TR", "UG", "UA", "AE", "GB", "US", "UY", "VE", "VN", "YE", "ZW")
 // @formatter:on
+
+@Suppress("MaximumLineLength")
+object UserAgents {
+    const val DESKTOP = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36"
+    const val ANDROID = "com.google.android.apps.youtube.music/5.28.1 (Linux; U; Android 11) gzip"
+    const val PLAYSTATION = "Mozilla/5.0 (PlayStation 4 5.55) AppleWebKit/601.2 (KHTML, like Gecko)"
+}

@@ -35,7 +35,7 @@ import kotlinx.coroutines.withContext
 
 private val VERSION_NAME = BuildConfig.VERSION_NAME.substringBeforeLast("-")
 private const val REPO_OWNER = "25huizengek1"
-private const val REPO_NAME = "ViMusic"
+private const val REPO_NAME = "ViTune"
 
 @Route
 @Composable
@@ -77,7 +77,7 @@ fun About() = SettingsCategoryScreen(
             onClick = {
                 uriHandler.openUri(
                     @Suppress("MaximumLineLength")
-                    "https://github.com/25huizengek1/ViMusic/issues/new?assignees=&labels=enhancement&template=feature_request.md"
+                    "https://github.com/$REPO_OWNER/$REPO_NAME/issues/new?assignees=&labels=enhancement&template=feature_request.md"
                 )
             }
         )
