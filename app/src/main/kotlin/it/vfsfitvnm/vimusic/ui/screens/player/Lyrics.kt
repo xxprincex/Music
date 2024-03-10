@@ -411,7 +411,8 @@ fun Lyrics(
                                 BasicText(
                                     text = sentence,
                                     style = typography.xs.center.medium.let {
-                                        if (index == synchronizedLyrics.index) it else it.disabled
+                                        if (index == synchronizedLyrics.index) it.color(Color.White)
+                                        else it.disabled
                                     },
                                     modifier = Modifier.padding(vertical = 4.dp, horizontal = 32.dp)
                                 )
