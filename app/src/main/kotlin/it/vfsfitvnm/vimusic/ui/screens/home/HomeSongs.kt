@@ -59,9 +59,11 @@ import it.vfsfitvnm.vimusic.enums.SortOrder
 import it.vfsfitvnm.vimusic.models.Song
 import it.vfsfitvnm.vimusic.preferences.AppearancePreferences
 import it.vfsfitvnm.vimusic.preferences.OrderPreferences
+import it.vfsfitvnm.vimusic.query
 import it.vfsfitvnm.vimusic.service.isLocal
 import it.vfsfitvnm.vimusic.transaction
 import it.vfsfitvnm.vimusic.ui.components.LocalMenuState
+import it.vfsfitvnm.vimusic.ui.components.themed.ConfirmationDialog
 import it.vfsfitvnm.vimusic.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
 import it.vfsfitvnm.vimusic.ui.components.themed.HeaderIconButton
@@ -147,6 +149,7 @@ fun HomeSongs(
             } ?: items
         }
     }
+    var hidingSong: String? by rememberSaveable { mutableStateOf(null) }
 
     LaunchedEffect(sortBy, sortOrder) {
         songProvider().collect { items = it }
@@ -266,6 +269,11 @@ fun HomeSongs(
                 items = filteredItems,
                 key = { song -> song.id }
             ) { song ->
+                if (hidingSong == song.id) HideSongDialog(
+                    song = song,
+                    onDismiss = { hidingSong = null }
+                )
+
                 SongItem(
                     modifier = Modifier
                         .combinedClickable(
@@ -274,7 +282,8 @@ fun HomeSongs(
                                 menuState.display {
                                     InHistoryMediaItemMenu(
                                         song = song,
-                                        onDismiss = menuState::hide
+                                        onDismiss = menuState::hide,
+                                        onHideFromDatabase = { hidingSong = song.id }
                                     )
                                 }
                             },
@@ -289,16 +298,15 @@ fun HomeSongs(
                         )
                         .animateItemPlacement()
                         .let {
-                            if (AppearancePreferences.swipeToHideSong) it.swipeToClose(
-                                key = filteredItems,
-                                onClose = { animationJob ->
+                            if (AppearancePreferences.swipeToHideSong) it.swipeToClose(filteredItems) { animationJob ->
+                                if (AppearancePreferences.swipeToHideSongConfirm)
+                                    hidingSong = song.id
+                                else {
                                     if (!song.isLocal) binder?.cache?.removeResource(song.id)
-                                    transaction {
-                                        Database.delete(song)
-                                    }
-                                    animationJob.join()
+                                    transaction { Database.delete(song) }
                                 }
-                            ) else it
+                                animationJob.join()
+                            } else it
                         },
                     song = song,
                     thumbnailSize = Dimensions.thumbnails.song,
@@ -335,4 +343,29 @@ fun HomeSongs(
             onClick = onSearchClick
         )
     }
+}
+
+@OptIn(UnstableApi::class)
+@Composable
+fun HideSongDialog(
+    song: Song,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val binder = LocalPlayerServiceBinder.current
+
+    ConfirmationDialog(
+        text = stringResource(R.string.confirm_hide_song),
+        onDismiss = { onDismiss() },
+        onConfirm = {
+            onDismiss()
+            query {
+                runCatching {
+                    if (!song.isLocal) binder?.cache?.removeResource(song.id)
+                    Database.delete(song)
+                }
+            }
+        },
+        modifier = modifier
+    )
 }

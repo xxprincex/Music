@@ -346,9 +346,10 @@ fun Queue(
                                         if (PlayerPreferences.horizontalSwipeToRemoveItem && !isPlayingThisMediaItem)
                                             it.swipeToClose(
                                                 key = windows,
-                                                delay = 100.milliseconds,
-                                                onClose = { player.removeMediaItem(window.firstPeriodIndex) }
-                                            )
+                                                delay = 100.milliseconds
+                                            ) {
+                                                player.removeMediaItem(window.firstPeriodIndex)
+                                            }
                                         else it
                                     }
                             )

@@ -155,6 +155,17 @@ fun AppearanceSettings() = with(AppearancePreferences) {
                 isChecked = swipeToHideSong,
                 onCheckedChange = { swipeToHideSong = it }
             )
+            AnimatedVisibility(
+                visible = swipeToHideSong,
+                label = ""
+            ) {
+                SwitchSettingsEntry(
+                    title = stringResource(R.string.swipe_to_hide_song_confirm),
+                    text = stringResource(R.string.swipe_to_hide_song_confirm_description),
+                    isChecked = swipeToHideSongConfirm,
+                    onCheckedChange = { swipeToHideSongConfirm = it }
+                )
+            }
         }
     }
 }

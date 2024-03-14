@@ -74,11 +74,13 @@ value class SwipeState internal constructor(
 @Composable
 fun rememberSwipeState(key: Any?): SwipeState {
     val state = remember(key) { SwipeState() }
-    DisposableEffect(Unit) {
+
+    DisposableEffect(key) {
         onDispose {
             state.recycle()
         }
     }
+
     return state
 }
 
@@ -91,7 +93,6 @@ fun Modifier.onSwipe(
     decay: Density.() -> DecayAnimationSpec<Float> = { splineBasedDecay(this) },
     animationSpec: AnimationSpec<Float> = spring(),
     bounds: ClosedRange<Dp>? = null,
-    disposable: Boolean = false,
     onSwipeOut: suspend (animationJob: Job) -> Unit
 ) = onSwipe(
     state = state,
@@ -103,8 +104,7 @@ fun Modifier.onSwipe(
     delay = delay,
     decay = decay,
     animationSpec = animationSpec,
-    bounds = bounds,
-    disposable = disposable
+    bounds = bounds
 )
 
 @Suppress("CyclomaticComplexMethod")
@@ -118,8 +118,7 @@ fun Modifier.onSwipe(
     delay: Duration = Duration.ZERO,
     decay: Density.() -> DecayAnimationSpec<Float> = { splineBasedDecay(this) },
     animationSpec: AnimationSpec<Float> = spring(),
-    bounds: ClosedRange<Dp>? = null,
-    disposable: Boolean = false
+    bounds: ClosedRange<Dp>? = null
 ) = this.composed {
     val swipeState = state ?: rememberSwipeState(key)
 
@@ -174,7 +173,6 @@ fun Modifier.onSwipe(
                             }
                             delay(delay)
                             onSwipeRight(animationJob)
-                            if (disposable) return@animationEnd swipeState.recycle()
                         }
 
                         targetOffset <= -size / 2 -> {
@@ -186,7 +184,6 @@ fun Modifier.onSwipe(
                             }
                             delay(delay)
                             onSwipeLeft(animationJob)
-                            if (disposable) return@animationEnd swipeState.recycle()
                         }
                     }
                     swipeState.offset.animateTo(
@@ -210,8 +207,8 @@ fun Modifier.onSwipe(
 }
 
 fun Modifier.swipeToClose(
-    state: SwipeState? = null,
     key: Any = Unit,
+    state: SwipeState? = null,
     delay: Duration = Duration.ZERO,
     decay: Density.() -> DecayAnimationSpec<Float> = { splineBasedDecay(this) },
     onClose: suspend (animationJob: Job) -> Unit
@@ -231,7 +228,6 @@ fun Modifier.swipeToClose(
             state = swipeState,
             key = key,
             animateOffset = true,
-            disposable = true,
             onSwipeLeft = onClose,
             orientation = Orientation.Horizontal,
             delay = delay,

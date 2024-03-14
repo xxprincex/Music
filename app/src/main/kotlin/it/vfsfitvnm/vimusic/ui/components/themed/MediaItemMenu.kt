@@ -2,7 +2,6 @@ package it.vfsfitvnm.vimusic.ui.components.themed
 
 import android.content.Intent
 import androidx.activity.compose.BackHandler
-import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.animateContentSize
@@ -47,7 +46,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
-import androidx.media3.common.util.UnstableApi
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
@@ -65,6 +63,7 @@ import it.vfsfitvnm.vimusic.transaction
 import it.vfsfitvnm.vimusic.ui.items.SongItem
 import it.vfsfitvnm.vimusic.ui.screens.albumRoute
 import it.vfsfitvnm.vimusic.ui.screens.artistRoute
+import it.vfsfitvnm.vimusic.ui.screens.home.HideSongDialog
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.favoritesIcon
@@ -85,37 +84,39 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@OptIn(UnstableApi::class)
 @Composable
 fun InHistoryMediaItemMenu(
     onDismiss: () -> Unit,
     song: Song,
     modifier: Modifier = Modifier
 ) {
-    val binder = LocalPlayerServiceBinder.current
-    var isHiding by remember { mutableStateOf(false) }
+    var isHiding by rememberSaveable { mutableStateOf(false) }
 
-    if (isHiding) ConfirmationDialog(
-        text = stringResource(R.string.confirm_hide_song),
-        onDismiss = { isHiding = false },
-        onConfirm = {
-            onDismiss()
-            query {
-                runCatching {
-                    if (!song.isLocal) binder?.cache?.removeResource(song.id)
-                    Database.delete(song)
-                }
-            }
-        }
+    if (isHiding) HideSongDialog(
+        song = song,
+        onDismiss = { isHiding = false }
     )
 
-    NonQueuedMediaItemMenu(
-        mediaItem = song.asMediaItem,
+    InHistoryMediaItemMenu(
         onDismiss = onDismiss,
+        song = song,
         onHideFromDatabase = { isHiding = true },
         modifier = modifier
     )
 }
+
+@Composable
+fun InHistoryMediaItemMenu(
+    onDismiss: () -> Unit,
+    song: Song,
+    onHideFromDatabase: () -> Unit,
+    modifier: Modifier = Modifier
+) = NonQueuedMediaItemMenu(
+    mediaItem = song.asMediaItem,
+    onDismiss = onDismiss,
+    onHideFromDatabase = { onHideFromDatabase() },
+    modifier = modifier
+)
 
 @Composable
 fun InPlaylistMediaItemMenu(
