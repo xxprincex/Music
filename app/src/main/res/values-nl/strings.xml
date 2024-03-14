@@ -204,6 +204,7 @@
     <string name="thumbnail_roundness_heaviest">Sterkste</string>
 
     <string name="text">Tekst</string>
+    <string name="font">Lettertype</string>
     <string name="use_system_font">Gebruik systeemlettertype</string>
     <string name="use_system_font_description">Gebruik het lettertype van het systeem</string>
     <string name="apply_font_padding">Gebruik marges rond lettertype</string>

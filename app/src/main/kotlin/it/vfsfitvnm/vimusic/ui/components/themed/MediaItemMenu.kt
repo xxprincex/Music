@@ -587,11 +587,12 @@ fun MediaItemMenu(
                                     modifier = Modifier.alpha(0f)
                                 )
                                 BasicText(
-                                    text = "${stringResource(R.string.format_hours, amount / 6)} " +
-                                            stringResource(
-                                                R.string.format_minutes,
-                                                (amount % 6) * 10
-                                            ),
+                                    text = "${stringResource(R.string.format_hours, amount / 6)} ${
+                                        stringResource(
+                                            R.string.format_minutes,
+                                            (amount % 6) * 10
+                                        )
+                                    }",
                                     style = typography.s.semiBold
                                 )
                             }

@@ -76,8 +76,8 @@ fun appearance(
     name: ColorPaletteName,
     mode: ColorPaletteMode,
     materialAccentColor: Color,
+    fontFamily: BuiltInFontFamily,
     sampleBitmap: Bitmap?,
-    useSystemFont: Boolean,
     applyFontPadding: Boolean,
     thumbnailRoundness: Dp,
     isSystemInDarkTheme: Boolean = isSystemInDarkTheme()
@@ -90,7 +90,7 @@ fun appearance(
         isDark,
         mode,
         isSystemInDarkTheme,
-        useSystemFont,
+        fontFamily,
         applyFontPadding,
         thumbnailRoundness
     ) {
@@ -104,7 +104,7 @@ fun appearance(
             colorPalette = colorPalette,
             typography = typographyOf(
                 color = colorPalette.text,
-                useSystemFont = useSystemFont,
+                fontFamily = fontFamily,
                 applyFontPadding = applyFontPadding
             ),
             thumbnailShapeCorners = thumbnailRoundness

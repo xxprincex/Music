@@ -163,9 +163,9 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
         val appearance = appearance(
             name = colorPaletteName,
             mode = colorPaletteMode,
+            fontFamily = fontFamily,
             materialAccentColor = Color(monet.getAccentColor(this@MainActivity)),
             sampleBitmap = sampleBitmap,
-            useSystemFont = useSystemFont,
             applyFontPadding = applyFontPadding,
             thumbnailRoundness = thumbnailRoundness.dp
         )

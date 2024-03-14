@@ -16,7 +16,9 @@ import it.vfsfitvnm.vimusic.enums.ThumbnailRoundness
 import it.vfsfitvnm.vimusic.preferences.AppearancePreferences
 import it.vfsfitvnm.vimusic.preferences.PlayerPreferences
 import it.vfsfitvnm.vimusic.ui.screens.Route
+import it.vfsfitvnm.vimusic.ui.styling.BuiltInFontFamily
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.ui.styling.googleFontsAvailable
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 
 @Route
@@ -66,11 +68,18 @@ fun AppearanceSettings() = with(AppearancePreferences) {
             )
         }
         SettingsGroup(title = stringResource(R.string.text)) {
-            SwitchSettingsEntry(
+            if (googleFontsAvailable()) EnumValueSelectorSettingsEntry(
+                title = stringResource(R.string.font),
+                selectedValue = fontFamily,
+                onValueSelected = { fontFamily = it },
+                valueText = {
+                    if (it == BuiltInFontFamily.System) stringResource(R.string.use_system_font) else it.name
+                }
+            ) else SwitchSettingsEntry(
                 title = stringResource(R.string.use_system_font),
                 text = stringResource(R.string.use_system_font_description),
-                isChecked = useSystemFont,
-                onCheckedChange = { useSystemFont = it }
+                isChecked = fontFamily == BuiltInFontFamily.System,
+                onCheckedChange = { fontFamily = if (it) BuiltInFontFamily.System else BuiltInFontFamily.Poppins }
             )
 
             SwitchSettingsEntry(

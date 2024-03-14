@@ -204,6 +204,7 @@
     <string name="thumbnail_roundness_heaviest">Heaviest</string>
 
     <string name="text">Text</string>
+    <string name="font">Font</string>
     <string name="use_system_font">Use system font</string>
     <string name="use_system_font_description">Use the font applied by the system</string>
     <string name="apply_font_padding">Apply font padding</string>
