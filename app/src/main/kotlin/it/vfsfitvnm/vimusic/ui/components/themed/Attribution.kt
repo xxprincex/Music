@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,7 +44,7 @@ fun Attribution(
     val attributionsIndex = text.lastIndexOf("\n\n${stringResource(R.string.from_wikipedia)}")
 
     var expanded by rememberSaveable { mutableStateOf(false) }
-    var overflow by remember { mutableStateOf(false) }
+    var overflow by rememberSaveable { mutableStateOf(false) }
 
     AnimatedContent(
         targetState = expanded,
