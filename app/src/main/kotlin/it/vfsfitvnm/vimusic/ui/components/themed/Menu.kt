@@ -1,9 +1,10 @@
 package it.vfsfitvnm.vimusic.ui.components.themed
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -46,6 +47,7 @@ inline fun Menu(
     content = content
 )
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MenuEntry(
     @DrawableRes icon: Int,
@@ -54,6 +56,7 @@ fun MenuEntry(
     modifier: Modifier = Modifier,
     secondaryText: String? = null,
     enabled: Boolean = true,
+    onLongClick: (() -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null
 ) {
     val (colorPalette, typography) = LocalAppearance.current
@@ -62,7 +65,11 @@ fun MenuEntry(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(24.dp),
         modifier = modifier
-            .clickable(enabled = enabled, onClick = onClick)
+            .combinedClickable(
+                enabled = enabled,
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
             .fillMaxWidth()
             .alpha(if (enabled) 1f else 0.4f)
             .padding(horizontal = 24.dp)

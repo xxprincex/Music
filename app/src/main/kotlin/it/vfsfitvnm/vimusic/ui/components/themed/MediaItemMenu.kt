@@ -27,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -80,7 +81,7 @@ import it.vfsfitvnm.vimusic.utils.semiBold
 import it.vfsfitvnm.vimusic.utils.thumbnail
 import it.vfsfitvnm.vimusic.utils.toast
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -534,21 +535,18 @@ fun MediaItemMenu(
                 val (_, typography) = LocalAppearance.current
 
                 var isShowingSleepTimerDialog by remember { mutableStateOf(false) }
+                var sleepTimerMillisLeft by remember { mutableLongStateOf(0L) }
 
-                val sleepTimerMillisLeft by (binder?.sleepTimerMillisLeft ?: flowOf(null))
-                    .collectAsState(initial = null)
+                LaunchedEffect(binder, binder?.sleepTimerMillisLeft) {
+                    binder?.sleepTimerMillisLeft?.collectLatest {
+                        sleepTimerMillisLeft = it ?: 0L
+                    }
+                }
 
                 if (isShowingSleepTimerDialog) {
-                    if (sleepTimerMillisLeft != null) ConfirmationDialog(
-                        text = stringResource(R.string.stop_sleep_timer_prompt),
-                        cancelText = stringResource(R.string.no),
-                        confirmText = stringResource(R.string.stop),
-                        onDismiss = { isShowingSleepTimerDialog = false },
-                        onConfirm = {
-                            binder?.cancelSleepTimer()
-                            onDismiss()
-                        }
-                    ) else DefaultDialog(onDismiss = { isShowingSleepTimerDialog = false }) {
+                    if (sleepTimerMillisLeft == 0L) DefaultDialog(onDismiss = {
+                        isShowingSleepTimerDialog = false
+                    }) {
                         var amount by remember { mutableIntStateOf(1) }
 
                         BasicText(
@@ -632,30 +630,46 @@ fun MediaItemMenu(
                                 }
                             )
                         }
-                    }
+                    } else ConfirmationDialog(
+                        text = stringResource(R.string.stop_sleep_timer_prompt),
+                        cancelText = stringResource(R.string.no),
+                        confirmText = stringResource(R.string.stop),
+                        onDismiss = { isShowingSleepTimerDialog = false },
+                        onConfirm = {
+                            binder?.cancelSleepTimer()
+                            onDismiss()
+                        }
+                    )
                 }
 
                 MenuEntry(
                     icon = R.drawable.alarm,
                     text = stringResource(R.string.sleep_timer),
                     onClick = { isShowingSleepTimerDialog = true },
-                    trailingContent = sleepTimerMillisLeft?.let {
-                        {
-                            BasicText(
-                                text = stringResource(
-                                    R.string.format_time_left,
-                                    formatAsDuration(it)
-                                ),
-                                style = typography.xxs.medium,
-                                modifier = Modifier
-                                    .background(
-                                        color = colorPalette.background0,
-                                        shape = RoundedCornerShape(16.dp)
-                                    )
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    .animateContentSize()
+                    onLongClick = {
+                        runCatching {
+                            binder?.startSleepTimer(
+                                binder.player.duration - binder.player.contentPosition
                             )
                         }
+                        isShowingSleepTimerDialog = false
+                        onDismiss()
+                    },
+                    trailingContent = {
+                        if (sleepTimerMillisLeft != 0L) BasicText(
+                            text = stringResource(
+                                R.string.format_time_left,
+                                formatAsDuration(sleepTimerMillisLeft)
+                            ),
+                            style = typography.xxs.medium,
+                            modifier = Modifier
+                                .background(
+                                    color = colorPalette.background0,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .animateContentSize()
+                        )
                     }
                 )
             }
