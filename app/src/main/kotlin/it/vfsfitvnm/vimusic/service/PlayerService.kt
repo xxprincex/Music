@@ -24,7 +24,6 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
 import android.text.format.DateUtils
 import androidx.annotation.OptIn
 import androidx.compose.runtime.getValue
@@ -59,7 +58,6 @@ import androidx.media3.exoplayer.RenderersFactory
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.analytics.PlaybackStats
 import androidx.media3.exoplayer.analytics.PlaybackStatsListener
-import androidx.media3.exoplayer.audio.AudioRendererEventListener
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioOffloadSupportProvider
 import androidx.media3.exoplayer.audio.DefaultAudioSink
@@ -211,10 +209,19 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private val mediaItemState = MutableStateFlow<MediaItem?>(null)
     private val isLikedState = mediaItemState
         .flatMapMerge { item ->
-            item?.mediaId?.let { Database.likedAt(it).distinctUntilChanged() } ?: flowOf(null)
+            item?.mediaId?.let {
+                Database
+                    .likedAt(it)
+                    .distinctUntilChanged()
+                    .cancellable()
+            } ?: flowOf(null)
         }
         .map { it != null }
-        .stateIn(coroutineScope, SharingStarted.Eagerly, false)
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.Eagerly,
+            initialValue = false
+        )
 
     override fun onBind(intent: Intent?): AndroidBinder {
         super.onBind(intent)
@@ -729,7 +736,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         updatePlaybackState()
 
-        if (events.containsAny(
+        if (
+            events.containsAny(
                 Player.EVENT_PLAYBACK_STATE_CHANGED,
                 Player.EVENT_PLAY_WHEN_READY_CHANGED,
                 Player.EVENT_IS_PLAYING_CHANGED,
@@ -844,9 +852,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         notificationManager?.run {
             if (getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null) createNotificationChannel(
                 NotificationChannel(
-                    NOTIFICATION_CHANNEL_ID,
-                    getString(R.string.now_playing),
-                    NotificationManager.IMPORTANCE_LOW
+                    /* id = */ NOTIFICATION_CHANNEL_ID,
+                    /* name = */ getString(R.string.now_playing),
+                    /* importance = */ NotificationManager.IMPORTANCE_LOW
                 ).apply {
                     setSound(null, null)
                     enableLights(false)
@@ -857,9 +865,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             if (getNotificationChannel(SLEEP_TIMER_NOTIFICATION_CHANNEL_ID) == null)
                 createNotificationChannel(
                     NotificationChannel(
-                        SLEEP_TIMER_NOTIFICATION_CHANNEL_ID,
-                        getString(R.string.sleep_timer),
-                        NotificationManager.IMPORTANCE_LOW
+                        /* id = */ SLEEP_TIMER_NOTIFICATION_CHANNEL_ID,
+                        /* name = */ getString(R.string.sleep_timer),
+                        /* importance = */ NotificationManager.IMPORTANCE_LOW
                     ).apply {
                         setSound(null, null)
                         enableLights(false)
@@ -893,8 +901,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     arrayOf(),
                     SilenceSkippingAudioProcessor(
                         /* minimumSilenceDurationUs = */ minimumSilenceDuration,
-                        /* paddingSilenceUs         = */ minimumSilenceDuration / 100L,
-                        /* silenceThresholdLevel    = */ 256
+                        /* silenceRetentionRatio = */ 0.01f,
+                        /* maxSilenceToKeepDurationUs = */ minimumSilenceDuration,
+                        /* minVolumeToKeepPercentageWhenMuting = */ 0,
+                        /* silenceThresholdLevel = */ 256
                     ),
                     SonicAudioProcessor()
                 )
@@ -904,14 +914,14 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 if (isAtLeastAndroid10) setOffloadMode(AudioSink.OFFLOAD_MODE_DISABLED)
             }
 
-        return RenderersFactory { handler: Handler?, _, audioListener: AudioRendererEventListener?, _, _ ->
+        return RenderersFactory { handler, _, audioListener, _, _ ->
             arrayOf(
                 MediaCodecAudioRenderer(
-                    this,
-                    MediaCodecSelector.DEFAULT,
-                    handler,
-                    audioListener,
-                    audioSink
+                    /* context = */ this,
+                    /* mediaCodecSelector = */ MediaCodecSelector.DEFAULT,
+                    /* eventHandler = */ handler,
+                    /* eventListener = */ audioListener,
+                    /* audioSink = */ audioSink
                 )
             )
         }
@@ -1022,7 +1032,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         params = Innertube.SearchFilter.Song.value
                     ),
                     fromMusicShelfRendererContent = Innertube.SongItem.Companion::from
-                )?.getOrNull()?.items?.firstOrNull()?.info?.endpoint?.let { playRadio(it) }
+                )
+                    ?.getOrNull()
+                    ?.items
+                    ?.firstOrNull()
+                    ?.info
+                    ?.endpoint
+                    ?.let { playRadio(it) }
             }
         }
     }
@@ -1030,8 +1046,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private fun likeAction() = mediaItemState.value?.let { mediaItem ->
         transaction {
             Database.like(
-                mediaItem.mediaId,
-                if (isLikedState.value) null else System.currentTimeMillis()
+                songId = mediaItem.mediaId,
+                likedAt = if (isLikedState.value) null else System.currentTimeMillis()
             )
         }
     }.let { }
@@ -1085,10 +1101,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         context(Context)
         val pendingIntent: PendingIntent
             get() = PendingIntent.getBroadcast(
-                this@Context,
-                100,
-                Intent(value).setPackage(packageName),
-                PendingIntent.FLAG_UPDATE_CURRENT.or(if (isAtLeastAndroid6) PendingIntent.FLAG_IMMUTABLE else 0)
+                /* context = */ this@Context,
+                /* requestCode = */ 100,
+                /* intent = */ Intent(value).setPackage(packageName),
+                /* flags = */ PendingIntent.FLAG_UPDATE_CURRENT or
+                        (if (isAtLeastAndroid6) PendingIntent.FLAG_IMMUTABLE else 0)
             )
 
         companion object {
