@@ -38,6 +38,7 @@ import it.vfsfitvnm.vimusic.ui.items.SongItem
 import it.vfsfitvnm.vimusic.ui.items.SongItemPlaceholder
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.PlaylistDownloadIcon
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.center
 import it.vfsfitvnm.vimusic.utils.disabled
@@ -46,6 +47,7 @@ import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
 import it.vfsfitvnm.vimusic.utils.isLandscape
 import it.vfsfitvnm.vimusic.utils.semiBold
+import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -100,7 +102,11 @@ fun AlbumSongs(
                                     }
                                 )
                             },
-                            null
+                            {
+                                PlaylistDownloadIcon(
+                                    songs = songs.map(Song::asMediaItem).toImmutableList()
+                                )
+                            }
                         )
 
                         if (!isLandscape) thumbnailContent()
