@@ -289,10 +289,10 @@ fun HomeSongs(
                         )
                         .animateItemPlacement()
                         .let {
-                            if (!song.isLocal && AppearancePreferences.swipeToHideSong) it.swipeToClose(
+                            if (AppearancePreferences.swipeToHideSong) it.swipeToClose(
                                 key = filteredItems,
                                 onClose = { animationJob ->
-                                    binder?.cache?.removeResource(song.id)
+                                    if (!song.isLocal) binder?.cache?.removeResource(song.id)
                                     transaction {
                                         Database.delete(song)
                                     }

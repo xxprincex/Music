@@ -102,7 +102,7 @@ fun InHistoryMediaItemMenu(
             onDismiss()
             query {
                 runCatching {
-                    binder?.cache?.removeResource(song.id)
+                    if (!song.isLocal) binder?.cache?.removeResource(song.id)
                     Database.delete(song)
                 }
             }
@@ -743,7 +743,7 @@ fun MediaItemMenu(
                 )
             }
 
-            if (!isLocal) onHideFromDatabase?.let { onHideFromDatabase ->
+            onHideFromDatabase?.let { onHideFromDatabase ->
                 MenuEntry(
                     icon = R.drawable.trash,
                     text = stringResource(R.string.hide),

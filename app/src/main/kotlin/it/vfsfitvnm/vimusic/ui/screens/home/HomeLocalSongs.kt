@@ -11,8 +11,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +41,7 @@ import it.vfsfitvnm.vimusic.utils.hasPermission
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid10
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isCompositionLaunched
+import it.vfsfitvnm.vimusic.utils.medium
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -68,13 +71,14 @@ fun HomeLocalSongs(onSearchClick: () -> Unit) = with(OrderPreferences) {
     var hasPermission by remember(isCompositionLaunched()) {
         mutableStateOf(context.applicationContext.hasPermission(permission))
     }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { hasPermission = it }
     )
 
     LaunchedEffect(hasPermission) {
-        context.musicFilesAsFlow().collect()
+        if (hasPermission) context.musicFilesAsFlow().collect()
     }
 
     if (hasPermission) HomeSongs(
@@ -101,9 +105,10 @@ fun HomeLocalSongs(onSearchClick: () -> Unit) = with(OrderPreferences) {
         ) {
             BasicText(
                 text = stringResource(R.string.media_permission_declined),
-                modifier = Modifier.fillMaxWidth(0.5f),
-                style = typography.s
+                modifier = Modifier.fillMaxWidth(0.75f),
+                style = typography.m.medium
             )
+            Spacer(modifier = Modifier.height(12.dp))
             SecondaryTextButton(
                 text = stringResource(R.string.open_settings),
                 onClick = {
