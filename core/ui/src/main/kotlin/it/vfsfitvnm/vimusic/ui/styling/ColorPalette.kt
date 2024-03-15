@@ -197,7 +197,8 @@ inline val ColorPalette.isDefault
     get() =
         this === DefaultDarkColorPalette || this === DefaultLightColorPalette || this === PureBlackColorPalette
 
-inline val ColorPalette.collapsedPlayerProgressBar get() = if (isDefault) text else accent
+inline val ColorPalette.collapsedPlayerProgressBar get() =
+    if (this === PureBlackColorPalette) DefaultDarkColorPalette.background0 else background2
 inline val ColorPalette.favoritesIcon get() = if (isDefault) red else accent
 inline val ColorPalette.shimmer get() = if (isDefault) Color(0xff838383) else accent
 inline val ColorPalette.primaryButton

@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -142,13 +143,12 @@ fun Player(
     }
 
     val mediaItem = nullableMediaItem ?: return
-
     val positionAndDuration by binder.player.positionAndDurationState()
 
     val windowInsets = WindowInsets.systemBars
-
     val horizontalBottomPaddingValues = windowInsets
-        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom).asPaddingValues()
+        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+        .asPaddingValues()
 
     OnGlobalRoute {
         layoutState.collapseSoft()
@@ -177,18 +177,18 @@ fun Player(
                     .clip(shape)
                     .background(colorPalette.background1)
                     .fillMaxSize()
-                    .padding(horizontalBottomPaddingValues)
                     .drawBehind {
-                        val progress =
-                            positionAndDuration.first.toFloat() / positionAndDuration.second.absoluteValue
-
-                        drawLine(
+                        drawRect(
                             color = colorPalette.collapsedPlayerProgressBar,
-                            start = Offset(x = 0f, y = 1.dp.toPx()),
-                            end = Offset(x = size.width * progress, y = 1.dp.toPx()),
-                            strokeWidth = 2.dp.toPx()
+                            topLeft = Offset.Zero,
+                            size = Size(
+                                width = positionAndDuration.first.toFloat() /
+                                        positionAndDuration.second.absoluteValue * size.width,
+                                height = size.height
+                            )
                         )
                     }
+                    .padding(horizontalBottomPaddingValues)
             ) {
                 Spacer(modifier = Modifier.width(2.dp))
 
