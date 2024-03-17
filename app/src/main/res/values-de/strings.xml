@@ -129,7 +129,7 @@
     <string name="no_browser_installed">Konnte keine Anwendung zum Surfen im Internet finden</string>
     <string name="no_equalizer_installed">Konnte keine Anwendung zum Entzerren von Audio finden</string>
     <string name="no_file_chooser_installed">Konnte keine Anwendung zum Erstellen von Dokumenten finden</string>
-    <string name="no_battery_optimization_settings_found">Konnte keine Einstellungen zur Batterieoptimierung finden, bitte ViMusic manuell auf die Whitelist setzen</string>
+    <string name="no_battery_optimization_settings_found">Konnte keine Einstellungen zur Batterieoptimierung finden, bitte ViTune manuell auf die Whitelist setzen</string>
 
     <string name="related_albums">Ähnliche Alben</string>
     <string name="similar_artists">Ähnliche Künstler</string>
@@ -156,7 +156,6 @@
     <string name="playback_speed">Wiedergabegeschwindigkeit</string>
     <string name="minimum_speed_value">Warum haben Sie das getan?!</string>
     <string name="song_volume_boost">Song-Lautstärke erhöhen</string>
-    <string name="song_loop">Liedschleife</string>
     <string name="queue_loop">Warteschleife</string>
     <string name="add_queue_to_playlist">Warteschlange zur Wiedergabeliste hinzufügen</string>
 
@@ -171,7 +170,7 @@
     <string name="view_playlist">Wiedergabeliste ansehen</string>
 
     <string name="search_placeholder">Suchen…</string>
-    <string name="format_version_credits">v%1$s von vfsfitvnm</string>
+    <string name="format_version_credits">v%1$s von Huizengek &amp; vfsfitvnm</string>
     <string name="social">Soziales</string>
     <string name="contact">Kontakt</string>
     <string name="github">GitHub</string>
@@ -241,7 +240,7 @@
     <string name="backup_description">Persönliche Einstellungen (z. B. der Themenmodus) und der Zwischenspeicher sind ausgeschlossen.</string>
     <string name="backup_action_description">Exportieren Sie die Musik-Datenbank auf den externen Speicher</string>
     <string name="restore">Wiederherstellen</string>
-    <string name="restore_warning">Vorhandene Daten werden überschrieben.\nViMusic schließt sich nach der Wiederherstellung der Datenbank automatisch.</string>
+    <string name="restore_warning">Vorhandene Daten werden überschrieben.\nViTune schließt sich nach der Wiederherstellung der Datenbank automatisch.</string>
     <string name="restore_description">Importieren Sie die Musik-Datenbank vom externen Speicher</string>
 
     <string name="other">Sonstiges</string>
@@ -276,7 +275,6 @@
     <string name="kill_app">Anwendung beenden</string>
     <string name="show_troubleshoot_section">Abschnitt zur Fehlerbehebung anzeigen</string>
 
-    <string name="player_and_audio">Player &amp; Audio</string>
     <string name="persistent_queue">Dauerhafte Warteschlange</string>
     <string name="persistent_queue_description">Abgespielte Titel speichern und wiederherstellen</string>
     <string name="resume_playback">Wiedergabe fortsetzen</string>
@@ -317,7 +315,7 @@
     <string name="username">Benutzername</string>
     <string name="password">Passwort</string>
     <string name="login">Anmelden</string>
-    <string name="sync_description">Sie können Wiedergabelisten hosten und mit ViMusic synchronisieren. Derzeit wird nur Piped unterstützt.</string>
+    <string name="sync_description">Sie können Wiedergabelisten hosten und mit ViTune synchronisieren. Derzeit wird nur Piped unterstützt.</string>
     <string name="add_account">Account hinzufügen</string>
     <string name="add_account_description">Verknüpfen Sie ein Piped-Konto mit Ihrer Instanz, Ihrem Benutzernamen und Ihrem Passwort.</string>
     <string name="learn_more">Mehr erfahren</string>

@@ -4,9 +4,8 @@ about: Suggest an idea for this project
 title: ''
 labels: enhancement
 assignees: ''
-
 ---
 
-## Feature request: [name]
+## Feature request: ...
 
 A clear and concise description of the feature you want to request.

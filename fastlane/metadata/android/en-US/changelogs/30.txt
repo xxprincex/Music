@@ -1,3 +1,0 @@
-* Added more translations
-* Fixed a layout issue with the coloring of songs in a list
-* Fixed problems with all sliders

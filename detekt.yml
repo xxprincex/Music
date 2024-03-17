@@ -20,7 +20,7 @@ Compose:
   ModifierMissing:
     active: true
     ignoreAnnotated:
-      - it.vfsfitvnm.vimusic.ui.screens.Route
+      - app.vitune.android.ui.screens.Route
   ModifierNaming:
     active: true
   ModifierNotUsedAtRoot:
@@ -109,7 +109,7 @@ style:
   ForbiddenComment:
     active: false
   MagicNumber:
-    active: false # For now, since there are way too many of them
+    active: false
   MaxLineLength:
     active: false # Overlaps with MaximumLineLength, ktlint preferred because of auto-correct
   ModifierOrder:

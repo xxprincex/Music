@@ -5,6 +5,7 @@ plugins {
 }
 
 android {
+    namespace = project.group.toString()
     compileSdk = 34
 
     defaultConfig {
@@ -13,7 +14,7 @@ android {
         minSdk = 21
         targetSdk = 34
 
-        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 35
+        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 1
         versionName = project.version.toString()
 
         multiDexEnabled = true
@@ -41,16 +42,15 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
-            manifestPlaceholders["appName"] = "ViMusic (Debug)"
+            manifestPlaceholders["appName"] = "ViTune Debug"
         }
 
         release {
             versionNameSuffix = "-RELEASE"
             isMinifyEnabled = true
             isShrinkResources = true
-            manifestPlaceholders["appName"] = "ViMusic"
+            manifestPlaceholders["appName"] = "ViTune"
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            buildConfigField("String", "RELEASE_HACK", "\"AndroidWhyTfDidYouMakeMeDoThis\"")
         }
 
         create("nightly") {
@@ -59,7 +59,7 @@ android {
 
             applicationIdSuffix = ".nightly"
             versionNameSuffix = "-NIGHTLY"
-            manifestPlaceholders["appName"] = "ViMusic Nightly"
+            manifestPlaceholders["appName"] = "ViTune Nightly"
             signingConfig = signingConfigs.findByName("ci")
         }
     }
