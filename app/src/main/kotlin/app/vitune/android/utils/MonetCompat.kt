@@ -1,6 +1,6 @@
 package app.vitune.android.utils
 
-import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -11,7 +11,7 @@ import app.vitune.core.ui.DefaultLightColorPalette
 import com.kieronquinn.monetcompat.core.MonetCompat
 import kotlinx.coroutines.launch
 
-val LocalMonetCompat = compositionLocalOf { MonetCompat.getInstance() }
+val LocalMonetCompat = staticCompositionLocalOf { MonetCompat.getInstance() }
 
 context(LifecycleOwner)
 inline fun MonetCompat.invokeOnReady(

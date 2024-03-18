@@ -5,11 +5,13 @@ plugins {
 }
 
 android {
-    namespace = project.group.toString()
+    val appId = "${project.group}.android"
+
+    namespace = appId
     compileSdk = 34
 
     defaultConfig {
-        applicationId = project.group.toString()
+        applicationId = appId
 
         minSdk = 21
         targetSdk = 34
@@ -36,8 +38,6 @@ android {
         }
     }
 
-    namespace = project.group.toString()
-
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -50,7 +50,10 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             manifestPlaceholders["appName"] = "ViTune"
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
 
         create("nightly") {
@@ -95,6 +98,8 @@ ksp {
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugaring)
+
     implementation(projects.compose.persist)
     implementation(projects.compose.preferences)
     implementation(projects.compose.routing)
@@ -132,8 +137,6 @@ dependencies {
     implementation(projects.providers.piped)
     implementation(projects.core.data)
     implementation(projects.core.ui)
-
-    coreLibraryDesugaring(libs.desugaring)
 
     detektPlugins(libs.detekt.compose)
     detektPlugins(libs.detekt.formatting)

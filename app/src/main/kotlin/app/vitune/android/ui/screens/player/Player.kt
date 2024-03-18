@@ -327,12 +327,13 @@ fun Player(
         }
 
         val controlsContent: @Composable (modifier: Modifier) -> Unit = { innerModifier ->
-            val media = mediaItem.toUiMedia(positionAndDuration.second)
+            val (position, duration) = positionAndDuration
 
             Controls(
-                media = media,
+                media = mediaItem.toUiMedia(duration),
+                binder = binder,
                 shouldBePlaying = shouldBePlaying,
-                position = positionAndDuration.first,
+                position = position,
                 modifier = innerModifier
             )
         }

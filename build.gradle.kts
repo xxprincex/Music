@@ -33,7 +33,7 @@ subprojects {
 }
 
 allprojects {
-    group = "app.vitune.android"
+    group = "app.vitune"
     version = "1.0.0"
 
     apply(plugin = "io.gitlab.arturbosch.detekt")

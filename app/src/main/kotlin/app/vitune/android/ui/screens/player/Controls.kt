@@ -59,6 +59,7 @@ import app.vitune.android.models.Song
 import app.vitune.android.models.ui.UiMedia
 import app.vitune.android.preferences.PlayerPreferences
 import app.vitune.android.query
+import app.vitune.android.service.PlayerService
 import app.vitune.android.transaction
 import app.vitune.android.ui.components.SeekBar
 import app.vitune.android.ui.components.themed.BigIconButton
@@ -83,6 +84,7 @@ private const val FORWARD_BACKWARD_OFFSET = 16f
 @Composable
 fun Controls(
     media: UiMedia,
+    binder: PlayerService.Binder,
     shouldBePlaying: Boolean,
     position: Long,
     modifier: Modifier = Modifier,
@@ -91,10 +93,16 @@ fun Controls(
     var likedAt by remember { mutableStateOf<Long?>(null) }
 
     LaunchedEffect(media) {
-        Database.likedAt(media.id).distinctUntilChanged().collect { likedAt = it }
+        Database
+            .likedAt(media.id)
+            .distinctUntilChanged()
+            .collect { likedAt = it }
     }
 
-    val shouldBePlayingTransition = updateTransition(shouldBePlaying, label = "shouldBePlaying")
+    val shouldBePlayingTransition = updateTransition(
+        targetState = shouldBePlaying,
+        label = "shouldBePlaying"
+    )
 
     val playButtonRadius by shouldBePlayingTransition.animateDp(
         transitionSpec = { tween(durationMillis = 100, easing = LinearEasing) },
@@ -105,6 +113,7 @@ fun Controls(
     when (layout) {
         PlayerPreferences.PlayerLayout.Classic -> ClassicControls(
             media = media,
+            binder = binder,
             shouldBePlaying = shouldBePlaying,
             position = position,
             likedAt = likedAt,
@@ -114,6 +123,7 @@ fun Controls(
 
         PlayerPreferences.PlayerLayout.New -> ModernControls(
             media = media,
+            binder = binder,
             shouldBePlaying = shouldBePlaying,
             position = position,
             likedAt = likedAt,
@@ -126,6 +136,7 @@ fun Controls(
 @Composable
 private fun ClassicControls(
     media: UiMedia,
+    binder: PlayerService.Binder,
     shouldBePlaying: Boolean,
     position: Long,
     likedAt: Long?,
@@ -133,7 +144,6 @@ private fun ClassicControls(
     modifier: Modifier = Modifier
 ) = with(PlayerPreferences) {
     val (colorPalette) = LocalAppearance.current
-    val binder = LocalPlayerServiceBinder.current ?: return
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -243,6 +253,7 @@ private fun ClassicControls(
 @Composable
 private fun ModernControls(
     media: UiMedia,
+    binder: PlayerService.Binder,
     shouldBePlaying: Boolean,
     position: Long,
     likedAt: Long?,
@@ -250,8 +261,6 @@ private fun ModernControls(
     modifier: Modifier = Modifier,
     controlHeight: Dp = 64.dp
 ) {
-    val binder = LocalPlayerServiceBinder.current ?: return
-
     val previousButtonContent: @Composable RowScope.() -> Unit = {
         SkipButton(
             iconId = R.drawable.play_skip_back,
@@ -413,24 +422,32 @@ private inline fun MediaInfoEntry(
 
 @Composable
 private fun MediaInfo(media: UiMedia) {
-    val typography = LocalAppearance.current.typography
+    val (_, typography) = LocalAppearance.current
 
     var artistInfo: List<Info>? by remember { mutableStateOf(null) }
     var maxHeight by rememberSaveable { mutableIntStateOf(0) }
 
     LaunchedEffect(media) {
-        artistInfo = withContext(Dispatchers.IO) {
-            Database.songArtistInfo(media.id).takeIf { it.isNotEmpty() }
+        withContext(Dispatchers.IO) {
+            artistInfo = Database
+                .songArtistInfo(media.id)
+                .takeIf { it.isNotEmpty() }
         }
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        MediaInfoEntry {
-            BasicText(
-                text = media.title,
-                style = typography.l.bold,
-                maxLines = 1
-            )
+        AnimatedContent(
+            targetState = media.title,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            label = ""
+        ) { title ->
+            MediaInfoEntry {
+                BasicText(
+                    text = title,
+                    style = typography.l.bold,
+                    maxLines = 1
+                )
+            }
         }
 
         AnimatedContent(
