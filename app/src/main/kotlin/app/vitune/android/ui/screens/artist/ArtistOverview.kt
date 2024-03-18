@@ -275,7 +275,7 @@ fun ArtistOverview(
             youtubeArtistPage?.radioEndpoint?.let { endpoint ->
                 FloatingActionsContainerWithScrollToTop(
                     scrollState = scrollState,
-                    iconId = R.drawable.radio,
+                    icon = R.drawable.radio,
                     onClick = {
                         binder?.stopRadio()
                         binder?.playRadio(endpoint)

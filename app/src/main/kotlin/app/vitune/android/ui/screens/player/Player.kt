@@ -84,6 +84,7 @@ import app.vitune.android.utils.semiBold
 import app.vitune.android.utils.shouldBePlaying
 import app.vitune.android.utils.thumbnail
 import app.vitune.android.utils.toast
+import app.vitune.compose.persist.PersistMapCleanup
 import app.vitune.compose.routing.OnGlobalRoute
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
@@ -97,11 +98,6 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlin.math.absoluteValue
 
-private fun onDismiss(binder: PlayerService.Binder) {
-    binder.stopRadio()
-    binder.player.clearMediaItems()
-}
-
 @Composable
 fun Player(
     layoutState: BottomSheetState,
@@ -109,17 +105,22 @@ fun Player(
     shape: RoundedCornerShape = RoundedCornerShape(
         topStart = 12.dp,
         topEnd = 12.dp
-    )
-) {
+    ),
+    windowInsets: WindowInsets = WindowInsets.systemBars
+) = with(PlayerPreferences) {
     val menuState = LocalMenuState.current
-
     val (colorPalette, typography, thumbnailCornerSize) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
+
+    PersistMapCleanup(prefix = "queue/suggestions")
 
     binder?.player ?: return
 
     var nullableMediaItem by remember {
-        mutableStateOf(binder.player.currentMediaItem, neverEqualPolicy())
+        mutableStateOf(
+            value = binder.player.currentMediaItem,
+            policy = neverEqualPolicy()
+        )
     }
 
     var shouldBePlaying by remember {
@@ -145,7 +146,6 @@ fun Player(
     val mediaItem = nullableMediaItem ?: return
     val positionAndDuration by binder.player.positionAndDurationState()
 
-    val windowInsets = WindowInsets.systemBars
     val horizontalBottomPaddingValues = windowInsets
         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
         .asPaddingValues()
@@ -165,7 +165,7 @@ fun Player(
                 verticalAlignment = Alignment.Top,
                 modifier = Modifier
                     .let {
-                        if (PlayerPreferences.horizontalSwipeToClose) it.onSwipe(
+                        if (horizontalSwipeToClose) it.onSwipe(
                             animateOffset = true,
                             onSwipeOut = { animationJob ->
                                 animationJob.join()
@@ -248,7 +248,7 @@ fun Player(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.height(Dimensions.items.collapsedPlayerHeight)
                 ) {
-                    AnimatedVisibility(visible = PlayerPreferences.isShowingPrevButtonCollapsed) {
+                    AnimatedVisibility(visible = isShowingPrevButtonCollapsed) {
                         IconButton(
                             icon = R.drawable.play_skip_back,
                             color = colorPalette.text,
@@ -309,8 +309,8 @@ fun Player(
 
         val thumbnailContent: @Composable (modifier: Modifier) -> Unit = { innerModifier ->
             Thumbnail(
-                isShowingLyrics = PlayerPreferences.isShowingLyrics,
-                onShowLyrics = { PlayerPreferences.isShowingLyrics = it },
+                isShowingLyrics = isShowingLyrics,
+                onShowLyrics = { isShowingLyrics = it },
                 isShowingStatsForNerds = isShowingStatsForNerds,
                 onShowStatsForNerds = { isShowingStatsForNerds = it },
                 modifier = innerModifier
@@ -320,7 +320,7 @@ fun Player(
                         direction = PinchDirection.Out,
                         threshold = 1.05f,
                         onPinch = {
-                            if (PlayerPreferences.isShowingLyrics) isShowingLyricsDialog = true
+                            if (isShowingLyrics) isShowingLyricsDialog = true
                         }
                     )
             )
@@ -382,12 +382,8 @@ fun Player(
             SliderDialog(
                 onDismiss = { speedDialogOpen = false },
                 title = stringResource(R.string.playback_speed),
-                provideState = {
-                    remember(PlayerPreferences.speed) {
-                        mutableFloatStateOf(PlayerPreferences.speed)
-                    }
-                },
-                onSlideCompleted = { PlayerPreferences.speed = it },
+                provideState = { remember(speed) { mutableFloatStateOf(speed) } },
+                onSlideCompleted = { speed = it },
                 min = 0f,
                 max = 2f,
                 toDisplay = {
@@ -401,9 +397,7 @@ fun Player(
                 ) {
                     SecondaryTextButton(
                         text = stringResource(R.string.reset),
-                        onClick = {
-                            PlayerPreferences.speed = 1f
-                        }
+                        onClick = { speed = 1f }
                     )
                 }
             }
@@ -451,45 +445,44 @@ fun Player(
             }
         }
 
-        with(PlayerPreferences) {
-            Queue(
-                layoutState = playerBottomSheetState,
-                beforeContent = {
-                    if (playerLayout == PlayerPreferences.PlayerLayout.New) IconButton(
-                        onClick = { trackLoopEnabled = !trackLoopEnabled },
-                        icon = R.drawable.infinite,
-                        enabled = trackLoopEnabled,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .size(20.dp)
-                    ) else Spacer(modifier = Modifier.width(20.dp))
-                },
-                afterContent = {
-                    IconButton(
-                        icon = R.drawable.ellipsis_horizontal,
-                        color = colorPalette.text,
-                        onClick = {
-                            menuState.display {
-                                PlayerMenu(
-                                    onDismiss = menuState::hide,
-                                    mediaItem = mediaItem,
-                                    binder = binder,
-                                    onShowSpeedDialog = { speedDialogOpen = true },
-                                    onShowNormalizationDialog =
-                                    if (volumeNormalization) ({ boostDialogOpen = true }) else null
-                                )
-                            }
-                        },
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .size(20.dp)
-                    )
-                },
-                backgroundColorProvider = { colorPalette.background2 },
-                modifier = Modifier.align(Alignment.BottomCenter),
-                shape = shape
-            )
-        }
+        Queue(
+            layoutState = playerBottomSheetState,
+            binder = binder,
+            beforeContent = {
+                if (playerLayout == PlayerPreferences.PlayerLayout.New) IconButton(
+                    onClick = { trackLoopEnabled = !trackLoopEnabled },
+                    icon = R.drawable.infinite,
+                    enabled = trackLoopEnabled,
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .size(20.dp)
+                ) else Spacer(modifier = Modifier.width(20.dp))
+            },
+            afterContent = {
+                IconButton(
+                    icon = R.drawable.ellipsis_horizontal,
+                    color = colorPalette.text,
+                    onClick = {
+                        menuState.display {
+                            PlayerMenu(
+                                onDismiss = menuState::hide,
+                                mediaItem = mediaItem,
+                                binder = binder,
+                                onShowSpeedDialog = { speedDialogOpen = true },
+                                onShowNormalizationDialog = {
+                                    boostDialogOpen = true
+                                }.takeIf { volumeNormalization }
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .size(20.dp)
+                )
+            },
+            modifier = Modifier.align(Alignment.BottomCenter),
+            shape = shape
+        )
     }
 }
 
@@ -532,4 +525,9 @@ private fun PlayerMenu(
         onShowSpeedDialog = onShowSpeedDialog,
         onShowNormalizationDialog = onShowNormalizationDialog
     )
+}
+
+private fun onDismiss(binder: PlayerService.Binder) {
+    binder.stopRadio()
+    binder.player.clearMediaItems()
 }

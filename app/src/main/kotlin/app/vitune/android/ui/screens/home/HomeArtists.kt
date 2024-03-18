@@ -131,7 +131,7 @@ fun HomeArtistList(
 
         FloatingActionsContainerWithScrollToTop(
             lazyGridState = lazyGridState,
-            iconId = R.drawable.search,
+            icon = R.drawable.search,
             onClick = onSearchClick
         )
     }

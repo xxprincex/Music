@@ -211,7 +211,7 @@ fun HomeDiscovery(
 
         FloatingActionsContainerWithScrollToTop(
             scrollState = scrollState,
-            iconId = R.drawable.search,
+            icon = R.drawable.search,
             onClick = onSearchClick
         )
     }

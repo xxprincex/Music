@@ -199,7 +199,7 @@ fun BuiltInPlaylistSongs(
 
         FloatingActionsContainerWithScrollToTop(
             lazyListState = lazyListState,
-            iconId = R.drawable.shuffle,
+            icon = R.drawable.shuffle,
             onClick = {
                 if (songs.isEmpty()) return@FloatingActionsContainerWithScrollToTop
                 binder?.stopRadio()

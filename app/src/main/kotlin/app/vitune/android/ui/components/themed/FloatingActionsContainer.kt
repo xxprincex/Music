@@ -1,5 +1,6 @@
 package app.vitune.android.ui.components.themed
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.MutableTransitionState
@@ -36,7 +37,8 @@ fun BoxScope.FloatingActionsContainerWithScrollToTop(
     lazyGridState: LazyGridState,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
-    iconId: Int? = null,
+    @DrawableRes
+    icon: Int? = null,
     onClick: (() -> Unit)? = null,
     windowInsets: WindowInsets = LocalPlayerAwareWindowInsets.current
 ) {
@@ -47,7 +49,7 @@ fun BoxScope.FloatingActionsContainerWithScrollToTop(
     FloatingActions(
         transitionState = transitionState,
         onScrollToTop = lazyGridState::smoothScrollToTop,
-        iconId = iconId,
+        icon = icon,
         onClick = onClick,
         windowInsets = windowInsets,
         modifier = modifier
@@ -59,7 +61,8 @@ fun BoxScope.FloatingActionsContainerWithScrollToTop(
     lazyListState: LazyListState,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
-    iconId: Int? = null,
+    @DrawableRes
+    icon: Int? = null,
     onClick: (() -> Unit)? = null,
     windowInsets: WindowInsets = LocalPlayerAwareWindowInsets.current
 ) {
@@ -70,7 +73,7 @@ fun BoxScope.FloatingActionsContainerWithScrollToTop(
     FloatingActions(
         transitionState = transitionState,
         onScrollToTop = lazyListState::smoothScrollToTop,
-        iconId = iconId,
+        icon = icon,
         onClick = onClick,
         windowInsets = windowInsets,
         modifier = modifier
@@ -82,7 +85,8 @@ fun BoxScope.FloatingActionsContainerWithScrollToTop(
     scrollState: ScrollState,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
-    iconId: Int? = null,
+    @DrawableRes
+    icon: Int? = null,
     onClick: (() -> Unit)? = null,
     windowInsets: WindowInsets = LocalPlayerAwareWindowInsets.current
 ) {
@@ -92,7 +96,7 @@ fun BoxScope.FloatingActionsContainerWithScrollToTop(
 
     FloatingActions(
         transitionState = transitionState,
-        iconId = iconId,
+        icon = icon,
         onClick = onClick,
         windowInsets = windowInsets,
         modifier = modifier
@@ -106,7 +110,8 @@ fun BoxScope.FloatingActions(
     windowInsets: WindowInsets,
     modifier: Modifier = Modifier,
     onScrollToTop: (suspend () -> Unit)? = null,
-    iconId: Int? = null,
+    @DrawableRes
+    icon: Int? = null,
     onClick: (() -> Unit)? = null
 ) {
     val transition = updateTransition(transitionState, "")
@@ -128,7 +133,7 @@ fun BoxScope.FloatingActions(
         onScrollToTop?.let {
             transition.AnimatedVisibility(
                 visible = { it?.isScrollingDown == false && it.isFar },
-                enter = slideInVertically(tween(500, if (iconId == null) 0 else 100)) { it },
+                enter = slideInVertically(tween(500, if (icon == null) 0 else 100)) { it },
                 exit = slideOutVertically(tween(500, 0)) { it }
             ) {
                 val coroutineScope = rememberCoroutineScope()
@@ -148,7 +153,7 @@ fun BoxScope.FloatingActions(
             }
         }
 
-        iconId?.let {
+        icon?.let {
             onClick?.let {
                 transition.AnimatedVisibility(
                     visible = { it?.isScrollingDown == false },
@@ -162,7 +167,7 @@ fun BoxScope.FloatingActions(
                     )
                 ) {
                     PrimaryButton(
-                        iconId = iconId,
+                        icon = icon,
                         onClick = onClick,
                         enabled = transition.targetState?.isScrollingDown == false,
                         modifier = Modifier

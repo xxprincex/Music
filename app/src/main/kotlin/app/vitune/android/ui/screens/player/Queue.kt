@@ -49,9 +49,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.res.painterResource
@@ -63,11 +63,11 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import app.vitune.android.Database
-import app.vitune.android.LocalPlayerServiceBinder
 import app.vitune.android.R
 import app.vitune.android.models.Playlist
 import app.vitune.android.models.SongPlaylistMap
 import app.vitune.android.preferences.PlayerPreferences
+import app.vitune.android.service.PlayerService
 import app.vitune.android.transaction
 import app.vitune.android.ui.components.BottomSheet
 import app.vitune.android.ui.components.BottomSheetState
@@ -98,7 +98,6 @@ import app.vitune.android.utils.shouldBePlaying
 import app.vitune.android.utils.shuffleQueue
 import app.vitune.android.utils.smoothScrollToTop
 import app.vitune.android.utils.windows
-import app.vitune.compose.persist.PersistMapCleanup
 import app.vitune.compose.persist.persist
 import app.vitune.compose.reordering.animateItemPlacement
 import app.vitune.compose.reordering.draggedItem
@@ -120,21 +119,20 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun Queue(
-    backgroundColorProvider: () -> Color,
     layoutState: BottomSheetState,
+    binder: PlayerService.Binder,
     beforeContent: @Composable RowScope.() -> Unit,
     afterContent: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
     shape: RoundedCornerShape = RoundedCornerShape(
         topStart = 12.dp,
         topEnd = 12.dp
-    )
+    ),
+    scrollConnection: NestedScrollConnection = remember(layoutState::preUpPostDownNestedScrollConnection),
+    windowInsets: WindowInsets = WindowInsets.systemBars
 ) {
-    val colorPalette = LocalAppearance.current.colorPalette
-    val typography = LocalAppearance.current.typography
-    val thumbnailShape = LocalAppearance.current.thumbnailShape
-
-    val windowInsets = WindowInsets.systemBars
+    val (colorPalette, typography, _, thumbnailShape) = LocalAppearance.current
+    val menuState = LocalMenuState.current
 
     val horizontalBottomPaddingValues = windowInsets
         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
@@ -142,10 +140,72 @@ fun Queue(
 
     var suggestions by persist<Result<List<MediaItem>?>?>(tag = "queue/suggestions")
 
-    PersistMapCleanup(prefix = "queue/suggestions")
+    var mediaItemIndex by remember {
+        mutableIntStateOf(if (binder.player.mediaItemCount == 0) -1 else binder.player.currentMediaItemIndex)
+    }
 
-    val scrollConnection = remember {
-        layoutState.preUpPostDownNestedScrollConnection
+    var windows by remember { mutableStateOf(binder.player.currentTimeline.windows) }
+    var shouldBePlaying by remember { mutableStateOf(binder.player.shouldBePlaying) }
+
+    val lazyListState = rememberLazyListState()
+    val reorderingState = rememberReorderingState(
+        lazyListState = lazyListState,
+        key = windows,
+        onDragEnd = binder.player::moveMediaItem
+    )
+
+    val visibleSuggestions by remember {
+        derivedStateOf {
+            suggestions
+                ?.getOrNull()
+                .orEmpty()
+                .filter { windows.none { window -> window.mediaItem.mediaId == it.mediaId } }
+        }
+    }
+
+    val shouldLoadSuggestions by remember {
+        derivedStateOf {
+            lazyListState.layoutInfo.visibleItemsInfo.any { it.key == "loading" }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        lazyListState.animateScrollToItem(mediaItemIndex.coerceAtLeast(0))
+    }
+
+    LaunchedEffect(mediaItemIndex, shouldLoadSuggestions) {
+        if (shouldLoadSuggestions) withContext(Dispatchers.IO) {
+            suggestions = runCatching {
+                Innertube.nextPage(
+                    NextBody(videoId = windows[mediaItemIndex].mediaItem.mediaId)
+                )?.mapCatching { page ->
+                    page.itemsPage?.items?.map { it.asMediaItem }
+                }
+            }.also { it.exceptionOrNull()?.printStackTrace() }.getOrNull()
+        }
+    }
+
+    binder.player.DisposableListener {
+        object : Player.Listener {
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                mediaItemIndex =
+                    if (binder.player.mediaItemCount == 0) -1 else binder.player.currentMediaItemIndex
+            }
+
+            override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+                windows = timeline.windows
+                mediaItemIndex =
+                    if (binder.player.mediaItemCount == 0) -1 else binder.player.currentMediaItemIndex
+            }
+
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                shouldBePlaying = binder.player.shouldBePlaying
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                shouldBePlaying = binder.player.shouldBePlaying
+            }
+        }
     }
 
     BottomSheet(
@@ -155,7 +215,7 @@ fun Queue(
             Row(
                 modifier = Modifier
                     .clip(shape)
-                    .drawBehind { drawRect(backgroundColorProvider()) }
+                    .background(colorPalette.background2)
                     .fillMaxSize()
                     .padding(horizontalBottomPaddingValues),
                 verticalAlignment = Alignment.CenterVertically,
@@ -164,93 +224,20 @@ fun Queue(
                 Spacer(modifier = Modifier.width(4.dp))
                 beforeContent()
                 Spacer(modifier = Modifier.weight(1f))
+
                 Image(
                     painter = painterResource(R.drawable.playlist),
                     contentDescription = null,
                     colorFilter = ColorFilter.tint(colorPalette.text),
                     modifier = Modifier.size(18.dp)
                 )
+
                 Spacer(modifier = Modifier.weight(1f))
                 afterContent()
                 Spacer(modifier = Modifier.width(4.dp))
             }
         }
     ) {
-        val binder = LocalPlayerServiceBinder.current
-        val menuState = LocalMenuState.current
-
-        binder?.player ?: return@BottomSheet
-
-        val player = binder.player
-
-        var mediaItemIndex by remember {
-            mutableIntStateOf(if (player.mediaItemCount == 0) -1 else player.currentMediaItemIndex)
-        }
-
-        var windows by remember { mutableStateOf(player.currentTimeline.windows) }
-        var shouldBePlaying by remember { mutableStateOf(player.shouldBePlaying) }
-
-        val reorderingState = rememberReorderingState(
-            lazyListState = rememberLazyListState(),
-            key = windows,
-            onDragEnd = player::moveMediaItem,
-            extraItemCount = 0
-        )
-
-        val visibleSuggestions by remember {
-            derivedStateOf {
-                suggestions
-                    ?.getOrNull()
-                    .orEmpty()
-                    .filter { windows.none { window -> window.mediaItem.mediaId == it.mediaId } }
-            }
-        }
-
-        val shouldLoadSuggestions by remember {
-            derivedStateOf {
-                reorderingState.lazyListState.layoutInfo.visibleItemsInfo.any { it.key == "loading" }
-            }
-        }
-
-        player.DisposableListener {
-            object : Player.Listener {
-                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                    mediaItemIndex =
-                        if (player.mediaItemCount == 0) -1 else player.currentMediaItemIndex
-                }
-
-                override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-                    windows = timeline.windows
-                    mediaItemIndex =
-                        if (player.mediaItemCount == 0) -1 else player.currentMediaItemIndex
-                }
-
-                override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-                    shouldBePlaying = binder.player.shouldBePlaying
-                }
-
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    shouldBePlaying = binder.player.shouldBePlaying
-                }
-            }
-        }
-
-        LaunchedEffect(mediaItemIndex, shouldLoadSuggestions) {
-            if (shouldLoadSuggestions) withContext(Dispatchers.IO) {
-                suggestions = runCatching {
-                    Innertube.nextPage(
-                        NextBody(
-                            videoId = windows[mediaItemIndex].mediaItem.mediaId
-                        )
-                    )?.mapCatching { it.itemsPage?.items?.map(Innertube.SongItem::asMediaItem) }
-                }.getOrNull()
-            }
-        }
-
-        LaunchedEffect(Unit) {
-            reorderingState.lazyListState.scrollToItem(index = mediaItemIndex.coerceAtLeast(0))
-        }
-
         val musicBarsTransition = updateTransition(
             targetState = if (reorderingState.isDragging) -1L else mediaItemIndex,
             label = ""
@@ -265,7 +252,7 @@ fun Queue(
             ) {
                 LookaheadScope {
                     LazyColumn(
-                        state = reorderingState.lazyListState,
+                        state = lazyListState,
                         contentPadding = windowInsets
                             .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                             .asPaddingValues(),
@@ -329,10 +316,10 @@ fun Queue(
                                         },
                                         onClick = {
                                             if (isPlayingThisMediaItem) {
-                                                if (shouldBePlaying) player.pause() else player.play()
+                                                if (shouldBePlaying) binder.player.pause() else binder.player.play()
                                             } else {
-                                                player.seekToDefaultPosition(window.firstPeriodIndex)
-                                                player.playWhenReady = true
+                                                binder.player.seekToDefaultPosition(window.firstPeriodIndex)
+                                                binder.player.playWhenReady = true
                                             }
                                         }
                                     )
@@ -348,7 +335,7 @@ fun Queue(
                                                 key = windows,
                                                 delay = 100.milliseconds
                                             ) {
-                                                player.removeMediaItem(window.firstPeriodIndex)
+                                                binder.player.removeMediaItem(window.firstPeriodIndex)
                                             }
                                         else it
                                     }
@@ -429,15 +416,15 @@ fun Queue(
                 }
 
                 FloatingActionsContainerWithScrollToTop(
-                    lazyListState = reorderingState.lazyListState,
-                    iconId = R.drawable.shuffle,
+                    lazyListState = lazyListState,
+                    icon = R.drawable.shuffle,
                     visible = !reorderingState.isDragging,
                     windowInsets = windowInsets.only(WindowInsetsSides.Horizontal),
                     onClick = {
                         reorderingState.coroutineScope.launch {
-                            reorderingState.lazyListState.smoothScrollToTop()
+                            lazyListState.smoothScrollToTop()
                         }.invokeOnCompletion {
-                            player.shuffleQueue()
+                            binder.player.shuffleQueue()
                         }
                     }
                 )

@@ -20,7 +20,7 @@ import app.vitune.core.ui.primaryButton
 @Composable
 fun PrimaryButton(
     onClick: () -> Unit,
-    @DrawableRes iconId: Int,
+    @DrawableRes icon: Int,
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
@@ -34,7 +34,7 @@ fun PrimaryButton(
             .size(62.dp)
     ) {
         Image(
-            painter = painterResource(iconId),
+            painter = painterResource(icon),
             contentDescription = null,
             colorFilter = ColorFilter.tint(colorPalette.text),
             modifier = Modifier

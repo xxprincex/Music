@@ -323,7 +323,7 @@ fun LocalPlaylistSongs(
 
         FloatingActionsContainerWithScrollToTop(
             lazyListState = lazyListState,
-            iconId = R.drawable.shuffle,
+            icon = R.drawable.shuffle,
             visible = !reorderingState.isDragging,
             onClick = {
                 songs?.let { songs ->

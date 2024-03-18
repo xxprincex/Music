@@ -339,7 +339,7 @@ fun HomeSongs(
 
         FloatingActionsContainerWithScrollToTop(
             lazyListState = lazyListState,
-            iconId = R.drawable.search,
+            icon = R.drawable.search,
             onClick = onSearchClick
         )
     }

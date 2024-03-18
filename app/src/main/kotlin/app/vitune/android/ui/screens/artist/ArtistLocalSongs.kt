@@ -130,7 +130,7 @@ fun ArtistLocalSongs(
 
             FloatingActionsContainerWithScrollToTop(
                 lazyListState = lazyListState,
-                iconId = R.drawable.shuffle,
+                icon = R.drawable.shuffle,
                 onClick = {
                     songs?.let { songs ->
                         if (songs.isNotEmpty()) {

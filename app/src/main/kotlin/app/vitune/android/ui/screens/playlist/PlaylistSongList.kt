@@ -232,7 +232,7 @@ fun PlaylistSongList(
 
             FloatingActionsContainerWithScrollToTop(
                 lazyListState = lazyListState,
-                iconId = R.drawable.shuffle,
+                icon = R.drawable.shuffle,
                 onClick = {
                     playlistPage?.songsPage?.items?.let { songs ->
                         if (songs.isNotEmpty()) {

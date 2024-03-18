@@ -149,7 +149,7 @@ fun PipedPlaylistSongList(
 
             FloatingActionsContainerWithScrollToTop(
                 lazyListState = lazyListState,
-                iconId = R.drawable.shuffle,
+                icon = R.drawable.shuffle,
                 onClick = {
                     playlist?.videos?.let { songs ->
                         if (songs.isNotEmpty()) {

@@ -165,7 +165,7 @@ fun AlbumSongs(
 
             FloatingActionsContainerWithScrollToTop(
                 lazyListState = lazyListState,
-                iconId = R.drawable.shuffle,
+                icon = R.drawable.shuffle,
                 onClick = {
                     if (songs.isNotEmpty()) {
                         binder?.stopRadio()
