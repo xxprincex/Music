@@ -271,7 +271,11 @@ fun HomeSongs(
             ) { song ->
                 if (hidingSong == song.id) HideSongDialog(
                     song = song,
-                    onDismiss = { hidingSong = null }
+                    onDismiss = { hidingSong = null },
+                    onConfirm = {
+                        hidingSong = null
+                        menuState.hide()
+                    }
                 )
 
                 SongItem(
@@ -350,15 +354,16 @@ fun HomeSongs(
 fun HideSongDialog(
     song: Song,
     onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val binder = LocalPlayerServiceBinder.current
 
     ConfirmationDialog(
         text = stringResource(R.string.confirm_hide_song),
-        onDismiss = { onDismiss() },
+        onDismiss = onDismiss,
         onConfirm = {
-            onDismiss()
+            onConfirm()
             query {
                 runCatching {
                     if (!song.isLocal) binder?.cache?.removeResource(song.id)

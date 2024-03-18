@@ -95,7 +95,8 @@ fun InHistoryMediaItemMenu(
 
     if (isHiding) HideSongDialog(
         song = song,
-        onDismiss = { isHiding = false }
+        onDismiss = { isHiding = false },
+        onConfirm = onDismiss
     )
 
     InHistoryMediaItemMenu(
@@ -115,7 +116,7 @@ fun InHistoryMediaItemMenu(
 ) = NonQueuedMediaItemMenu(
     mediaItem = song.asMediaItem,
     onDismiss = onDismiss,
-    onHideFromDatabase = { onHideFromDatabase() },
+    onHideFromDatabase = onHideFromDatabase,
     modifier = modifier
 )
 
