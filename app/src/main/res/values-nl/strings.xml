@@ -229,7 +229,6 @@
     <string name="max_size">Maximale grootte</string>
     <string name="format_cache_space_used">%1$s gebruikt (%2$s%%)</string>
     <string name="song_cache">Songcache</string>
-    <string name="used_word">gebruikt</string>
     <string name="database">Database</string>
 
     <string name="cleanup">Opruimen</string>

@@ -2,16 +2,22 @@ package app.vitune.android.ui.screens.settings
 
 import android.text.format.Formatter
 import androidx.annotation.OptIn
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import app.vitune.android.LocalPlayerServiceBinder
 import app.vitune.android.R
 import app.vitune.android.preferences.DataPreferences
+import app.vitune.android.ui.components.themed.LinearProgressIndicator
 import app.vitune.android.ui.screens.Route
 import app.vitune.core.data.enums.ExoPlayerDiskCacheSize
 import coil.Coil
@@ -29,16 +35,30 @@ fun CacheSettings() = with(DataPreferences) {
         SettingsDescription(text = stringResource(R.string.cache_description))
 
         Coil.imageLoader(context).diskCache?.let { diskCache ->
-            val diskCacheSize = remember(diskCache) { diskCache.size }
+            val diskCacheSize by remember { derivedStateOf { diskCache.size } }
+            val formattedSize = remember(diskCacheSize) {
+                Formatter.formatShortFileSize(context, diskCacheSize)
+            }
+            val sizePercentage = remember(diskCacheSize, coilDiskCacheMaxSize) {
+                diskCacheSize.toFloat() / coilDiskCacheMaxSize.bytes.coerceAtLeast(1)
+            }
 
             SettingsGroup(
                 title = stringResource(R.string.image_cache),
                 description = stringResource(
                     R.string.format_cache_space_used,
-                    Formatter.formatShortFileSize(context, diskCacheSize),
-                    diskCacheSize * 100 / coilDiskCacheMaxSize.bytes.coerceAtLeast(1)
+                    formattedSize,
+                    (sizePercentage * 100).toInt()
                 )
             ) {
+                LinearProgressIndicator(
+                    progress = sizePercentage,
+                    strokeCap = StrokeCap.Round,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                        .padding(start = 32.dp, end = 16.dp)
+                )
                 EnumValueSelectorSettingsEntry(
                     title = stringResource(R.string.max_size),
                     selectedValue = coilDiskCacheMaxSize,
@@ -48,18 +68,30 @@ fun CacheSettings() = with(DataPreferences) {
         }
         binder?.cache?.let { cache ->
             val diskCacheSize by remember { derivedStateOf { cache.cacheSpace } }
+            val formattedSize = remember(diskCacheSize) {
+                Formatter.formatShortFileSize(context, diskCacheSize)
+            }
+            val sizePercentage = remember(diskCacheSize, exoPlayerDiskCacheMaxSize) {
+                diskCacheSize.toFloat() / exoPlayerDiskCacheMaxSize.bytes.coerceAtLeast(1)
+            }
 
             SettingsGroup(
                 title = stringResource(R.string.song_cache),
-                description = buildString {
-                    append(Formatter.formatShortFileSize(context, diskCacheSize))
-                    append(" ${stringResource(R.string.used_word)}")
-                    when (val size = exoPlayerDiskCacheMaxSize) {
-                        ExoPlayerDiskCacheSize.Unlimited -> {}
-                        else -> append(" (${diskCacheSize * 100 / size.bytes}%)")
-                    }
-                }
+                description = if (exoPlayerDiskCacheMaxSize == ExoPlayerDiskCacheSize.Unlimited) null
+                else stringResource(
+                    R.string.format_cache_space_used,
+                    formattedSize,
+                    (sizePercentage * 100).toInt()
+                )
             ) {
+                LinearProgressIndicator(
+                    progress = sizePercentage,
+                    strokeCap = StrokeCap.Round,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                        .padding(start = 32.dp, end = 16.dp)
+                )
                 EnumValueSelectorSettingsEntry(
                     title = stringResource(R.string.max_size),
                     selectedValue = exoPlayerDiskCacheMaxSize,

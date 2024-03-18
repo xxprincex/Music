@@ -224,7 +224,6 @@
     <string name="max_size">Max. Größe</string>
     <string name="format_cache_space_used">%1$s verwendet (%2$s%%)</string>
     <string name="song_cache">Song-Zwischenspeicher</string>
-    <string name="used_word">verwendet</string>
     <string name="database">Datenbank</string>
 
     <string name="cleanup">Zurücksetzen</string>
