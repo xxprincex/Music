@@ -87,6 +87,11 @@ android {
     packaging {
         resources.excludes.add("META-INF/**/*")
     }
+
+    androidResources {
+        @Suppress("UnstableApiUsage")
+        generateLocaleConfig = true
+    }
 }
 
 kotlin {

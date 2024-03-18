@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.vitune.android.R
 import app.vitune.android.preferences.AppearancePreferences
 import app.vitune.android.preferences.PlayerPreferences
 import app.vitune.android.ui.screens.Route
+import app.vitune.android.utils.currentLocale
+import app.vitune.android.utils.findActivity
+import app.vitune.android.utils.startLanguagePicker
 import app.vitune.core.ui.BuiltInFontFamily
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.enums.ColorPaletteMode
@@ -25,6 +29,7 @@ import app.vitune.core.ui.utils.isAtLeastAndroid13
 @Composable
 fun AppearanceSettings() = with(AppearancePreferences) {
     val (colorPalette) = LocalAppearance.current
+    val context = LocalContext.current
 
     SettingsCategoryScreen(title = stringResource(R.string.appearance)) {
         SettingsGroup(title = stringResource(R.string.colors)) {
@@ -68,6 +73,15 @@ fun AppearanceSettings() = with(AppearancePreferences) {
             )
         }
         SettingsGroup(title = stringResource(R.string.text)) {
+            if (isAtLeastAndroid13) SettingsEntry(
+                title = stringResource(R.string.language),
+                text = currentLocale()?.displayLanguage
+                    ?: stringResource(R.string.theme_name_default),
+                onClick = {
+                    context.findActivity().startLanguagePicker()
+                }
+            )
+
             if (googleFontsAvailable()) EnumValueSelectorSettingsEntry(
                 title = stringResource(R.string.font),
                 selectedValue = fontFamily,

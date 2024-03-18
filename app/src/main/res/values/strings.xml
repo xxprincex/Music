@@ -208,6 +208,7 @@
     <string name="use_system_font_description">Use the font applied by the system</string>
     <string name="apply_font_padding">Apply font padding</string>
     <string name="apply_font_padding_description">Add spacing around texts</string>
+    <string name="language">Language</string>
 
     <string name="lockscreen">Lock screen</string>
     <string name="show_song_cover">Show song cover</string>

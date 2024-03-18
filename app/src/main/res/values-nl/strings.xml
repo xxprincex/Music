@@ -208,6 +208,7 @@
     <string name="use_system_font_description">Gebruik het lettertype van het systeem</string>
     <string name="apply_font_padding">Gebruik marges rond lettertype</string>
     <string name="apply_font_padding_description">Voegt afstand toe tussen de tekst</string>
+    <string name="language">Taal</string>
 
     <string name="lockscreen">Vergrendelscherm</string>
     <string name="show_song_cover">Toon albumhoes</string>

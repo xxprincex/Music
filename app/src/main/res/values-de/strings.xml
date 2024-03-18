@@ -203,6 +203,7 @@
     <string name="use_system_font_description">Verwenden Sie die vom System verwendete Schriftart</string>
     <string name="apply_font_padding">Auffüllen der Schrift</string>
     <string name="apply_font_padding_description">Textabstände hinzufügen</string>
+    <string name="language">Sprache</string>
 
     <string name="lockscreen">Sperrbildschirm</string>
     <string name="show_song_cover">Song-Cover anzeigen</string>
