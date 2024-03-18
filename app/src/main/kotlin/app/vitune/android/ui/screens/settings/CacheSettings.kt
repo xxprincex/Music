@@ -2,6 +2,7 @@ package app.vitune.android.ui.screens.settings
 
 import android.text.format.Formatter
 import androidx.annotation.OptIn
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -84,14 +85,16 @@ fun CacheSettings() = with(DataPreferences) {
                     (sizePercentage * 100).toInt()
                 )
             ) {
-                LinearProgressIndicator(
-                    progress = sizePercentage,
-                    strokeCap = StrokeCap.Round,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp)
-                        .padding(start = 32.dp, end = 16.dp)
-                )
+                AnimatedVisibility(visible = exoPlayerDiskCacheMaxSize != ExoPlayerDiskCacheSize.Unlimited) {
+                    LinearProgressIndicator(
+                        progress = sizePercentage,
+                        strokeCap = StrokeCap.Round,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp)
+                            .padding(start = 32.dp, end = 16.dp)
+                    )
+                }
                 EnumValueSelectorSettingsEntry(
                     title = stringResource(R.string.max_size),
                     selectedValue = exoPlayerDiskCacheMaxSize,
