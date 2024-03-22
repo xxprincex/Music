@@ -5,15 +5,18 @@ plugins {
 }
 
 android {
+    val appId = "${project.group}.android"
+
+    namespace = appId
     compileSdk = 34
 
     defaultConfig {
-        applicationId = project.group.toString()
+        applicationId = appId
 
         minSdk = 21
         targetSdk = 34
 
-        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 35
+        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 1
         versionName = project.version.toString()
 
         multiDexEnabled = true
@@ -35,22 +38,22 @@ android {
         }
     }
 
-    namespace = project.group.toString()
-
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
-            manifestPlaceholders["appName"] = "ViMusic (Debug)"
+            manifestPlaceholders["appName"] = "ViTune Debug"
         }
 
         release {
             versionNameSuffix = "-RELEASE"
             isMinifyEnabled = true
             isShrinkResources = true
-            manifestPlaceholders["appName"] = "ViMusic"
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            buildConfigField("String", "RELEASE_HACK", "\"AndroidWhyTfDidYouMakeMeDoThis\"")
+            manifestPlaceholders["appName"] = "ViTune"
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
 
         create("nightly") {
@@ -59,7 +62,7 @@ android {
 
             applicationIdSuffix = ".nightly"
             versionNameSuffix = "-NIGHTLY"
-            manifestPlaceholders["appName"] = "ViMusic Nightly"
+            manifestPlaceholders["appName"] = "ViTune Nightly"
             signingConfig = signingConfigs.findByName("ci")
         }
     }
@@ -84,6 +87,11 @@ android {
     packaging {
         resources.excludes.add("META-INF/**/*")
     }
+
+    androidResources {
+        @Suppress("UnstableApiUsage")
+        generateLocaleConfig = true
+    }
 }
 
 kotlin {
@@ -95,6 +103,8 @@ ksp {
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugaring)
+
     implementation(projects.compose.persist)
     implementation(projects.compose.preferences)
     implementation(projects.compose.routing)
@@ -132,8 +142,6 @@ dependencies {
     implementation(projects.providers.piped)
     implementation(projects.core.data)
     implementation(projects.core.ui)
-
-    coreLibraryDesugaring(libs.desugaring)
 
     detektPlugins(libs.detekt.compose)
     detektPlugins(libs.detekt.formatting)

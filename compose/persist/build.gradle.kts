@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "it.vfsfitvnm.compose.persist"
+    namespace = "app.vitune.compose.persist"
     compileSdk = 34
 
     defaultConfig {

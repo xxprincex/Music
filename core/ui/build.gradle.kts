@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "it.vfsfitvnm.compose.core.ui"
+    namespace = "app.vitune.core.ui"
     compileSdk = 34
 
     defaultConfig {

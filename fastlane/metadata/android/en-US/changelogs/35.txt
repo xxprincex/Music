@@ -1,6 +1,0 @@
-- Minor UI tweaks
-- Fixed stability issues with the appearance
-- Fixed inconsistent seek bar behavior
-- Fixed inconsistent appearance
-- Minor bug fixes
-- Added hold gesture to Sleep timer

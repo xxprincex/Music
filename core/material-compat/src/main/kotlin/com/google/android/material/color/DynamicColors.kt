@@ -1,6 +1,6 @@
 package com.google.android.material.color
 
-import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid12
+import app.vitune.core.ui.utils.isAtLeastAndroid12
 
 @Suppress("unused")
 object DynamicColors {

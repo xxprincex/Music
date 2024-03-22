@@ -33,8 +33,8 @@ subprojects {
 }
 
 allprojects {
-    group = "it.vfsfitvnm.vimusic"
-    version = "0.6.7"
+    group = "app.vitune"
+    version = "1.0.0"
 
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
@@ -45,7 +45,7 @@ allprojects {
     }
 
     tasks.withType<Detekt>().configureEach {
-        jvmTarget = "11"
+        jvmTarget = "17"
         reports {
             html.required = true
         }

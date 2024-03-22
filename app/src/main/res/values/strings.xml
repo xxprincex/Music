@@ -131,7 +131,7 @@
     <string name="no_browser_installed">Couldn\'t find an application to browse the internet</string>
     <string name="no_equalizer_installed">Couldn\'t find an application to equalize audio</string>
     <string name="no_file_chooser_installed">Couldn\'t find an application to create documents</string>
-    <string name="no_battery_optimization_settings_found">Couldn\'t find battery optimization settings, please whitelist ViMusic manually</string>
+    <string name="no_battery_optimization_settings_found">Couldn\'t find battery optimization settings, please whitelist ViTune manually</string>
 
     <string name="related_albums">Related albums</string>
     <string name="similar_artists">Similar artists</string>
@@ -158,7 +158,6 @@
     <string name="playback_speed">Playback speed</string>
     <string name="minimum_speed_value">Why would you do this?!</string>
     <string name="song_volume_boost">Song volume boost</string>
-    <string name="song_loop">Song loop</string>
     <string name="queue_loop">Queue loop</string>
     <string name="add_queue_to_playlist">Add queue to playlist</string>
 
@@ -173,7 +172,7 @@
     <string name="view_playlist">View playlist</string>
 
     <string name="search_placeholder">Enter a name</string>
-    <string name="format_version_credits">v%1$s by vfsfitvnm</string>
+    <string name="format_version_credits">v%1$s by Huizengek &amp; vfsfitvnm</string>
     <string name="social">Social</string>
     <string name="contact">Contact</string>
     <string name="github">GitHub</string>
@@ -209,6 +208,7 @@
     <string name="use_system_font_description">Use the font applied by the system</string>
     <string name="apply_font_padding">Apply font padding</string>
     <string name="apply_font_padding_description">Add spacing around texts</string>
+    <string name="language">Language</string>
 
     <string name="lockscreen">Lock screen</string>
     <string name="show_song_cover">Show song cover</string>
@@ -230,7 +230,6 @@
     <string name="max_size">Max size</string>
     <string name="format_cache_space_used">%1$s used (%2$s%%)</string>
     <string name="song_cache">Song cache</string>
-    <string name="used_word">used</string>
     <string name="database">Database</string>
 
     <string name="cleanup">Cleanup</string>
@@ -246,7 +245,7 @@
     <string name="backup_description">Personal preferences (i.e. the theme mode) and the cache are excluded.</string>
     <string name="backup_action_description">Export the database to the external storage</string>
     <string name="restore">Restore</string>
-    <string name="restore_warning">Existing data will be overwritten.\nViMusic will automatically close itself after restoring the database.</string>
+    <string name="restore_warning">Existing data will be overwritten.\nViTune will automatically close itself after restoring the database.</string>
     <string name="restore_description">Import the database from the external storage</string>
 
     <string name="other">Other</string>
@@ -281,7 +280,6 @@
     <string name="kill_app">Kill app</string>
     <string name="show_troubleshoot_section">Show troubleshoot section</string>
 
-    <string name="player_and_audio">Player &amp; Audio</string>
     <string name="persistent_queue">Persistent queue</string>
     <string name="persistent_queue_description">Save and restore playing songs</string>
     <string name="resume_playback">Resume playback</string>
@@ -322,7 +320,7 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="login">Login</string>
-    <string name="sync_description">You can host playlists elsewhere and synchronize them with ViMusic. Currently only supports Piped.</string>
+    <string name="sync_description">You can host playlists elsewhere and synchronize them with ViTune. Currently only supports Piped.</string>
     <string name="add_account">Add account</string>
     <string name="add_account_description">Link a Piped account with your instance, username and password.</string>
     <string name="learn_more">Learn more</string>
