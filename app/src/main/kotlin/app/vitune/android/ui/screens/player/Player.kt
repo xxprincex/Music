@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -299,7 +300,12 @@ fun Player(
 
         val containerModifier = Modifier
             .clip(shape)
-            .background(colorPalette.background1)
+            .background(
+                Brush.verticalGradient(
+                    0.5f to colorPalette.background1,
+                    1f to colorPalette.background0
+                )
+            )
             .padding(
                 windowInsets
                     .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
