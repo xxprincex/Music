@@ -185,6 +185,10 @@ fun Queue(
         }
     }
 
+    LaunchedEffect(mediaItemIndex) {
+        suggestions = null
+    }
+
     binder.player.DisposableListener {
         object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
