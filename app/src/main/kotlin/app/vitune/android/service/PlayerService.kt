@@ -846,35 +846,22 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     private fun createNotificationChannel() {
         notificationManager = getSystemService()
-
         if (!isAtLeastAndroid8) return
 
-        notificationManager?.run {
-            if (getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null) createNotificationChannel(
-                NotificationChannel(
-                    /* id = */ NOTIFICATION_CHANNEL_ID,
-                    /* name = */ getString(R.string.now_playing),
-                    /* importance = */ NotificationManager.IMPORTANCE_LOW
-                ).apply {
-                    setSound(null, null)
-                    enableLights(false)
-                    enableVibration(false)
-                }
+        notificationManager?.createNotificationChannel(
+            NotificationChannel(
+                /* id = */ NOTIFICATION_CHANNEL_ID,
+                /* name = */ getString(R.string.now_playing),
+                /* importance = */ NotificationManager.IMPORTANCE_LOW
             )
-
-            if (getNotificationChannel(SLEEP_TIMER_NOTIFICATION_CHANNEL_ID) == null)
-                createNotificationChannel(
-                    NotificationChannel(
-                        /* id = */ SLEEP_TIMER_NOTIFICATION_CHANNEL_ID,
-                        /* name = */ getString(R.string.sleep_timer),
-                        /* importance = */ NotificationManager.IMPORTANCE_LOW
-                    ).apply {
-                        setSound(null, null)
-                        enableLights(false)
-                        enableVibration(false)
-                    }
-                )
-        }
+        )
+        notificationManager?.createNotificationChannel(
+            NotificationChannel(
+                /* id = */ SLEEP_TIMER_NOTIFICATION_CHANNEL_ID,
+                /* name = */ getString(R.string.sleep_timer),
+                /* importance = */ NotificationManager.IMPORTANCE_LOW
+            )
+        )
     }
 
     private fun createMediaSourceFactory() = DefaultMediaSourceFactory(
