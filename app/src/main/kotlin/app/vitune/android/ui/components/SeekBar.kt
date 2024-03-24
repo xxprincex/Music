@@ -15,6 +15,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -402,6 +403,8 @@ private fun Duration(
 ) {
     val typography = LocalAppearance.current.typography
 
+    var showRemaining by remember { mutableStateOf(false) }
+
     Column {
         Spacer(Modifier.height(8.dp))
         Row(
@@ -410,10 +413,12 @@ private fun Duration(
             modifier = Modifier.fillMaxWidth()
         ) {
             BasicText(
-                text = formatAsDuration(position),
+                text = if (showRemaining) "-${formatAsDuration(duration - position)}"
+                else formatAsDuration(position),
                 style = typography.xxs.semiBold,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.clickable { showRemaining = !showRemaining }
             )
 
             if (duration != C.TIME_UNSET) BasicText(
