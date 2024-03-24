@@ -26,19 +26,22 @@ object PlayerPreferences : GlobalPreferencesHolder() {
     var resumePlaybackWhenDeviceConnected by resumePlaybackWhenDeviceConnectedProperty
     val speedProperty = float(1f)
     var speed by speedProperty
-
     var minimumSilence by long(2_000_000L)
     var persistentQueue by boolean(true)
+    var stopWhenClosed by boolean(false)
+
     var isShowingLyrics by boolean(false)
     var isShowingSynchronizedLyrics by boolean(false)
+
     var isShowingPrevButtonCollapsed by boolean(false)
-    var stopWhenClosed by boolean(false)
     var horizontalSwipeToClose by boolean(false)
     var horizontalSwipeToRemoveItem by boolean(false)
+
     var playerLayout by enum(PlayerLayout.New)
     var seekBarStyle by enum(SeekBarStyle.Wavy)
     var wavySeekBarQuality by enum(WavySeekBarQuality.Great)
     var showLike by boolean(false)
+    var showRemaining by boolean(false)
 
     enum class PlayerLayout(val displayName: @Composable () -> String) {
         Classic(displayName = { stringResource(R.string.classic_player_layout_name) }),
@@ -59,7 +62,9 @@ object PlayerPreferences : GlobalPreferencesHolder() {
         Medium(quality = 15f, displayName = { stringResource(R.string.seek_bar_quality_medium) }),
         High(quality = 5f, displayName = { stringResource(R.string.seek_bar_quality_high) }),
         Great(quality = 1f, displayName = { stringResource(R.string.seek_bar_quality_great) }),
-        Subpixel(quality = 0.5f, displayName = { stringResource(R.string.seek_bar_quality_subpixel) })
+        Subpixel(
+            quality = 0.5f,
+            displayName = { stringResource(R.string.seek_bar_quality_subpixel) })
     }
 
     val volumeNormalizationBaseGainRounded get() = (volumeNormalizationBaseGain * 100).toInt()

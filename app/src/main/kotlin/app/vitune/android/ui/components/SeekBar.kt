@@ -403,8 +403,6 @@ private fun Duration(
 ) {
     val typography = LocalAppearance.current.typography
 
-    var showRemaining by remember { mutableStateOf(false) }
-
     Column {
         Spacer(Modifier.height(8.dp))
         Row(
@@ -413,12 +411,14 @@ private fun Duration(
             modifier = Modifier.fillMaxWidth()
         ) {
             BasicText(
-                text = if (showRemaining) "-${formatAsDuration(duration - position)}"
+                text = if (PlayerPreferences.showRemaining) "-${formatAsDuration(duration - position)}"
                 else formatAsDuration(position),
                 style = typography.xxs.semiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.clickable { showRemaining = !showRemaining }
+                modifier = Modifier.clickable {
+                    PlayerPreferences.showRemaining = !PlayerPreferences.showRemaining
+                }
             )
 
             if (duration != C.TIME_UNSET) BasicText(
