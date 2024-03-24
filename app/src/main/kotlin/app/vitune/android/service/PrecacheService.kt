@@ -106,56 +106,64 @@ class PrecacheService : DownloadService(
         runCatching {
             if (bound) unbindService(serviceConnection)
             bindService(intent<PlayerService>(), serviceConnection, Context.BIND_AUTO_CREATE)
+        }.exceptionOrNull()?.let {
+            it.printStackTrace()
+            toast(getString(R.string.error_pre_cache))
         }
 
         val cache = BlockingDeferredCache {
             suspendCoroutine {
                 waiters += { it.resume(Unit) }
             }
-            binder?.cache ?: error("PlayerService failed to start, crashing...")
+            binder?.cache ?: run {
+                toast(getString(R.string.error_pre_cache))
+                error("PlayerService failed to start, crashing...")
+            }
         }
 
         progressUpdaterJob?.cancel()
         progressUpdaterJob = coroutineScope.launch {
-            downloadQueue.receiveAsFlow().debounce(100.milliseconds).collect { downloadManager ->
-                mutableDownloadState.update { !downloadManager.isIdle }
-            }
+            downloadQueue
+                .receiveAsFlow()
+                .debounce(100.milliseconds)
+                .collect { downloadManager ->
+                    mutableDownloadState.update { !downloadManager.isIdle }
+                }
         }
 
         return DownloadManager(
-            this,
-            PlayerService.createDatabaseProvider(this),
-            cache,
-            PlayerService.createYouTubeDataSourceResolverFactory(
+            /* context = */ this,
+            /* databaseProvider = */ PlayerService.createDatabaseProvider(this),
+            /* cache = */ cache,
+            /* upstreamFactory = */ PlayerService.createYouTubeDataSourceResolverFactory(
                 findMediaItem = { null },
                 context = this,
                 cache = cache,
                 chunkLength = null
             ),
-            executor
+            /* executor = */ executor
         ).apply {
             maxParallelDownloads = 3
             minRetryCount = 1
             requirements = Requirements(Requirements.NETWORK)
-            addListener(object : DownloadManager.Listener {
-                override fun onIdle(downloadManager: DownloadManager) =
-                    mutableDownloadState.update { false }
 
-                override fun onDownloadChanged(
-                    downloadManager: DownloadManager,
-                    download: Download,
-                    finalException: Exception?
-                ) {
-                    downloadQueue.trySend(downloadManager)
-                }
+            addListener(
+                object : DownloadManager.Listener {
+                    override fun onIdle(downloadManager: DownloadManager) =
+                        mutableDownloadState.update { false }
 
-                override fun onDownloadRemoved(
-                    downloadManager: DownloadManager,
-                    download: Download
-                ) {
-                    downloadQueue.trySend(downloadManager)
+                    override fun onDownloadChanged(
+                        downloadManager: DownloadManager,
+                        download: Download,
+                        finalException: Exception?
+                    ) = downloadQueue.trySend(downloadManager).let { }
+
+                    override fun onDownloadRemoved(
+                        downloadManager: DownloadManager,
+                        download: Download
+                    ) = downloadQueue.trySend(downloadManager).let { }
                 }
-            })
+            )
         }
     }
 
