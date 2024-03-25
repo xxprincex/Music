@@ -228,7 +228,8 @@
     <string name="cache_description">When the cache runs out of space, the resources that haven\'t been accessed for the longest time are cleared</string>
     <string name="image_cache">Image cache</string>
     <string name="max_size">Max size</string>
-    <string name="format_cache_space_used">%1$s used (%2$s%%)</string>
+    <string name="format_cache_space_used">%1$s used</string>
+    <string name="format_cache_space_used_percentage">%1$s used (%2$s%%)</string>
     <string name="song_cache">Song cache</string>
     <string name="database">Database</string>
 

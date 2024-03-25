@@ -223,7 +223,8 @@
     <string name="cache_description">Wenn der Platz im Zwischenspeicher voll ist, werden die Ressourcen, auf die am längsten nicht mehr zugegriffen wurde, gelöscht.</string>
     <string name="image_cache">Bild-Zwischenspeicher</string>
     <string name="max_size">Max. Größe</string>
-    <string name="format_cache_space_used">%1$s verwendet (%2$s%%)</string>
+    <string name="format_cache_space_used">%1$s verwendet</string>
+    <string name="format_cache_space_used_percentage">%1$s verwendet (%2$s%%)</string>
     <string name="song_cache">Song-Zwischenspeicher</string>
     <string name="database">Datenbank</string>
 

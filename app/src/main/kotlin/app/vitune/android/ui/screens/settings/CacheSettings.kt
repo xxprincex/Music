@@ -47,7 +47,7 @@ fun CacheSettings() = with(DataPreferences) {
             SettingsGroup(
                 title = stringResource(R.string.image_cache),
                 description = stringResource(
-                    R.string.format_cache_space_used,
+                    R.string.format_cache_space_used_percentage,
                     formattedSize,
                     (sizePercentage * 100).toInt()
                 )
@@ -78,9 +78,12 @@ fun CacheSettings() = with(DataPreferences) {
 
             SettingsGroup(
                 title = stringResource(R.string.song_cache),
-                description = if (exoPlayerDiskCacheMaxSize == ExoPlayerDiskCacheSize.Unlimited) null
-                else stringResource(
+                description = if (exoPlayerDiskCacheMaxSize == ExoPlayerDiskCacheSize.Unlimited) stringResource(
                     R.string.format_cache_space_used,
+                    formattedSize
+                )
+                else stringResource(
+                    R.string.format_cache_space_used_percentage,
                     formattedSize,
                     (sizePercentage * 100).toInt()
                 )
