@@ -43,7 +43,7 @@ align="center">](https://github.com/25huizengek1/ViTune/releases/latest)
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"
 height="80"
-align="center">](https://25huizengek1.github.io/fdroid-repo/fdroid/repo/)
+align="center">](https://repo.vitune.app/)
 
 [<img src="https://github.com/ImranR98/Obtainium/blob/main/assets/graphics/badge_obtainium.png"
 alt="Get it on Obtainium"
