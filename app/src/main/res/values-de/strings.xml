@@ -64,7 +64,7 @@
     <string name="no">Nein</string>
     <string name="stop">Stop</string>
     <string name="set">Einstellung</string>
-    <string name="hide">Ausblenden</string>
+    <string name="hide">Löschen</string>
     <string name="rename">Umbenennen</string>
     <string name="delete">Löschen</string>
     <string name="reset">Reset</string>
@@ -85,7 +85,7 @@
     <string name="watch_on_youtube">Auf YouTube ansehen</string>
     <string name="open_in_youtube_music">Öffnen in YouTube Musik</string>
     <string name="watch_playlist_on_youtube">Wiedergabeliste auf YouTube ansehen</string>
-    <string name="youtube_music_not_installed">YouTube Music is not installed on your device!</string>
+    <string name="youtube_music_not_installed">YouTube Music ist auf deinem Gerät nicht installiert!</string>
 
     <string name="remove_from_queue">Aus der Warteschlange entfernen</string>
     <string name="remove_from_playlist">Aus der Wiedergabeliste entfernen</string>
@@ -119,7 +119,7 @@
     <string name="error_piped_link">Bei der Verknüpfung Ihres Piped-Kontos ist ein unbekannter Fehler aufgetreten. Bitte versuchen Sie es erneut.</string>
     <string name="error_piped_instances_unavailable">Liste der Piped-Instanzen ist derzeit nicht verfügbar.</string>
     <string name="error_bassboost_init">Es ist ein Fehler bei der Initialisierung von Bass Boost aufgetreten. Wahrscheinlich unterstützt Ihr Gerät diese Funktion nicht. Ändern Sie den Bassverstärkungspegel oder versuchen Sie es erneut.</string>
-    <string name="error_pre_cache">An unknown error occurred during pre-caching. Please try again.</string>
+    <string name="error_pre_cache">Beim Zwischenspeichern ist ein unbekannter Fehler aufgetreten. Bitte versuchen Sie es erneut.</string>
 
     <string name="media_permission_declined">Berechtigung abgelehnt, bitte erteilen Sie die Medienberechtigung in den Einstellungen Ihres Geräts.</string>
     <string name="open_settings">Einstellungen öffnen</string>
@@ -264,7 +264,7 @@
     <string name="ignore_battery_optimizations">Akku-Optimierungen ignorieren</string>
     <string name="ignoring_battery_optimizations">Beschränkung bereits aufgehoben</string>
     <string name="ignore_battery_optimizations_action">Hintergrundbeschränkungen deaktivieren</string>
-    <string name="invincible_service">Unbesiegbarer Service</string>
+    <string name="invincible_service">Unbezwingbarer Dienst</string>
     <string name="invincible_service_description">Sollte die Wiedergabe in 99,99% der Fälle aufrechterhalten, falls das Ausschalten der Batterieoptimierungen nicht ausreicht.</string>
 
     <string name="need_help">Brauchen Sie Hilfe?</string>
