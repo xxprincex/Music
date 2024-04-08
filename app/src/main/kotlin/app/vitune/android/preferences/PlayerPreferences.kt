@@ -26,6 +26,8 @@ object PlayerPreferences : GlobalPreferencesHolder() {
     var resumePlaybackWhenDeviceConnected by resumePlaybackWhenDeviceConnectedProperty
     val speedProperty = float(1f)
     var speed by speedProperty
+    val pitchProperty = float(1f)
+    var pitch by pitchProperty
     var minimumSilence by long(2_000_000L)
     var persistentQueue by boolean(true)
     var stopWhenClosed by boolean(false)
