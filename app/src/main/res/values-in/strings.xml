@@ -302,7 +302,7 @@
     <string name="bass_boost">Peningkatan bass</string>
     <string name="bass_boost_description">Boost low frequencies to improve listening experience</string>
     <string name="bass_boost_level">Bass boost level</string>
-    <string name="bass_boost_level_description">Level (0-1000) peningkatan frekuensi rendah; gunakan dengan risiko sendiri!</string>
+    <string name="bass_boost_level_description">Level (0–1000) peningkatan frekuensi rendah; gunakan dengan risiko sendiri!</string>
     <string name="equalizer_description">Interaksi dengan pengatur suara sistem</string>
 
     <string name="filter_placeholder">Filter…</string>
@@ -366,17 +366,14 @@
     <string name="max_dynamic_thumbnail_size_description">Ukuran maksimal thumbnail saat thumbnail dinamis digunakan</string>
 
     <plurals name="format_reset_blacklist_description">
-        <item quantity="one">Hapus %1$s lagu dari daftar hitam</item>
         <item quantity="other">Hapus semua %1$s lagu dari daftar hitam</item>
     </plurals>
 
     <plurals name="format_reset_quick_picks_amount">
-        <item quantity="one">Hapus %1$s peristiwa pemutaran</item>
         <item quantity="other">Hapus %1$s peristiwa pemutaran</item>
     </plurals>
 
     <plurals name="song_count_plural">
-        <item quantity="one">%1$d lagu</item>
         <item quantity="other">%1$d lagu</item>
     </plurals>
 </resources>
