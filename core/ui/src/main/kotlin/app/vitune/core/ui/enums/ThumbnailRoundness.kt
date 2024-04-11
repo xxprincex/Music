@@ -10,7 +10,7 @@ enum class ThumbnailRoundness(val dp: Dp) {
     Medium(8.dp),
     Heavy(12.dp),
     Heavier(16.dp),
-    Heaviest(16.dp);
+    Heaviest(18.dp);
 
     val shape get() = dp.roundedShape
 }
