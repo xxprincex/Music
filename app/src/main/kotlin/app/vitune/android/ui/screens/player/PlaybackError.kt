@@ -26,7 +26,8 @@ import app.vitune.android.utils.center
 import app.vitune.android.utils.color
 import app.vitune.android.utils.medium
 import app.vitune.core.ui.LocalAppearance
-import app.vitune.core.ui.PureBlackColorPalette
+import app.vitune.core.ui.onOverlay
+import app.vitune.core.ui.overlay
 
 @Composable
 fun PlaybackError(
@@ -35,6 +36,7 @@ fun PlaybackError(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) = Box(modifier = modifier) {
+    val (colorPalette, typography) = LocalAppearance.current
     val message by rememberUpdatedState(newValue = messageProvider())
 
     AnimatedVisibility(
@@ -66,9 +68,9 @@ fun PlaybackError(
     ) { currentMessage ->
         if (currentMessage != null) BasicText(
             text = currentMessage,
-            style = LocalAppearance.current.typography.xs.center.medium.color(PureBlackColorPalette.text),
+            style = typography.xs.center.medium.color(colorPalette.onOverlay),
             modifier = Modifier
-                .background(Color.Black.copy(0.4f))
+                .background(colorPalette.overlay.copy(alpha = 0.4f))
                 .padding(all = 8.dp)
                 .fillMaxWidth()
         )

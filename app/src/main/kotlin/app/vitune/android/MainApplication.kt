@@ -81,12 +81,12 @@ import app.vitune.android.utils.toast
 import app.vitune.compose.persist.LocalPersistMap
 import app.vitune.compose.persist.PersistMap
 import app.vitune.compose.preferences.PreferencesHolder
+import app.vitune.core.ui.Darkness
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.SystemBarAppearance
+import app.vitune.core.ui.amoled
 import app.vitune.core.ui.appearance
-import app.vitune.core.ui.dynamicColorPaletteOf
-import app.vitune.core.ui.enums.ColorPaletteName
 import app.vitune.core.ui.rippleTheme
 import app.vitune.core.ui.shimmerTheme
 import app.vitune.providers.innertube.Innertube
@@ -161,8 +161,9 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
     ) = with(AppearancePreferences) {
         val sampleBitmap by binder.collectProvidedBitmapAsState()
         val appearance = appearance(
-            name = colorPaletteName,
-            mode = colorPaletteMode,
+            source = colorSource,
+            mode = colorMode,
+            darkness = darkness,
             fontFamily = fontFamily,
             materialAccentColor = Color(monet.getAccentColor(this@MainActivity)),
             sampleBitmap = sampleBitmap,
@@ -258,15 +259,9 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
 
                     CompositionLocalProvider(
                         LocalAppearance provides LocalAppearance.current.let {
-                            if (
-                                AppearancePreferences.colorPaletteName == ColorPaletteName.AMOLED
-                            ) it.copy(
-                                colorPalette = dynamicColorPaletteOf(
-                                    accentColor = it.colorPalette.accent,
-                                    isDark = true,
-                                    isAmoled = false
-                                )
-                            ) else it
+                            if (it.colorPalette.isDark && AppearancePreferences.darkness == Darkness.AMOLED) {
+                                it.copy(colorPalette = it.colorPalette.amoled())
+                            } else it
                         }
                     ) {
                         Player(

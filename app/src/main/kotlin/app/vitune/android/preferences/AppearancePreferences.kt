@@ -1,14 +1,36 @@
 package app.vitune.android.preferences
 
 import app.vitune.android.GlobalPreferencesHolder
+import app.vitune.android.preferences.OldPreferences.ColorPaletteMode
+import app.vitune.android.preferences.OldPreferences.ColorPaletteName
 import app.vitune.core.ui.BuiltInFontFamily
-import app.vitune.core.ui.enums.ColorPaletteMode
-import app.vitune.core.ui.enums.ColorPaletteName
-import app.vitune.core.ui.enums.ThumbnailRoundness
+import app.vitune.core.ui.ColorMode
+import app.vitune.core.ui.ColorSource
+import app.vitune.core.ui.Darkness
+import app.vitune.core.ui.ThumbnailRoundness
 
 object AppearancePreferences : GlobalPreferencesHolder() {
-    var colorPaletteName by enum(ColorPaletteName.Dynamic)
-    var colorPaletteMode by enum(ColorPaletteMode.System)
+    var colorSource by enum(
+        when (OldPreferences.oldColorPaletteName) {
+            ColorPaletteName.Default, ColorPaletteName.PureBlack -> ColorSource.Default
+            ColorPaletteName.Dynamic, ColorPaletteName.AMOLED -> ColorSource.Dynamic
+            ColorPaletteName.MaterialYou -> ColorSource.MaterialYou
+        }
+    )
+    var colorMode by enum(
+        when (OldPreferences.oldColorPaletteMode) {
+            ColorPaletteMode.Light -> ColorMode.Light
+            ColorPaletteMode.Dark -> ColorMode.Dark
+            ColorPaletteMode.System -> ColorMode.System
+        }
+    )
+    var darkness by enum(
+        when (OldPreferences.oldColorPaletteName) {
+            ColorPaletteName.Default, ColorPaletteName.Dynamic, ColorPaletteName.MaterialYou -> Darkness.Normal
+            ColorPaletteName.PureBlack -> Darkness.PureBlack
+            ColorPaletteName.AMOLED -> Darkness.AMOLED
+        }
+    )
     var thumbnailRoundness by enum(ThumbnailRoundness.Medium)
     var fontFamily by enum(BuiltInFontFamily.Poppins)
     var applyFontPadding by boolean(false)

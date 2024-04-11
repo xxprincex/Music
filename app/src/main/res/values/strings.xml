@@ -184,17 +184,20 @@
     <string name="request_feature">Request a feature or suggest an idea</string>
     <string name="request_feature_description">You will be redirected to GitHub</string>
 
-    <string name="theme">Theme</string>
-    <string name="theme_name_default">Default</string>
-    <string name="theme_name_dynamic">Dynamic</string>
-    <string name="theme_name_pureblack">PureBlack</string>
-    <string name="theme_name_amoled">AMOLED</string>
-    <string name="theme_name_materialyou">Material You</string>
+    <string name="color_source">Accent color source</string>
+    <string name="color_source_default">Default</string>
+    <string name="color_source_dynamic">Dynamic</string>
+    <string name="color_source_material_you">Material You</string>
 
-    <string name="theme_mode">Theme mode</string>
-    <string name="theme_mode_light">Light</string>
-    <string name="theme_mode_dark">Dark</string>
-    <string name="theme_mode_system">System</string>
+    <string name="darkness">Darkness</string>
+    <string name="darkness_normal">Normal</string>
+    <string name="darkness_pureblack">PureBlack</string>
+    <string name="darkness_amoled">AMOLED</string>
+
+    <string name="color_mode">Mode</string>
+    <string name="color_mode_light">Light</string>
+    <string name="color_mode_dark">Dark</string>
+    <string name="color_mode_system">System</string>
 
     <string name="thumbnail_roundness">Thumbnail roundness</string>
     <string name="thumbnail_roundness_none">None</string>

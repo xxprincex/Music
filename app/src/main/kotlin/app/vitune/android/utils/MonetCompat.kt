@@ -7,7 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import app.vitune.core.ui.ColorPalette
-import app.vitune.core.ui.DefaultLightColorPalette
+import app.vitune.core.ui.defaultLightPalette
 import com.kieronquinn.monetcompat.core.MonetCompat
 import kotlinx.coroutines.launch
 
@@ -24,7 +24,7 @@ inline fun MonetCompat.invokeOnReady(
     }
 }
 
-fun MonetCompat.setDefaultPalette(palette: ColorPalette = DefaultLightColorPalette) {
+fun MonetCompat.setDefaultPalette(palette: ColorPalette = defaultLightPalette) {
     defaultAccentColor = palette.accent.toArgb()
     defaultBackgroundColor = palette.background0.toArgb()
     defaultPrimaryColor = palette.background1.toArgb()

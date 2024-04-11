@@ -184,17 +184,20 @@
     <string name="request_feature">Verzoek een functie of suggereer een idee</string>
     <string name="request_feature_description">Je wordt doorverwezen naar GitHub</string>
 
-    <string name="theme">Thema</string>
-    <string name="theme_name_default">Standaard</string>
-    <string name="theme_name_dynamic">Dynamisch</string>
-    <string name="theme_name_pureblack">PuurZwart</string>
-    <string name="theme_name_amoled">AMOLED</string>
-    <string name="theme_name_materialyou">Material You</string>
+    <string name="color_source">Bron voor accentkleur</string>
+    <string name="color_source_default">Standaard</string>
+    <string name="color_source_dynamic">Dynamisch</string>
+    <string name="color_source_material_you">Material You</string>
 
-    <string name="theme_mode">Modus</string>
-    <string name="theme_mode_light">Licht</string>
-    <string name="theme_mode_dark">Donker</string>
-    <string name="theme_mode_system">Systeem</string>
+    <string name="darkness">Donkerheid</string>
+    <string name="darkness_normal">Normaal</string>
+    <string name="darkness_pureblack">PuurZwart</string>
+    <string name="darkness_amoled">AMOLED</string>
+
+    <string name="color_mode">Modus</string>
+    <string name="color_mode_light">Licht</string>
+    <string name="color_mode_dark">Donker</string>
+    <string name="color_mode_system">Systeem</string>
 
     <string name="thumbnail_roundness">Rondheid van miniaturen</string>
     <string name="thumbnail_roundness_none">Geen</string>

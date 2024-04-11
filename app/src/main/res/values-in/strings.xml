@@ -182,17 +182,20 @@
     <string name="request_feature">Minta fitur atau usulkan ide</string>
     <string name="request_feature_description">Anda akan diarahkan ke GitHub</string>
 
-    <string name="theme">Tema</string>
-    <string name="theme_name_default">Default</string>
-    <string name="theme_name_dynamic">Dinamis</string>
-    <string name="theme_name_pureblack">Hitam Murni</string>
-    <string name="theme_name_amoled">AMOLED</string>
-    <string name="theme_name_materialyou">Material You</string>
+    <string name="color_source">Sumber warna aksen</string>
+    <string name="color_source_default">Default</string>
+    <string name="color_source_dynamic">Dinamis</string>
+    <string name="color_source_material_you">Material You</string>
 
-    <string name="theme_mode">Mode tema</string>
-    <string name="theme_mode_light">Terang</string>
-    <string name="theme_mode_dark">Gelap</string>
-    <string name="theme_mode_system">Sistem</string>
+    <string name="darkness">Kegelapan</string>
+    <string name="darkness_normal">Normal</string>
+    <string name="darkness_pureblack">Hitam Murni</string>
+    <string name="darkness_amoled">AMOLED</string>
+
+    <string name="color_mode">Mode</string>
+    <string name="color_mode_light">Terang</string>
+    <string name="color_mode_dark">Gelap</string>
+    <string name="color_mode_system">Sistem</string>
 
     <string name="thumbnail_roundness">Kebulatan thumbnail</string>
     <string name="thumbnail_roundness_none">Tidak ada</string>
