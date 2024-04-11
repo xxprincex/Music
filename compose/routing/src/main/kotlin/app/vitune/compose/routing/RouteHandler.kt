@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 @Composable
 fun RouteHandler(
     modifier: Modifier = Modifier,
-    listenToGlobalEmitter: Boolean = false,
+    listenToGlobalEmitter: Boolean = true,
     transitionSpec: AnimatedContentTransitionScope<Route?>.() -> ContentTransform = {
         when {
             isStacking -> defaultStacking
@@ -87,8 +87,6 @@ fun RouteHandler(
         parameters = parameters,
         push = onRouteChanged,
         pop = {
-            predictiveBackProgress = null
-            onRouteChanged(null)
             backDispatcher?.onBackPressed()
         }
     )

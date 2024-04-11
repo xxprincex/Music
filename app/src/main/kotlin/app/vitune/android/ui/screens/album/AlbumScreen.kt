@@ -107,7 +107,7 @@ fun AlbumScreen(browseId: String) {
             }
     }
 
-    RouteHandler(listenToGlobalEmitter = true) {
+    RouteHandler {
         GlobalRoutes()
 
         NavHost {
