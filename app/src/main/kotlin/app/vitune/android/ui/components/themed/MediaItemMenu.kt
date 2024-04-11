@@ -3,9 +3,12 @@ package app.vitune.android.ui.components.themed
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.Companion.Left
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.Companion.Right
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -273,34 +276,33 @@ fun MediaItemMenu(
     onShowSpeedDialog: (() -> Unit)? = null,
     onShowNormalizationDialog: (() -> Unit)? = null
 ) {
-    val (colorPalette) = LocalAppearance.current
+    val (colorPalette, typography) = LocalAppearance.current
     val density = LocalDensity.current
     val uriHandler = LocalUriHandler.current
-    val playerServiceBinder = LocalPlayerServiceBinder.current
+    val binder = LocalPlayerServiceBinder.current
     val context = LocalContext.current
 
     val isLocal by remember { derivedStateOf { mediaItem.isLocal } }
 
     var isViewingPlaylists by remember { mutableStateOf(false) }
+    var width by remember { mutableStateOf(0.dp) }
     var height by remember { mutableStateOf(0.dp) }
     var likedAt by remember { mutableStateOf<Long?>(null) }
     var isBlacklisted by remember { mutableStateOf(false) }
 
     var albumInfo by remember {
         mutableStateOf(
-            mediaItem.mediaMetadata.extras?.getString("albumId")?.let { albumId ->
-                Info(albumId, null)
-            }
+            mediaItem.mediaMetadata.extras
+                ?.getString("albumId")
+                ?.let { Info(it, null) }
         )
     }
 
     var artistsInfo by remember {
         mutableStateOf(
-            mediaItem.mediaMetadata.extras?.getStringArrayList("artistNames")?.let { artistNames ->
-                mediaItem.mediaMetadata.extras?.getStringArrayList("artistIds")?.let { artistIds ->
-                    artistNames.zip(artistIds).map { (authorName, authorId) ->
-                        Info(authorId, authorName)
-                    }
+            mediaItem.mediaMetadata.extras?.getStringArrayList("artistNames")?.let { names ->
+                mediaItem.mediaMetadata.extras?.getStringArrayList("artistIds")?.let { ids ->
+                    names.zip(ids) { name, id -> Info(id, name) }
                 }
             }
         )
@@ -311,8 +313,16 @@ fun MediaItemMenu(
             if (albumInfo == null) albumInfo = Database.songAlbumInfo(mediaItem.mediaId)
             if (artistsInfo == null) artistsInfo = Database.songArtistInfo(mediaItem.mediaId)
 
-            launch { Database.likedAt(mediaItem.mediaId).collect { likedAt = it } }
-            launch { Database.blacklisted(mediaItem.mediaId).collect { isBlacklisted = it } }
+            launch {
+                Database
+                    .likedAt(mediaItem.mediaId)
+                    .collect { likedAt = it }
+            }
+            launch {
+                Database
+                    .blacklisted(mediaItem.mediaId)
+                    .collect { isBlacklisted = it }
+            }
         }
     }
 
@@ -320,8 +330,7 @@ fun MediaItemMenu(
         targetState = isViewingPlaylists,
         transitionSpec = {
             val animationSpec = tween<IntOffset>(400)
-            val slideDirection = if (targetState) AnimatedContentTransitionScope.SlideDirection.Left
-            else AnimatedContentTransitionScope.SlideDirection.Right
+            val slideDirection = if (targetState) Left else Right
 
             slideIntoContainer(slideDirection, animationSpec) togetherWith
                     slideOutOfContainer(slideDirection, animationSpec)
@@ -330,7 +339,10 @@ fun MediaItemMenu(
     ) { currentIsViewingPlaylists ->
         if (currentIsViewingPlaylists) {
             val playlistPreviews by remember {
-                Database.playlistPreviews(PlaylistSortBy.DateAdded, SortOrder.Descending)
+                Database.playlistPreviews(
+                    sortBy = PlaylistSortBy.DateAdded,
+                    sortOrder = SortOrder.Descending
+                )
             }.collectAsState(initial = emptyList(), context = Dispatchers.IO)
 
             var isCreatingNewPlaylist by rememberSaveable { mutableStateOf(false) }
@@ -390,6 +402,7 @@ fun MediaItemMenu(
             }
         } else Menu(
             modifier = modifier.onPlaced {
+                width = with(density) { it.size.width.toDp() }
                 height = with(density) { it.size.height.toDp() }
             }
         ) {
@@ -413,13 +426,14 @@ fun MediaItemMenu(
                         color = colorPalette.favoritesIcon,
                         onClick = {
                             query {
-                                if (Database.like(
-                                        mediaItem.mediaId,
-                                        if (likedAt == null) System.currentTimeMillis() else null
-                                    ) == 0
-                                ) {
-                                    Database.insert(mediaItem, Song::toggleLike)
-                                }
+                                if (
+                                    Database.like(
+                                        songId = mediaItem.mediaId,
+                                        likedAt = if (likedAt == null) System.currentTimeMillis() else null
+                                    ) != 0
+                                ) return@query
+
+                                Database.insert(mediaItem, Song::toggleLike)
                             }
                         },
                         modifier = Modifier
@@ -444,49 +458,7 @@ fun MediaItemMenu(
                     .padding(vertical = 8.dp)
             )
 
-            if (!isLocal && !isCached(mediaItem.mediaId)) MenuEntry(
-                icon = R.drawable.download,
-                text = stringResource(R.string.pre_cache),
-                onClick = {
-                    onDismiss()
-                    PrecacheService.scheduleCache(context.applicationContext, mediaItem)
-                }
-            )
-
-            if (!isLocal) onStartRadio?.let { onStartRadio ->
-                MenuEntry(
-                    icon = R.drawable.radio,
-                    text = stringResource(R.string.start_radio),
-                    onClick = {
-                        onDismiss()
-                        onStartRadio()
-                    }
-                )
-            }
-
-            onShowSpeedDialog?.let { onShowSpeedDialog ->
-                MenuEntry(
-                    icon = R.drawable.speed,
-                    text = stringResource(R.string.playback_settings),
-                    onClick = {
-                        onDismiss()
-                        onShowSpeedDialog()
-                    }
-                )
-            }
-
-            onShowNormalizationDialog?.let { onShowNormalizationDialog ->
-                MenuEntry(
-                    icon = R.drawable.volume_up,
-                    text = stringResource(R.string.song_volume_boost),
-                    onClick = {
-                        onDismiss()
-                        onShowNormalizationDialog()
-                    }
-                )
-            }
-
-            onPlayNext?.let { onPlayNext ->
+            onPlayNext?.let {
                 MenuEntry(
                     icon = R.drawable.play_skip_forward,
                     text = stringResource(R.string.play_next),
@@ -497,7 +469,7 @@ fun MediaItemMenu(
                 )
             }
 
-            onEnqueue?.let { onEnqueue ->
+            onEnqueue?.let {
                 MenuEntry(
                     icon = R.drawable.enqueue,
                     text = stringResource(R.string.enqueue),
@@ -508,19 +480,34 @@ fun MediaItemMenu(
                 )
             }
 
-            if (!mediaItem.isLocal) MenuEntry(
-                icon = R.drawable.remove_circle_outline,
-                text = if (isBlacklisted) stringResource(R.string.remove_from_blacklist)
-                else stringResource(R.string.add_to_blacklist),
-                onClick = {
-                    transaction {
-                        Database.insert(mediaItem)
-                        Database.toggleBlacklist(mediaItem.mediaId)
+            if (!isLocal) onStartRadio?.let {
+                MenuEntry(
+                    icon = R.drawable.radio,
+                    text = stringResource(R.string.start_radio),
+                    onClick = {
+                        onDismiss()
+                        onStartRadio()
                     }
-                }
-            )
+                )
+            }
 
-            onGoToEqualizer?.let { onGoToEqualizer ->
+            onAddToPlaylist?.let {
+                MenuEntry(
+                    icon = R.drawable.playlist,
+                    text = stringResource(R.string.add_to_playlist),
+                    onClick = { isViewingPlaylists = true },
+                    trailingContent = {
+                        Image(
+                            painter = painterResource(R.drawable.chevron_forward),
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(colorPalette.textSecondary),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                )
+            }
+
+            onGoToEqualizer?.let {
                 MenuEntry(
                     icon = R.drawable.equalizer,
                     text = stringResource(R.string.equalizer),
@@ -531,10 +518,29 @@ fun MediaItemMenu(
                 )
             }
 
-            onShowSleepTimer?.let {
-                val binder = LocalPlayerServiceBinder.current
-                val (_, typography) = LocalAppearance.current
+            onShowSpeedDialog?.let {
+                MenuEntry(
+                    icon = R.drawable.speed,
+                    text = stringResource(R.string.playback_settings),
+                    onClick = {
+                        onDismiss()
+                        onShowSpeedDialog()
+                    }
+                )
+            }
 
+            onShowNormalizationDialog?.let {
+                MenuEntry(
+                    icon = R.drawable.volume_up,
+                    text = stringResource(R.string.volume_boost),
+                    onClick = {
+                        onDismiss()
+                        onShowNormalizationDialog()
+                    }
+                )
+            }
+
+            onShowSleepTimer?.let {
                 var isShowingSleepTimerDialog by remember { mutableStateOf(false) }
                 var sleepTimerMillisLeft by remember { mutableLongStateOf(0L) }
 
@@ -675,21 +681,7 @@ fun MediaItemMenu(
                 )
             }
 
-            if (onAddToPlaylist != null) MenuEntry(
-                icon = R.drawable.playlist,
-                text = stringResource(R.string.add_to_playlist),
-                onClick = { isViewingPlaylists = true },
-                trailingContent = {
-                    Image(
-                        painter = painterResource(R.drawable.chevron_forward),
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(colorPalette.textSecondary),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            )
-
-            if (!isLocal) onGoToAlbum?.let { onGoToAlbum ->
+            if (!isLocal) onGoToAlbum?.let {
                 albumInfo?.let { (albumId) ->
                     MenuEntry(
                         icon = R.drawable.disc,
@@ -702,15 +694,15 @@ fun MediaItemMenu(
                 }
             }
 
-            if (!isLocal) onGoToArtist?.let { onGoToArtist ->
-                artistsInfo?.forEach { (authorId, authorName) ->
-                    authorName?.let { name ->
+            if (!isLocal) onGoToArtist?.let {
+                artistsInfo?.forEach { (id, name) ->
+                    name?.let {
                         MenuEntry(
                             icon = R.drawable.person,
                             text = stringResource(R.string.format_go_to_artist, name),
                             onClick = {
                                 onDismiss()
-                                onGoToArtist(authorId)
+                                onGoToArtist(id)
                             }
                         )
                     }
@@ -722,7 +714,7 @@ fun MediaItemMenu(
                 text = stringResource(R.string.watch_on_youtube),
                 onClick = {
                     onDismiss()
-                    playerServiceBinder?.player?.pause()
+                    binder?.player?.pause()
                     uriHandler.openUri("https://youtube.com/watch?v=${mediaItem.mediaId}")
                 }
             )
@@ -732,13 +724,45 @@ fun MediaItemMenu(
                 text = stringResource(R.string.open_in_youtube_music),
                 onClick = {
                     onDismiss()
-                    playerServiceBinder?.player?.pause()
+                    binder?.player?.pause()
                     if (!launchYouTubeMusic(context, "watch?v=${mediaItem.mediaId}"))
                         context.toast(context.getString(R.string.youtube_music_not_installed))
                 }
             )
 
-            onRemoveFromQueue?.let { onRemoveFromQueue ->
+            if (!isLocal && !isCached(mediaItem.mediaId)) MenuEntry(
+                icon = R.drawable.download,
+                text = stringResource(R.string.pre_cache),
+                onClick = {
+                    onDismiss()
+                    runCatching {
+                        PrecacheService.scheduleCache(
+                            context = context.applicationContext,
+                            mediaItem = mediaItem
+                        )
+                    }.exceptionOrNull()?.printStackTrace()
+                }
+            )
+
+            if (!mediaItem.isLocal) AnimatedContent(
+                targetState = isBlacklisted,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = ""
+            ) { blacklisted ->
+                MenuEntry(
+                    icon = R.drawable.remove_circle_outline,
+                    text = if (blacklisted) stringResource(R.string.remove_from_blacklist)
+                    else stringResource(R.string.add_to_blacklist),
+                    onClick = {
+                        transaction {
+                            Database.insert(mediaItem)
+                            Database.toggleBlacklist(mediaItem.mediaId)
+                        }
+                    }
+                )
+            }
+
+            onRemoveFromQueue?.let {
                 MenuEntry(
                     icon = R.drawable.trash,
                     text = stringResource(R.string.remove_from_queue),
@@ -749,7 +773,7 @@ fun MediaItemMenu(
                 )
             }
 
-            onRemoveFromPlaylist?.let { onRemoveFromPlaylist ->
+            onRemoveFromPlaylist?.let {
                 MenuEntry(
                     icon = R.drawable.trash,
                     text = stringResource(R.string.remove_from_playlist),
@@ -760,7 +784,7 @@ fun MediaItemMenu(
                 )
             }
 
-            onHideFromDatabase?.let { onHideFromDatabase ->
+            onHideFromDatabase?.let {
                 MenuEntry(
                     icon = R.drawable.trash,
                     text = stringResource(R.string.hide),

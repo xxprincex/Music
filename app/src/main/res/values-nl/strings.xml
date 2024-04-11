@@ -159,7 +159,7 @@
     <string name="playback_pitch">Toonhoogte</string>
     <string name="playback_settings">Snelheid en toonhoogte</string>
     <string name="minimum_speed_value">Waarom zou je dat doen?!</string>
-    <string name="song_volume_boost">Volume-boost</string>
+    <string name="volume_boost">Volume-boost</string>
     <string name="queue_loop">Wachtrij herhalen</string>
     <string name="add_queue_to_playlist">Voeg wachtrij toe aan afspeellijst</string>
 

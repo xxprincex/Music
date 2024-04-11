@@ -157,7 +157,7 @@
 
     <string name="playback_speed">Kecepatan pemutaran</string>
     <string name="minimum_speed_value">Mengapa Anda melakukan ini?!</string>
-    <string name="song_volume_boost">Peningkatan volume lagu</string>
+    <string name="volume_boost">Peningkatan volume</string>
     <string name="queue_loop">Antrian loop</string>
     <string name="add_queue_to_playlist">Tambahkan antrian ke daftar putar</string>
 

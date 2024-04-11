@@ -159,7 +159,7 @@
     <string name="playback_pitch">Stellplatz</string>
     <string name="playback_settings">Geschwindigkeit &amp; Tonhöhe</string>
     <string name="minimum_speed_value">Warum haben Sie das getan?!</string>
-    <string name="song_volume_boost">Song-Lautstärke erhöhen</string>
+    <string name="volume_boost">Lautstärke erhöhen</string>
     <string name="queue_loop">Warteschleife</string>
     <string name="add_queue_to_playlist">Warteschlange zur Wiedergabeliste hinzufügen</string>
 

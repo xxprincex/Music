@@ -3,8 +3,6 @@ package app.vitune.android.ui.screens.player
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.media.audiofx.AudioEffect
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -77,6 +75,7 @@ import app.vitune.android.ui.modifiers.PinchDirection
 import app.vitune.android.ui.modifiers.onSwipe
 import app.vitune.android.ui.modifiers.pinchToToggle
 import app.vitune.android.utils.DisposableListener
+import app.vitune.android.utils.findActivity
 import app.vitune.android.utils.forceSeekToNext
 import app.vitune.android.utils.forceSeekToPrevious
 import app.vitune.android.utils.positionAndDurationState
@@ -437,7 +436,7 @@ fun Player(
 
             SliderDialog(
                 onDismiss = { boostDialogOpen = false },
-                title = stringResource(R.string.song_volume_boost)
+                title = stringResource(R.string.volume_boost)
             ) {
                 SliderDialogBody(
                     provideState = {
@@ -521,9 +520,6 @@ private fun PlayerMenu(
 ) {
     val context = LocalContext.current
 
-    val activityResultLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
-
     BaseMediaItemMenu(
         mediaItem = mediaItem,
         onStartRadio = {
@@ -533,7 +529,7 @@ private fun PlayerMenu(
         },
         onGoToEqualizer = {
             try {
-                activityResultLauncher.launch(
+                context.findActivity().startActivity(
                     Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL).apply {
                         putExtra(AudioEffect.EXTRA_AUDIO_SESSION, binder.player.audioSessionId)
                         putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.packageName)
