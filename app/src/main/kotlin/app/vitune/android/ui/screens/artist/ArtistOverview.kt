@@ -48,6 +48,10 @@ import app.vitune.core.ui.LocalAppearance
 import app.vitune.providers.innertube.Innertube
 import app.vitune.providers.innertube.models.NavigationEndpoint
 
+private val sectionTextModifier = Modifier
+    .padding(horizontal = 16.dp)
+    .padding(top = 24.dp, bottom = 8.dp)
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArtistOverview(
@@ -59,6 +63,9 @@ fun ArtistOverview(
     thumbnailContent: @Composable () -> Unit,
     headerContent: @Composable (textButton: (@Composable () -> Unit)?) -> Unit,
     modifier: Modifier = Modifier
+) = LayoutWithAdaptiveThumbnail(
+    thumbnailContent = thumbnailContent,
+    modifier = modifier
 ) {
     val (colorPalette, typography) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
@@ -67,219 +74,217 @@ fun ArtistOverview(
 
     val endPaddingValues = windowInsets.only(WindowInsetsSides.End).asPaddingValues()
 
-    val sectionTextModifier = Modifier
-        .padding(horizontal = 16.dp)
-        .padding(top = 24.dp, bottom = 8.dp)
-
     val scrollState = rememberScrollState()
 
-    LayoutWithAdaptiveThumbnail(
-        thumbnailContent = thumbnailContent,
-        modifier = modifier
-    ) {
-        Box {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .background(colorPalette.background0)
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(
-                        windowInsets
-                            .only(WindowInsetsSides.Vertical)
-                            .asPaddingValues()
-                    )
-            ) {
-                Box(modifier = Modifier.padding(endPaddingValues)) {
-                    headerContent {
-                        youtubeArtistPage?.shuffleEndpoint?.let { endpoint ->
-                            SecondaryTextButton(
-                                text = stringResource(R.string.shuffle),
-                                onClick = {
-                                    binder?.stopRadio()
-                                    binder?.playRadio(endpoint)
+    Box {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .background(colorPalette.background0)
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(
+                    windowInsets
+                        .only(WindowInsetsSides.Vertical)
+                        .asPaddingValues()
+                )
+        ) {
+            Box(modifier = Modifier.padding(endPaddingValues)) {
+                headerContent {
+                    youtubeArtistPage?.shuffleEndpoint?.let { endpoint ->
+                        SecondaryTextButton(
+                            text = stringResource(R.string.shuffle),
+                            onClick = {
+                                binder?.stopRadio()
+                                binder?.playRadio(endpoint)
+                            }
+                        )
+                    }
+                }
+            }
+
+            thumbnailContent()
+
+            youtubeArtistPage?.let { artist ->
+                artist.songs?.let { songs ->
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(endPaddingValues)
+                    ) {
+                        BasicText(
+                            text = stringResource(R.string.songs),
+                            style = typography.m.semiBold,
+                            modifier = sectionTextModifier
+                        )
+
+                        artist.songsEndpoint?.let {
+                            BasicText(
+                                text = stringResource(R.string.view_all),
+                                style = typography.xs.secondary,
+                                modifier = sectionTextModifier.clickable(onClick = onViewAllSongsClick)
+                            )
+                        }
+                    }
+
+                    songs.forEach { song ->
+                        SongItem(
+                            song = song,
+                            thumbnailSize = Dimensions.thumbnails.song,
+                            modifier = Modifier
+                                .combinedClickable(
+                                    onLongClick = {
+                                        menuState.display {
+                                            NonQueuedMediaItemMenu(
+                                                onDismiss = menuState::hide,
+                                                mediaItem = song.asMediaItem
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        val mediaItem = song.asMediaItem
+                                        binder?.stopRadio()
+                                        binder?.player?.forcePlay(mediaItem)
+                                        binder?.setupRadio(
+                                            NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
+                                        )
+                                    }
+                                )
+                                .padding(endPaddingValues)
+                        )
+                    }
+                }
+
+                artist.albums?.let { albums ->
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(endPaddingValues)
+                    ) {
+                        BasicText(
+                            text = stringResource(R.string.albums),
+                            style = typography.m.semiBold,
+                            modifier = sectionTextModifier
+                        )
+
+                        artist.albumsEndpoint?.let {
+                            BasicText(
+                                text = stringResource(R.string.view_all),
+                                style = typography.xs.secondary,
+                                modifier = sectionTextModifier.clickable(onClick = onViewAllAlbumsClick)
+                            )
+                        }
+                    }
+
+                    LazyRow(
+                        contentPadding = endPaddingValues,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(
+                            items = albums,
+                            key = Innertube.AlbumItem::key
+                        ) { album ->
+                            AlbumItem(
+                                album = album,
+                                thumbnailSize = Dimensions.thumbnails.album,
+                                alternative = true,
+                                modifier = Modifier.clickable {
+                                    onAlbumClick(album.key)
                                 }
                             )
                         }
                     }
                 }
 
-                thumbnailContent()
-
-                youtubeArtistPage?.let {
-                    youtubeArtistPage.songs?.let { songs ->
-                        Row(
-                            verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(endPaddingValues)
-                        ) {
-                            BasicText(
-                                text = stringResource(R.string.songs),
-                                style = typography.m.semiBold,
-                                modifier = sectionTextModifier
-                            )
-
-                            youtubeArtistPage.songsEndpoint?.let {
-                                BasicText(
-                                    text = stringResource(R.string.view_all),
-                                    style = typography.xs.secondary,
-                                    modifier = sectionTextModifier.clickable(onClick = onViewAllSongsClick)
-                                )
-                            }
-                        }
-
-                        songs.forEach { song ->
-                            SongItem(
-                                song = song,
-                                thumbnailSize = Dimensions.thumbnails.song,
-                                modifier = Modifier
-                                    .combinedClickable(
-                                        onLongClick = {
-                                            menuState.display {
-                                                NonQueuedMediaItemMenu(
-                                                    onDismiss = menuState::hide,
-                                                    mediaItem = song.asMediaItem
-                                                )
-                                            }
-                                        },
-                                        onClick = {
-                                            val mediaItem = song.asMediaItem
-                                            binder?.stopRadio()
-                                            binder?.player?.forcePlay(mediaItem)
-                                            binder?.setupRadio(
-                                                NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
-                                            )
-                                        }
-                                    )
-                                    .padding(endPaddingValues)
-                            )
-                        }
-                    }
-
-                    youtubeArtistPage.albums?.let { albums ->
-                        Row(
-                            verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(endPaddingValues)
-                        ) {
-                            BasicText(
-                                text = stringResource(R.string.albums),
-                                style = typography.m.semiBold,
-                                modifier = sectionTextModifier
-                            )
-
-                            youtubeArtistPage.albumsEndpoint?.let {
-                                BasicText(
-                                    text = stringResource(R.string.view_all),
-                                    style = typography.xs.secondary,
-                                    modifier = sectionTextModifier.clickable(onClick = onViewAllAlbumsClick)
-                                )
-                            }
-                        }
-
-                        LazyRow(
-                            contentPadding = endPaddingValues,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            items(
-                                items = albums,
-                                key = Innertube.AlbumItem::key
-                            ) { album ->
-                                AlbumItem(
-                                    album = album,
-                                    thumbnailSize = Dimensions.thumbnails.album,
-                                    alternative = true,
-                                    modifier = Modifier.clickable(onClick = {
-                                        onAlbumClick(album.key)
-                                    })
-                                )
-                            }
-                        }
-                    }
-
-                    youtubeArtistPage.singles?.let { singles ->
-                        Row(
-                            verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(endPaddingValues)
-                        ) {
-                            BasicText(
-                                text = stringResource(R.string.singles),
-                                style = typography.m.semiBold,
-                                modifier = sectionTextModifier
-                            )
-
-                            youtubeArtistPage.singlesEndpoint?.let {
-                                BasicText(
-                                    text = stringResource(R.string.view_all),
-                                    style = typography.xs.secondary,
-                                    modifier = sectionTextModifier.clickable(onClick = onViewAllSinglesClick)
-                                )
-                            }
-                        }
-
-                        LazyRow(
-                            contentPadding = endPaddingValues,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            items(
-                                items = singles,
-                                key = Innertube.AlbumItem::key
-                            ) { album ->
-                                AlbumItem(
-                                    album = album,
-                                    thumbnailSize = Dimensions.thumbnails.album,
-                                    alternative = true,
-                                    modifier = Modifier.clickable(onClick = { onAlbumClick(album.key) })
-                                )
-                            }
-                        }
-                    }
-
-                    youtubeArtistPage.description?.let { description ->
-                        Attribution(
-                            text = description,
-                            modifier = Modifier
-                                .padding(top = 16.dp)
-                                .padding(vertical = 16.dp, horizontal = 8.dp)
+                artist.singles?.let { singles ->
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(endPaddingValues)
+                    ) {
+                        BasicText(
+                            text = stringResource(R.string.singles),
+                            style = typography.m.semiBold,
+                            modifier = sectionTextModifier
                         )
+
+                        artist.singlesEndpoint?.let {
+                            BasicText(
+                                text = stringResource(R.string.view_all),
+                                style = typography.xs.secondary,
+                                modifier = sectionTextModifier.clickable(onClick = onViewAllSinglesClick)
+                            )
+                        }
                     }
-                } ?: ShimmerHost {
-                    TextPlaceholder(modifier = sectionTextModifier)
 
-                    repeat(5) {
-                        SongItemPlaceholder(thumbnailSize = Dimensions.thumbnails.song)
-                    }
-
-                    repeat(2) {
-                        TextPlaceholder(modifier = sectionTextModifier)
-
-                        Row {
-                            repeat(2) {
-                                AlbumItemPlaceholder(
-                                    thumbnailSize = Dimensions.thumbnails.album,
-                                    alternative = true
-                                )
-                            }
+                    LazyRow(
+                        contentPadding = endPaddingValues,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(
+                            items = singles,
+                            key = Innertube.AlbumItem::key
+                        ) { album ->
+                            AlbumItem(
+                                album = album,
+                                thumbnailSize = Dimensions.thumbnails.album,
+                                alternative = true,
+                                modifier = Modifier.clickable(onClick = { onAlbumClick(album.key) })
+                            )
                         }
                     }
                 }
-            }
 
-            youtubeArtistPage?.radioEndpoint?.let { endpoint ->
-                FloatingActionsContainerWithScrollToTop(
-                    scrollState = scrollState,
-                    icon = R.drawable.radio,
-                    onClick = {
-                        binder?.stopRadio()
-                        binder?.playRadio(endpoint)
-                    }
+                artist.description?.let { description ->
+                    Attribution(
+                        text = description,
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .padding(vertical = 16.dp, horizontal = 8.dp)
+                    )
+                }
+
+                Unit
+            } ?: ArtistOverviewBodyPlaceholder()
+        }
+
+        youtubeArtistPage?.radioEndpoint?.let { endpoint ->
+            FloatingActionsContainerWithScrollToTop(
+                scrollState = scrollState,
+                icon = R.drawable.radio,
+                onClick = {
+                    binder?.stopRadio()
+                    binder?.playRadio(endpoint)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun ArtistOverviewBodyPlaceholder(modifier: Modifier = Modifier) = ShimmerHost(
+    modifier = modifier
+) {
+    TextPlaceholder(modifier = sectionTextModifier)
+
+    repeat(5) {
+        SongItemPlaceholder(thumbnailSize = Dimensions.thumbnails.song)
+    }
+
+    repeat(2) {
+        TextPlaceholder(modifier = sectionTextModifier)
+
+        Row {
+            repeat(2) {
+                AlbumItemPlaceholder(
+                    thumbnailSize = Dimensions.thumbnails.album,
+                    alternative = true
                 )
             }
         }
