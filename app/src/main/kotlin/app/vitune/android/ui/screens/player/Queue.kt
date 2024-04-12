@@ -423,7 +423,7 @@ fun Queue(
                     lazyListState = lazyListState,
                     icon = R.drawable.shuffle,
                     visible = !reorderingState.isDragging,
-                    windowInsets = windowInsets.only(WindowInsetsSides.Horizontal),
+                    insets = windowInsets.only(WindowInsetsSides.Horizontal),
                     onClick = {
                         reorderingState.coroutineScope.launch {
                             lazyListState.smoothScrollToTop()
