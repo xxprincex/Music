@@ -5,30 +5,31 @@ import app.vitune.providers.innertube.models.NavigationEndpoint
 import app.vitune.providers.innertube.models.bodies.BrowseBody
 import io.ktor.http.Url
 
-suspend fun Innertube.albumPage(body: BrowseBody) = playlistPage(body)?.map { album ->
-    album.url?.let { Url(it).parameters["list"] }?.let { playlistId ->
-        playlistPage(BrowseBody(browseId = "VL$playlistId"))?.getOrNull()?.let { playlist ->
-            album.copy(songsPage = playlist.songsPage)
+suspend fun Innertube.albumPage(body: BrowseBody) =
+    playlistPage(body)
+        ?.map { album ->
+            album.url?.let {
+                playlistPage(body = BrowseBody(browseId = "VL${Url(it).parameters["list"]}"))
+                    ?.getOrNull()
+                    ?.let { playlist -> album.copy(songsPage = playlist.songsPage) }
+            } ?: album
         }
-    } ?: album
-}?.map { album ->
-    val albumInfo = Innertube.Info(
-        name = album.title,
-        endpoint = NavigationEndpoint.Endpoint.Browse(
-            browseId = body.browseId,
-            params = body.params
-        )
-    )
-
-    album.copy(
-        songsPage = album.songsPage?.copy(
-            items = album.songsPage.items?.map { song ->
-                song.copy(
-                    authors = song.authors ?: album.authors,
-                    album = albumInfo,
-                    thumbnail = album.thumbnail
+        ?.map { album ->
+            album.copy(
+                songsPage = album.songsPage?.copy(
+                    items = album.songsPage.items?.map { song ->
+                        song.copy(
+                            authors = song.authors ?: album.authors,
+                            album = Innertube.Info(
+                                name = album.title,
+                                endpoint = NavigationEndpoint.Endpoint.Browse(
+                                    browseId = body.browseId,
+                                    params = body.params
+                                )
+                            ),
+                            thumbnail = album.thumbnail
+                        )
+                    }
                 )
-            }
-        )
-    )
-}
+            )
+        }
