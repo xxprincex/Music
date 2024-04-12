@@ -56,7 +56,7 @@ fun SyncSettings() {
     var linkingPiped by remember { mutableStateOf(false) }
     if (linkingPiped) DefaultDialog(
         onDismiss = { linkingPiped = false },
-        horizontalAlignment = Alignment.Start
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         var isLoading by rememberSaveable { mutableStateOf(false) }
         var hasError by rememberSaveable { mutableStateOf(false) }
