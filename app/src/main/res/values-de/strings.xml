@@ -74,6 +74,7 @@
 
     <string name="on_label">an</string>
     <string name="off_label">aus</string>
+    <string name="off_text">Aus</string>
     <string name="unknown">Unbekannt</string>
     <string name="now_playing">Jetzt spielt</string>
 
@@ -182,7 +183,7 @@
     <string name="report_bug">Ein Problem melden</string>
     <string name="report_bug_description">Wenn Sie Hilfe bei einem Fehler benötigen, können Sie einen Fehler auf GitHub melden (zum Weiterleiten klicken)</string>
     <string name="request_feature">Eine Funktion anfordern oder eine Idee vorschlagen</string>
-    <string name="request_feature_description">Sie werden zu GitHub weitergeleitet</string>
+    <string name="redirect_github">Sie werden zu GitHub weitergeleitet</string>
 
     <string name="theme">Thema</string>
     <string name="theme_name_default">Standard</string>

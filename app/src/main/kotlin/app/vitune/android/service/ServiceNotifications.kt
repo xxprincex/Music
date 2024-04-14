@@ -8,3 +8,6 @@ const val SLEEP_TIMER_NOTIFICATION_CHANNEL_ID = "sleep_timer_channel_id"
 
 const val DOWNLOAD_NOTIFICATION_ID = 1003
 const val DOWNLOAD_NOTIFICATION_CHANNEL_ID = "download_channel_id"
+
+const val VERSION_NOTIFICATION_ID = 1004
+const val VERSION_NOTIFICATION_CHANNEL_ID = "version_channel_id"

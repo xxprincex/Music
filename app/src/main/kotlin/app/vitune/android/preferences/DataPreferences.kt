@@ -8,6 +8,7 @@ import app.vitune.core.data.enums.CoilDiskCacheSize
 import app.vitune.core.data.enums.ExoPlayerDiskCacheSize
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 
 object DataPreferences : GlobalPreferencesHolder() {
     var coilDiskCacheMaxSize by enum(CoilDiskCacheSize.`128MB`)
@@ -20,8 +21,12 @@ object DataPreferences : GlobalPreferencesHolder() {
     val topListPeriodProperty = enum(TopListPeriod.AllTime)
     var topListPeriod by topListPeriodProperty
     var quickPicksSource by enum(QuickPicksSource.Trending)
+    var versionCheckPeriod by enum(VersionCheckPeriod.Off)
 
-    enum class TopListPeriod(val displayName: @Composable () -> String, val duration: Duration? = null) {
+    enum class TopListPeriod(
+        val displayName: @Composable () -> String,
+        val duration: Duration? = null
+    ) {
         PastDay(displayName = { stringResource(R.string.past_24_hours) }, duration = 1.days),
         PastWeek(displayName = { stringResource(R.string.past_week) }, duration = 7.days),
         PastMonth(displayName = { stringResource(R.string.past_month) }, duration = 30.days),
@@ -32,5 +37,15 @@ object DataPreferences : GlobalPreferencesHolder() {
     enum class QuickPicksSource(val displayName: @Composable () -> String) {
         Trending(displayName = { stringResource(R.string.trending) }),
         LastInteraction(displayName = { stringResource(R.string.last_interaction) })
+    }
+
+    enum class VersionCheckPeriod(
+        val displayName: @Composable () -> String,
+        val period: Duration?
+    ) {
+        Off(displayName = { stringResource(R.string.off_text) }, period = null),
+        Hourly(displayName = { stringResource(R.string.hourly) }, period = 1.hours),
+        Daily(displayName = { stringResource(R.string.daily) }, period = 1.days),
+        Weekly(displayName = { stringResource(R.string.weekly) }, period = 7.days)
     }
 }

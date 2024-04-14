@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.PowerManager
 import android.widget.Toast
+import androidx.core.app.PendingIntentCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import app.vitune.android.BuildConfig
@@ -26,13 +27,23 @@ inline fun <reified T : BroadcastReceiver> Context.broadcastPendingIntent(
 
 inline fun <reified T : Activity> Context.activityPendingIntent(
     requestCode: Int = 0,
-    flags: Int = 0,
-    block: Intent.() -> Unit = {}
+    @PendingIntentCompat.Flags flags: Int = 0,
+    block: Intent.() -> Unit = { }
+) = pendingIntent(
+    intent = intent<T>().apply(block),
+    requestCode = requestCode,
+    flags = flags
+)
+
+fun Context.pendingIntent(
+    intent: Intent,
+    requestCode: Int = 0,
+    @PendingIntentCompat.Flags flags: Int = 0
 ): PendingIntent = PendingIntent.getActivity(
-    this,
-    requestCode,
-    intent<T>().apply(block),
-    (if (isAtLeastAndroid6) PendingIntent.FLAG_IMMUTABLE else 0) or flags
+    /* context = */ this,
+    /* requestCode = */ requestCode,
+    /* intent = */ intent,
+    /* flags = */ (if (isAtLeastAndroid6) PendingIntent.FLAG_IMMUTABLE else 0) or flags
 )
 
 val Context.isIgnoringBatteryOptimizations

@@ -74,6 +74,7 @@
 
     <string name="on_label">on</string>
     <string name="off_label">off</string>
+    <string name="off_text">Off</string>
     <string name="unknown">Unknown</string>
     <string name="now_playing">Now playing</string>
 
@@ -182,7 +183,7 @@
     <string name="report_bug">Report an issue</string>
     <string name="report_bug_description">If you need help with a bug you can file an issue on GitHub (click to redirect)</string>
     <string name="request_feature">Request a feature or suggest an idea</string>
-    <string name="request_feature_description">You will be redirected to GitHub</string>
+    <string name="redirect_github">You will be redirected to GitHub</string>
 
     <string name="theme">Theme</string>
     <string name="theme_name_default">Default</string>
@@ -366,6 +367,11 @@
     <string name="dynamic_thumbnails">Dynamic thumbnails</string>
     <string name="max_dynamic_thumbnail_size">Max dynamic thumbnail size</string>
     <string name="max_dynamic_thumbnail_size_description">The maximum size of a thumbnail when a dynamic thumbnail is used</string>
+
+    <string name="hourly">Hourly</string>
+    <string name="daily">Daily</string>
+    <string name="weekly">Weekly</string>
+    <string name="version_check">Automatically check for updates</string>
 
     <plurals name="format_reset_blacklist_description">
         <item quantity="one">Remove %1$s song from the blacklist</item>

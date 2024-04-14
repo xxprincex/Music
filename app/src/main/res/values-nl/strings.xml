@@ -74,6 +74,7 @@
 
     <string name="on_label">aan</string>
     <string name="off_label">uit</string>
+    <string name="off_text">Uit</string>
     <string name="unknown">Onbekend</string>
     <string name="now_playing">Speelt nu</string>
 
@@ -182,7 +183,7 @@
     <string name="report_bug">Meld probleem</string>
     <string name="report_bug_description">Als je hulp nodig hebt kun je een probleem melden op GitHub (klik om door te verwijzen)</string>
     <string name="request_feature">Verzoek een functie of suggereer een idee</string>
-    <string name="request_feature_description">Je wordt doorverwezen naar GitHub</string>
+    <string name="redirect_github">Je wordt doorverwezen naar GitHub</string>
 
     <string name="theme">Thema</string>
     <string name="theme_name_default">Standaard</string>
@@ -366,6 +367,11 @@
     <string name="dynamic_thumbnails">Dynamische miniaturen</string>
     <string name="max_dynamic_thumbnail_size">Maximale dynamische miniatuurgrootte</string>
     <string name="max_dynamic_thumbnail_size_description">De maximale grootte van een miniatuur wanneer een dynamische miniatuur wordt gebruikt</string>
+
+    <string name="hourly">Uurlijks</string>
+    <string name="daily">Dagelijks</string>
+    <string name="weekly">Wekelijks</string>
+    <string name="version_check">Check automatisch voor updates</string>
 
     <plurals name="format_reset_blacklist_description">
         <item quantity="one">Haal %1$s nummer van de zwarte lijst</item>

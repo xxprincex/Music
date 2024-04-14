@@ -1,11 +1,13 @@
 package app.vitune.core.data.utils
 
-inline val String.version get() = Version(value = this)
+inline val String.version get() = Version(
+    removePrefix("v")
+        .split(".")
+        .mapNotNull { it.toIntOrNull() }
+)
 
 @JvmInline
 value class Version(private val parts: List<Int>) {
-    constructor(value: String) : this(value.split(".").mapNotNull { it.toIntOrNull() })
-
     val major get() = parts.firstOrNull()
     val minor get() = parts.getOrNull(1)
     val patch get() = parts.getOrNull(2)
