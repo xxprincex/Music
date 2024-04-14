@@ -45,6 +45,7 @@ import app.vitune.android.utils.secondary
 import app.vitune.android.utils.semiBold
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
+import app.vitune.core.ui.utils.isLandscape
 import app.vitune.providers.innertube.Innertube
 import app.vitune.providers.innertube.models.NavigationEndpoint
 
@@ -103,7 +104,7 @@ fun ArtistOverview(
                 }
             }
 
-            thumbnailContent()
+            if (!isLandscape) thumbnailContent()
 
             youtubeArtistPage?.let { artist ->
                 artist.songs?.let { songs ->
