@@ -1,14 +1,13 @@
 package app.vitune.compose.routing
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.SeekableTransitionState
-import androidx.compose.animation.core.rememberTransition
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,8 +19,9 @@ import androidx.compose.ui.Modifier
 @Composable
 fun RouteHandler(
     modifier: Modifier = Modifier,
-    listenToGlobalEmitter: Boolean = true,
-    transitionSpec: AnimatedContentTransitionScope<Route?>.() -> ContentTransform = {
+    listenToGlobalEmitter: Boolean = false,
+    handleBackPress: Boolean = true,
+    transitionSpec: AnimatedContentTransitionScope<RouteHandlerScope>.() -> ContentTransform = {
         when {
             isStacking -> defaultStacking
             isStill -> defaultStill
@@ -38,6 +38,7 @@ fun RouteHandler(
         route = route,
         onRouteChanged = { route = it },
         listenToGlobalEmitter = listenToGlobalEmitter,
+        handleBackPress = handleBackPress,
         transitionSpec = transitionSpec,
         modifier = modifier,
         content = content
@@ -51,7 +52,8 @@ fun RouteHandler(
     onRouteChanged: (Route?) -> Unit,
     modifier: Modifier = Modifier,
     listenToGlobalEmitter: Boolean = false,
-    transitionSpec: AnimatedContentTransitionScope<Route?>.() -> ContentTransform = {
+    handleBackPress: Boolean = true,
+    transitionSpec: AnimatedContentTransitionScope<RouteHandlerScope>.() -> ContentTransform = {
         when {
             isStacking -> defaultStacking
             isStill -> defaultStill
@@ -61,54 +63,36 @@ fun RouteHandler(
     content: @Composable RouteHandlerScope.() -> Unit
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-    val parameters = rememberSaveable { arrayOfNulls<Any?>(3) }
 
-    if (listenToGlobalEmitter && route == null) OnGlobalRoute { (newRoute, newParameters) ->
-        newParameters.forEachIndexed(parameters::set)
-        onRouteChanged(newRoute)
+    val parameters = rememberSaveable {
+        arrayOfNulls<Any?>(3)
     }
 
-    var predictiveBackProgress: Float? by remember { mutableStateOf(null) }
-    GlobalPredictiveBackHandler(
-        enabled = route != null,
-        onStart = { predictiveBackProgress = 0f },
-        onProgress = { predictiveBackProgress = it },
-        onFinish = {
-            onRouteChanged(null)
-            predictiveBackProgress = null
-        },
-        onCancel = {
-            predictiveBackProgress = null
-        }
-    )
-
-    fun Route?.scope() = RouteHandlerScope(
-        route = this,
-        parameters = parameters,
-        push = onRouteChanged,
-        pop = {
-            backDispatcher?.onBackPressed()
-        }
-    )
-
-    val transitionState = remember { SeekableTransitionState(route) }
-
-    if (predictiveBackProgress == null) LaunchedEffect(route) {
-        if (transitionState.currentState != route) transitionState.animateTo(route)
-    } else LaunchedEffect(predictiveBackProgress) {
-        transitionState.seekTo(
-            fraction = predictiveBackProgress ?: 0f,
-            targetState = null
+    val scope = remember(route) {
+        RouteHandlerScope(
+            route = route,
+            parameters = parameters,
+            push = onRouteChanged,
+            pop = { if (handleBackPress) backDispatcher?.onBackPressed() else onRouteChanged(null) }
         )
     }
 
-    rememberTransition(
-        transitionState = transitionState,
-        label = null
-    ).AnimatedContent(
+    if (listenToGlobalEmitter && route == null) {
+        OnGlobalRoute { (newRoute, newParameters) ->
+            newParameters.forEachIndexed(parameters::set)
+            onRouteChanged(newRoute)
+        }
+    }
+
+    BackHandler(enabled = handleBackPress && route != null) {
+        onRouteChanged(null)
+    }
+
+    updateTransition(targetState = scope, label = null).AnimatedContent(
         transitionSpec = transitionSpec,
+        contentKey = RouteHandlerScope::route,
         modifier = modifier
     ) {
-        it.scope().content()
+        it.content()
     }
 }

@@ -1,5 +1,6 @@
 package app.vitune.android.ui.screens.home
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.res.stringResource
@@ -30,7 +31,14 @@ import app.vitune.android.ui.screens.settings.SettingsScreen
 import app.vitune.android.ui.screens.settingsRoute
 import app.vitune.compose.persist.PersistMapCleanup
 import app.vitune.compose.routing.RouteHandler
+import app.vitune.compose.routing.defaultStacking
+import app.vitune.compose.routing.defaultStill
+import app.vitune.compose.routing.defaultUnstacking
+import app.vitune.compose.routing.isStacking
+import app.vitune.compose.routing.isUnknown
+import app.vitune.compose.routing.isUnstacking
 
+@OptIn(ExperimentalAnimationApi::class)
 @Route
 @Composable
 fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
@@ -38,7 +46,22 @@ fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
 
     PersistMapCleanup("home/")
 
-    RouteHandler {
+    RouteHandler(
+        listenToGlobalEmitter = true,
+        transitionSpec = {
+            when {
+                isStacking -> defaultStacking
+                isUnstacking -> defaultUnstacking
+                isUnknown -> when {
+                    initialState.route == searchRoute && targetState.route == searchResultRoute -> defaultStacking
+                    initialState.route == searchResultRoute && targetState.route == searchRoute -> defaultUnstacking
+                    else -> defaultStill
+                }
+
+                else -> defaultStill
+            }
+        }
+    ) {
         GlobalRoutes()
 
         settingsRoute {
@@ -52,7 +75,9 @@ fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
         }
 
         builtInPlaylistRoute { builtInPlaylist ->
-            BuiltInPlaylistScreen(builtInPlaylist = builtInPlaylist)
+            BuiltInPlaylistScreen(
+                builtInPlaylist = builtInPlaylist
+            )
         }
 
         searchResultRoute { query ->
@@ -66,6 +91,7 @@ fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
             SearchScreen(
                 initialTextInput = initialTextInput,
                 onSearch = { query ->
+                    pop()
                     searchResultRoute(query)
 
                     if (!DataPreferences.pauseSearchHistory) query {

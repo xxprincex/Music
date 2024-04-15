@@ -20,7 +20,7 @@ fun PlaylistScreen(
     val saveableStateHolder = rememberSaveableStateHolder()
     PersistMapCleanup(prefix = "playlist/$browseId")
 
-    RouteHandler {
+    RouteHandler(listenToGlobalEmitter = true) {
         GlobalRoutes()
 
         NavHost {

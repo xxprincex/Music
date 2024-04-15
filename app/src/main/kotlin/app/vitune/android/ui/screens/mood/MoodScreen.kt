@@ -18,7 +18,7 @@ fun MoodScreen(mood: Mood) {
 
     PersistMapCleanup(prefix = "playlist/$DEFAULT_BROWSE_ID")
 
-    RouteHandler {
+    RouteHandler(listenToGlobalEmitter = true) {
         GlobalRoutes()
 
         NavHost {

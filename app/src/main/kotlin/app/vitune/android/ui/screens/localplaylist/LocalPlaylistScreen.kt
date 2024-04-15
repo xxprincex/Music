@@ -17,7 +17,7 @@ fun LocalPlaylistScreen(playlistId: Long) {
 
     PersistMapCleanup(prefix = "localPlaylist/$playlistId/")
 
-    RouteHandler {
+    RouteHandler(listenToGlobalEmitter = true) {
         GlobalRoutes()
 
         NavHost {

@@ -7,7 +7,7 @@ import androidx.compose.runtime.Stable
 class RouteHandlerScope(
     val route: Route?,
     val parameters: Array<Any?>,
-    val push: (Route?) -> Unit,
+    private val push: (Route?) -> Unit,
     val pop: () -> Unit
 ) {
     @Composable

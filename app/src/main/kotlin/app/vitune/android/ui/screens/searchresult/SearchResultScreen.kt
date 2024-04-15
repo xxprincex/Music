@@ -56,7 +56,7 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
 
     PersistMapCleanup(prefix = "searchResults/$query/")
 
-    RouteHandler {
+    RouteHandler(listenToGlobalEmitter = true) {
         GlobalRoutes()
 
         NavHost {

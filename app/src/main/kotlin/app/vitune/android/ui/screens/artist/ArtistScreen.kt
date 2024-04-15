@@ -102,7 +102,7 @@ fun ArtistScreen(browseId: String) {
             }
     }
 
-    RouteHandler {
+    RouteHandler(listenToGlobalEmitter = true) {
         GlobalRoutes()
 
         NavHost {
