@@ -2,13 +2,10 @@ package app.vitune.core.ui
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.palette.graphics.Palette
-import app.vitune.core.ui.enums.ColorPaletteMode
-import app.vitune.core.ui.enums.ColorPaletteName
 
 @Immutable
 data class ColorPalette(
@@ -22,80 +19,173 @@ data class ColorPalette(
     val text: Color,
     val textSecondary: Color,
     val textDisabled: Color,
-    val isDark: Boolean,
-    val isAmoled: Boolean
+    val isDefault: Boolean,
+    val isDark: Boolean
 ) {
-    companion object : Saver<ColorPalette, List<Any>> {
-        override fun restore(value: List<Any>) = when (val accent = value[0] as Int) {
-            0 -> DefaultDarkColorPalette
-            1 -> DefaultLightColorPalette
-            2 -> PureBlackColorPalette
-            else -> dynamicColorPaletteOf(
-                accentColor = Color(accent),
-                isDark = value[1] as Boolean,
-                isAmoled = value[2] as Boolean
-            )
-        }
+    object Saver : androidx.compose.runtime.saveable.Saver<ColorPalette, List<Any>> {
+        override fun restore(value: List<Any>) = ColorPalette(
+            background0 = Color(value[0] as Int),
+            background1 = Color(value[1] as Int),
+            background2 = Color(value[2] as Int),
+            accent = Color(value[3] as Int),
+            onAccent = Color(value[4] as Int),
+            red = Color(value[5] as Int),
+            blue = Color(value[6] as Int),
+            text = Color(value[7] as Int),
+            textSecondary = Color(value[8] as Int),
+            textDisabled = Color(value[9] as Int),
+            isDefault = value[10] as Boolean,
+            isDark = value[11] as Boolean
+        )
 
         override fun SaverScope.save(value: ColorPalette) = listOf(
-            when {
-                value === DefaultDarkColorPalette -> 0
-                value === DefaultLightColorPalette -> 1
-                value === PureBlackColorPalette -> 2
-                else -> value.accent.toArgb()
-            },
-            value.isDark,
-            value.isAmoled
+            value.background0.toArgb(),
+            value.background1.toArgb(),
+            value.background2.toArgb(),
+            value.accent.toArgb(),
+            value.onAccent.toArgb(),
+            value.red.toArgb(),
+            value.blue.toArgb(),
+            value.text.toArgb(),
+            value.textSecondary.toArgb(),
+            value.textDisabled.toArgb(),
+            value.isDefault,
+            value.isDark
         )
     }
 }
 
-val DefaultDarkColorPalette = ColorPalette(
-    background0 = Color(0xff16171d),
-    background1 = Color(0xff1f2029),
-    background2 = Color(0xff2b2d3b),
-    text = Color(0xffe1e1e2),
-    textSecondary = Color(0xffa3a4a6),
-    textDisabled = Color(0xff6f6f73),
-    accent = Color(0xff3e44ce),
-    onAccent = Color.White,
-    isDark = true,
-    isAmoled = false
-)
+private val defaultAccentColor = Color(0xff3e44ce).hsl
 
-val DefaultLightColorPalette = ColorPalette(
+val defaultLightPalette = lightColorPalette(null)
+val defaultDarkPalette = darkColorPalette(null, Darkness.Normal)
+
+fun lightColorPalette(accent: Hsl? = null) = if (accent == null) ColorPalette(
     background0 = Color(0xfffdfdfe),
     background1 = Color(0xfff8f8fc),
     background2 = Color(0xffeaeaf5),
     text = Color(0xff212121),
     textSecondary = Color(0xff656566),
     textDisabled = Color(0xff9d9d9d),
-    accent = Color(0xff3e44ce),
+    accent = defaultAccentColor.color,
     onAccent = Color.White,
-    isDark = false,
-    isAmoled = false
-)
+    isDefault = true,
+    isDark = false
+) else {
+    val (hue, saturation) = accent
 
-val PureBlackColorPalette = DefaultDarkColorPalette.copy(
-    background0 = Color.Black,
-    background1 = Color.Black,
-    background2 = Color.Black
-)
+    ColorPalette(
+        background0 = Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.1f),
+            lightness = 0.925f
+        ),
+        background1 = Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.3f),
+            lightness = 0.90f
+        ),
+        background2 = Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.4f),
+            lightness = 0.85f
+        ),
+        text = Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.02f),
+            lightness = 0.12f
+        ),
+        textSecondary = Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.1f),
+            lightness = 0.40f
+        ),
+        textDisabled = Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.2f),
+            lightness = 0.65f
+        ),
+        accent = Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.5f),
+            lightness = 0.5f
+        ),
+        onAccent = Color.White,
+        isDefault = false,
+        isDark = false
+    )
+}
 
-fun colorPaletteOf(
-    name: ColorPaletteName,
-    mode: ColorPaletteMode,
-    isDark: Boolean
-) = when (name) {
-    ColorPaletteName.Default,
-    ColorPaletteName.Dynamic, ColorPaletteName.MaterialYou -> when (mode) {
-        ColorPaletteMode.Light -> DefaultLightColorPalette
-        ColorPaletteMode.Dark -> DefaultDarkColorPalette
-        ColorPaletteMode.System -> if (isDark) DefaultDarkColorPalette else DefaultLightColorPalette
-    }
+fun darkColorPalette(
+    accent: Hsl? = null,
+    darkness: Darkness
+) = if (accent == null) ColorPalette(
+    background0 = Color(0xff16171d),
+    background1 = Color(0xff1f2029),
+    background2 = Color(0xff2b2d3b),
+    text = Color(0xffe1e1e2),
+    textSecondary = Color(0xffa3a4a6),
+    textDisabled = Color(0xff6f6f73),
+    accent = defaultAccentColor.color,
+    onAccent = Color.White,
+    isDefault = true,
+    isDark = true
+) else {
+    val (hue, saturation) = accent
 
-    ColorPaletteName.PureBlack -> PureBlackColorPalette
-    ColorPaletteName.AMOLED -> PureBlackColorPalette.copy(isAmoled = true)
+    ColorPalette(
+        background0 = if (darkness == Darkness.Normal) Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.1f),
+            lightness = 0.10f
+        ) else Color.Black,
+        background1 = if (darkness == Darkness.Normal) Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.3f),
+            lightness = 0.15f
+        ) else Color.Black,
+        background2 = if (darkness == Darkness.Normal) Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.4f),
+            lightness = 0.2f
+        ) else Color.Black,
+        text = Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.02f),
+            lightness = 0.88f
+        ),
+        textSecondary = Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.1f),
+            lightness = 0.65f
+        ),
+        textDisabled = Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(0.2f),
+            lightness = 0.40f
+        ),
+        accent = Color.hsl(
+            hue = hue,
+            saturation = saturation.coerceAtMost(if (darkness == Darkness.AMOLED) 0.4f else 0.5f),
+            lightness = 0.5f
+        ),
+        onAccent = Color.White,
+        isDefault = false,
+        isDark = true
+    )
+}
+
+fun accentColorOf(
+    source: ColorSource,
+    isDark: Boolean,
+    materialAccentColor: Color?,
+    sampleBitmap: Bitmap?
+) = when (source) {
+    ColorSource.Default -> null
+    ColorSource.Dynamic -> sampleBitmap?.let { dynamicAccentColorOf(it, isDark) }
+        ?: defaultAccentColor
+
+    ColorSource.MaterialYou -> materialAccentColor?.hsl ?: defaultAccentColor
 }
 
 fun dynamicAccentColorOf(
@@ -129,86 +219,57 @@ fun dynamicAccentColorOf(
     return arr.hsl
 }
 
-@Suppress("CyclomaticComplexMethod")
-fun dynamicColorPaletteOf(
-    hsl: Hsl,
-    isDark: Boolean,
-    isAmoled: Boolean
-) = hsl.let { (hue, saturation) ->
-    val accentColor = Color.hsl(
-        hue = hue,
-        saturation = saturation.coerceAtMost(if (isAmoled) 0.4f else 0.5f),
-        lightness = 0.5f
-    )
+fun ColorPalette.amoled() = if (isDark) {
+    val (hue, saturation) = accent.hsl
 
-    if (isAmoled) PureBlackColorPalette.copy(
-        isAmoled = true,
-        accent = accentColor
-    ) else colorPaletteOf(
-        name = ColorPaletteName.Dynamic,
-        mode = if (isDark) ColorPaletteMode.Dark else ColorPaletteMode.Light,
-        isDark = isDark
-    ).copy(
+    copy(
         background0 = Color.hsl(
             hue = hue,
             saturation = saturation.coerceAtMost(0.1f),
-            lightness = if (isDark) 0.10f else 0.925f
+            lightness = 0.10f
         ),
         background1 = Color.hsl(
             hue = hue,
             saturation = saturation.coerceAtMost(0.3f),
-            lightness = if (isDark) 0.15f else 0.90f
+            lightness = 0.15f
         ),
         background2 = Color.hsl(
             hue = hue,
             saturation = saturation.coerceAtMost(0.4f),
-            lightness = if (isDark) 0.2f else 0.85f
+            lightness = 0.2f
         ),
-        accent = accentColor,
-        text = Color.hsl(
-            hue = hue,
-            saturation = saturation.coerceAtMost(0.02f),
-            lightness = if (isDark) 0.88f else 0.12f
-        ),
-        textSecondary = Color.hsl(
-            hue = hue,
-            saturation = saturation.coerceAtMost(0.1f),
-            lightness = if (isDark) 0.65f else 0.40f
-        ),
-        textDisabled = Color.hsl(
-            hue = hue,
-            saturation = saturation.coerceAtMost(0.2f),
-            lightness = if (isDark) 0.40f else 0.65f
-        )
     )
+} else this
+
+fun colorPaletteOf(
+    source: ColorSource,
+    darkness: Darkness,
+    isDark: Boolean,
+    materialAccentColor: Color?,
+    sampleBitmap: Bitmap?
+): ColorPalette {
+    val accentColor = accentColorOf(
+        source = source,
+        isDark = isDark,
+        materialAccentColor = materialAccentColor,
+        sampleBitmap = sampleBitmap
+    )
+
+    return if (isDark) darkColorPalette(accentColor, darkness) else lightColorPalette(accentColor)
 }
 
-fun dynamicColorPaletteOf(
-    accentColor: Color,
-    isDark: Boolean,
-    isAmoled: Boolean
-) = dynamicColorPaletteOf(
-    hsl = accentColor.hsl,
-    isDark = isDark,
-    isAmoled = isAmoled
-)
-
-inline val ColorPalette.isDefault
-    get() =
-        this === DefaultDarkColorPalette || this === DefaultLightColorPalette || this === PureBlackColorPalette
-
-inline val ColorPalette.collapsedPlayerProgressBar get() =
-    if (this === PureBlackColorPalette) DefaultDarkColorPalette.background0 else background2
+inline val ColorPalette.isPureBlack get() = background0 == Color.Black
+inline val ColorPalette.collapsedPlayerProgressBar
+    get() = if (isPureBlack) defaultDarkPalette.background0 else background2
 inline val ColorPalette.favoritesIcon get() = if (isDefault) red else accent
 inline val ColorPalette.shimmer get() = if (isDefault) Color(0xff838383) else accent
-inline val ColorPalette.primaryButton
-    get() = if (this === PureBlackColorPalette || isAmoled) Color(0xFF272727) else background2
+inline val ColorPalette.primaryButton get() = if (isPureBlack) Color(0xff272727) else background2
 
 @Suppress("UnusedReceiverParameter")
-inline val ColorPalette.overlay get() = PureBlackColorPalette.background0.copy(alpha = 0.75f)
+inline val ColorPalette.overlay get() = Color.Black.copy(alpha = 0.75f)
 
 @Suppress("UnusedReceiverParameter")
-inline val ColorPalette.onOverlay get() = PureBlackColorPalette.text
+inline val ColorPalette.onOverlay get() = defaultDarkPalette.text
 
 @Suppress("UnusedReceiverParameter")
-inline val ColorPalette.onOverlayShimmer get() = PureBlackColorPalette.shimmer
+inline val ColorPalette.onOverlayShimmer get() = defaultDarkPalette.shimmer

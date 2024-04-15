@@ -90,7 +90,7 @@ import app.vitune.compose.routing.OnGlobalRoute
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.collapsedPlayerProgressBar
-import app.vitune.core.ui.enums.ThumbnailRoundness
+import app.vitune.core.ui.ThumbnailRoundness
 import app.vitune.core.ui.utils.isLandscape
 import app.vitune.core.ui.utils.px
 import app.vitune.core.ui.utils.roundedShape

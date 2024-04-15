@@ -6,22 +6,17 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import app.vitune.core.ui.enums.ColorPaletteMode
-import app.vitune.core.ui.enums.ColorPaletteName
 import app.vitune.core.ui.utils.isAtLeastAndroid6
 import app.vitune.core.ui.utils.isAtLeastAndroid8
 import app.vitune.core.ui.utils.isCompositionLaunched
@@ -41,13 +36,13 @@ data class Appearance(
     companion object AppearanceSaver : Saver<Appearance, List<Any>> {
         @Suppress("UNCHECKED_CAST")
         override fun restore(value: List<Any>) = Appearance(
-            colorPalette = ColorPalette.restore(value[0] as List<Any>),
+            colorPalette = ColorPalette.Saver.restore(value[0] as List<Any>),
             typography = Typography.restore(value[1] as List<Any>),
             thumbnailShapeCorners = (value[2] as Float).dp
         )
 
         override fun SaverScope.save(value: Appearance) = listOf(
-            with(ColorPalette.Companion) { save(value.colorPalette) },
+            with(ColorPalette.Saver) { save(value.colorPalette) },
             with(Typography.Companion) { save(value.typography) },
             value.thumbnailShapeCorners.value
         )
@@ -73,33 +68,43 @@ inline fun rememberAppearance(
 
 @Composable
 fun appearance(
-    name: ColorPaletteName,
-    mode: ColorPaletteMode,
-    materialAccentColor: Color,
-    fontFamily: BuiltInFontFamily,
+    source: ColorSource,
+    mode: ColorMode,
+    darkness: Darkness,
+    materialAccentColor: Color?,
     sampleBitmap: Bitmap?,
+    fontFamily: BuiltInFontFamily,
     applyFontPadding: Boolean,
     thumbnailRoundness: Dp,
     isSystemInDarkTheme: Boolean = isSystemInDarkTheme()
 ): Appearance {
     val isDark = remember(mode, isSystemInDarkTheme) {
-        mode == ColorPaletteMode.Dark || (mode == ColorPaletteMode.System && isSystemInDarkTheme)
+        mode == ColorMode.Dark || (mode == ColorMode.System && isSystemInDarkTheme)
     }
 
-    val defaultTheme = remember(
+    val colorPalette = remember(
+        source,
+        darkness,
         isDark,
-        mode,
-        isSystemInDarkTheme,
+        materialAccentColor,
+        sampleBitmap
+    ) {
+        colorPaletteOf(
+            source = source,
+            darkness = darkness,
+            isDark = isDark,
+            materialAccentColor = materialAccentColor,
+            sampleBitmap = sampleBitmap
+        )
+    }
+
+    return rememberAppearance(
+        colorPalette,
         fontFamily,
         applyFontPadding,
-        thumbnailRoundness
+        thumbnailRoundness,
+        isDark = isDark
     ) {
-        val colorPalette = colorPaletteOf(
-            name = ColorPaletteName.Default,
-            mode = mode,
-            isDark = isSystemInDarkTheme
-        )
-
         Appearance(
             colorPalette = colorPalette,
             typography = typographyOf(
@@ -107,60 +112,6 @@ fun appearance(
                 fontFamily = fontFamily,
                 applyFontPadding = applyFontPadding
             ),
-            thumbnailShapeCorners = thumbnailRoundness
-        )
-    }
-
-    var dynamicAccentColor by rememberSaveable(stateSaver = Hsl.Saver) {
-        mutableStateOf(defaultTheme.colorPalette.accent.hsl)
-    }
-
-    LaunchedEffect(sampleBitmap, name) {
-        if (!name.isDynamic) return@LaunchedEffect
-
-        dynamicAccentColor = sampleBitmap?.let {
-            dynamicAccentColorOf(
-                bitmap = it,
-                isDark = isDark
-            )
-        } ?: defaultTheme.colorPalette.accent.hsl
-    }
-
-    val colorPalette by remember(name, isDark) {
-        derivedStateOf {
-            when (name) {
-                ColorPaletteName.Default -> defaultTheme.colorPalette
-                ColorPaletteName.Dynamic -> dynamicColorPaletteOf(
-                    hsl = dynamicAccentColor,
-                    isDark = isDark,
-                    isAmoled = false
-                )
-
-                ColorPaletteName.MaterialYou -> dynamicColorPaletteOf(
-                    accentColor = materialAccentColor,
-                    isDark = isDark,
-                    isAmoled = false
-                )
-
-                ColorPaletteName.PureBlack -> PureBlackColorPalette
-                ColorPaletteName.AMOLED -> dynamicColorPaletteOf(
-                    hsl = dynamicAccentColor,
-                    isDark = true,
-                    isAmoled = true
-                )
-            }
-        }
-    }
-
-    return rememberAppearance(
-        colorPalette,
-        defaultTheme,
-        thumbnailRoundness,
-        isDark = isDark
-    ) {
-        Appearance(
-            colorPalette = colorPalette,
-            typography = defaultTheme.typography.copy(color = colorPalette.text),
             thumbnailShapeCorners = thumbnailRoundness
         )
     }.value

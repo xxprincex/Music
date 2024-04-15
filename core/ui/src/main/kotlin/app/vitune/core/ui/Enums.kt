@@ -1,4 +1,4 @@
-package app.vitune.core.ui.enums
+package app.vitune.core.ui
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -13,4 +13,22 @@ enum class ThumbnailRoundness(val dp: Dp) {
     Heaviest(18.dp);
 
     val shape get() = dp.roundedShape
+}
+
+enum class ColorSource {
+    Default,
+    Dynamic,
+    MaterialYou
+}
+
+enum class ColorMode {
+    System,
+    Light,
+    Dark
+}
+
+enum class Darkness {
+    Normal,
+    AMOLED,
+    PureBlack
 }

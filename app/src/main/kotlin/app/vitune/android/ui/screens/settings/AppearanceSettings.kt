@@ -3,6 +3,7 @@ package app.vitune.android.ui.screens.settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -18,10 +19,11 @@ import app.vitune.android.utils.currentLocale
 import app.vitune.android.utils.findActivity
 import app.vitune.android.utils.startLanguagePicker
 import app.vitune.core.ui.BuiltInFontFamily
+import app.vitune.core.ui.ColorMode
+import app.vitune.core.ui.ColorSource
+import app.vitune.core.ui.Darkness
 import app.vitune.core.ui.LocalAppearance
-import app.vitune.core.ui.enums.ColorPaletteMode
-import app.vitune.core.ui.enums.ColorPaletteName
-import app.vitune.core.ui.enums.ThumbnailRoundness
+import app.vitune.core.ui.ThumbnailRoundness
 import app.vitune.core.ui.googleFontsAvailable
 import app.vitune.core.ui.utils.isAtLeastAndroid13
 
@@ -30,24 +32,30 @@ import app.vitune.core.ui.utils.isAtLeastAndroid13
 fun AppearanceSettings() = with(AppearancePreferences) {
     val (colorPalette) = LocalAppearance.current
     val context = LocalContext.current
+    val isDark = isSystemInDarkTheme()
 
     SettingsCategoryScreen(title = stringResource(R.string.appearance)) {
         SettingsGroup(title = stringResource(R.string.colors)) {
             EnumValueSelectorSettingsEntry(
-                title = stringResource(R.string.theme),
-                selectedValue = colorPaletteName,
-                onValueSelected = { colorPaletteName = it },
+                title = stringResource(R.string.color_source),
+                selectedValue = colorSource,
+                onValueSelected = { colorSource = it },
                 valueText = { it.nameLocalized }
             )
-
             EnumValueSelectorSettingsEntry(
-                title = stringResource(R.string.theme_mode),
-                selectedValue = colorPaletteMode,
-                isEnabled = colorPaletteName != ColorPaletteName.PureBlack &&
-                        colorPaletteName != ColorPaletteName.AMOLED,
-                onValueSelected = { colorPaletteMode = it },
+                title = stringResource(R.string.color_mode),
+                selectedValue = colorMode,
+                onValueSelected = { colorMode = it },
                 valueText = { it.nameLocalized }
             )
+            AnimatedVisibility(visible = colorMode == ColorMode.Dark || (colorMode == ColorMode.System && isDark)) {
+                EnumValueSelectorSettingsEntry(
+                    title = stringResource(R.string.darkness),
+                    selectedValue = darkness,
+                    onValueSelected = { darkness = it },
+                    valueText = { it.nameLocalized }
+                )
+            }
         }
         SettingsGroup(title = stringResource(R.string.shapes)) {
             EnumValueSelectorSettingsEntry(
@@ -76,7 +84,7 @@ fun AppearanceSettings() = with(AppearancePreferences) {
             if (isAtLeastAndroid13) SettingsEntry(
                 title = stringResource(R.string.language),
                 text = currentLocale()?.displayLanguage
-                    ?: stringResource(R.string.theme_name_default),
+                    ?: stringResource(R.string.color_source_default),
                 onClick = {
                     context.findActivity().startLanguagePicker()
                 }
@@ -195,23 +203,30 @@ fun AppearanceSettings() = with(AppearancePreferences) {
     }
 }
 
-val ColorPaletteName.nameLocalized
+val ColorSource.nameLocalized
     @Composable get() = stringResource(
         when (this) {
-            ColorPaletteName.Default -> R.string.theme_name_default
-            ColorPaletteName.Dynamic -> R.string.theme_name_dynamic
-            ColorPaletteName.PureBlack -> R.string.theme_name_pureblack
-            ColorPaletteName.AMOLED -> R.string.theme_name_amoled
-            ColorPaletteName.MaterialYou -> R.string.theme_name_materialyou
+            ColorSource.Default -> R.string.color_source_default
+            ColorSource.Dynamic -> R.string.color_source_dynamic
+            ColorSource.MaterialYou -> R.string.color_source_material_you
         }
     )
 
-val ColorPaletteMode.nameLocalized
+val ColorMode.nameLocalized
     @Composable get() = stringResource(
         when (this) {
-            ColorPaletteMode.Light -> R.string.theme_mode_light
-            ColorPaletteMode.Dark -> R.string.theme_mode_dark
-            ColorPaletteMode.System -> R.string.theme_mode_system
+            ColorMode.System -> R.string.color_mode_system
+            ColorMode.Light -> R.string.color_mode_light
+            ColorMode.Dark -> R.string.color_mode_dark
+        }
+    )
+
+val Darkness.nameLocalized
+    @Composable get() = stringResource(
+        when (this) {
+            Darkness.Normal -> R.string.darkness_normal
+            Darkness.AMOLED -> R.string.darkness_amoled
+            Darkness.PureBlack -> R.string.darkness_pureblack
         }
     )
 

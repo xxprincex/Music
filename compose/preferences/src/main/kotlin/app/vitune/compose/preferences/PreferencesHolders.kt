@@ -76,49 +76,77 @@ open class PreferencesHolder(
     name: String,
     mode: Int = Context.MODE_PRIVATE
 ) : SharedPreferences by application.getSharedPreferences(name, mode) {
-    fun boolean(defaultValue: Boolean) = SharedPreferencesProperty(
+    fun boolean(
+        defaultValue: Boolean,
+        name: String? = null
+    ) = SharedPreferencesProperty(
         get = { getBoolean(it, defaultValue) },
         set = { k, v -> putBoolean(k, v) },
-        default = defaultValue
+        default = defaultValue,
+        name = name
     )
 
-    fun string(defaultValue: String) = SharedPreferencesProperty(
+    fun string(
+        defaultValue: String,
+        name: String? = null
+    ) = SharedPreferencesProperty(
         get = { getString(it, null) ?: defaultValue },
         set = { k, v -> putString(k, v) },
-        default = defaultValue
+        default = defaultValue,
+        name = name
     )
 
-    fun int(defaultValue: Int) = SharedPreferencesProperty(
+    fun int(
+        defaultValue: Int,
+        name: String? = null
+    ) = SharedPreferencesProperty(
         get = { getInt(it, defaultValue) },
         set = { k, v -> putInt(k, v) },
-        default = defaultValue
+        default = defaultValue,
+        name = name
     )
 
-    fun float(defaultValue: Float) = SharedPreferencesProperty(
+    fun float(
+        defaultValue: Float,
+        name: String? = null
+    ) = SharedPreferencesProperty(
         get = { getFloat(it, defaultValue) },
         set = { k, v -> putFloat(k, v) },
-        default = defaultValue
+        default = defaultValue,
+        name = name
     )
 
-    fun long(defaultValue: Long) = SharedPreferencesProperty(
+    fun long(
+        defaultValue: Long,
+        name: String? = null
+    ) = SharedPreferencesProperty(
         get = { getLong(it, defaultValue) },
         set = { k, v -> putLong(k, v) },
-        default = defaultValue
+        default = defaultValue,
+        name = name
     )
 
-    inline fun <reified T : Enum<T>> enum(defaultValue: T) = SharedPreferencesProperty(
+    inline fun <reified T : Enum<T>> enum(
+        defaultValue: T,
+        name: String? = null
+    ) = SharedPreferencesProperty(
         get = {
             getString(it, null)
                 ?.let { runCatching { enumValueOf<T>(it) }.getOrNull() }
                 ?: defaultValue
         },
         set = { k, v -> putString(k, v.name) },
-        default = defaultValue
+        default = defaultValue,
+        name = name
     )
 
-    fun stringSet(defaultValue: Set<String>) = SharedPreferencesProperty(
+    fun stringSet(
+        defaultValue: Set<String>,
+        name: String? = null
+    ) = SharedPreferencesProperty(
         get = { getStringSet(it, null) ?: defaultValue },
         set = { k, v -> putStringSet(k, v) },
-        default = defaultValue
+        default = defaultValue,
+        name = name
     )
 }

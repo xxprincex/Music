@@ -185,17 +185,20 @@
     <string name="request_feature">Eine Funktion anfordern oder eine Idee vorschlagen</string>
     <string name="redirect_github">Sie werden zu GitHub weitergeleitet</string>
 
-    <string name="theme">Thema</string>
-    <string name="theme_name_default">Standard</string>
-    <string name="theme_name_dynamic">Dynamisch</string>
-    <string name="theme_name_pureblack">Rein Schwarz</string>
-    <string name="theme_name_amoled">AMOLED</string>
-    <string name="theme_name_materialyou">Material You</string>
+    <string name="color_source">Akzent Farbquelle</string>
+    <string name="color_source_default">Standard</string>
+    <string name="color_source_dynamic">Dynamisch</string>
+    <string name="color_source_material_you">Material You</string>
 
-    <string name="theme_mode">Theme-Modus</string>
-    <string name="theme_mode_light">Hell</string>
-    <string name="theme_mode_dark">Dunkel</string>
-    <string name="theme_mode_system">System</string>
+    <string name="darkness">Dunkelheit</string>
+    <string name="darkness_normal">Normal</string>
+    <string name="darkness_pureblack">Rein Schwarz</string>
+    <string name="darkness_amoled">AMOLED</string>
+
+    <string name="color_mode">Theme-Modus</string>
+    <string name="color_mode_light">Hell</string>
+    <string name="color_mode_dark">Dunkel</string>
+    <string name="color_mode_system">System</string>
 
     <string name="thumbnail_roundness">Rundheit der Vorschaubilder</string>
     <string name="thumbnail_roundness_none">Keine</string>

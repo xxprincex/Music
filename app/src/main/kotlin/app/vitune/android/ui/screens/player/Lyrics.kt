@@ -75,10 +75,10 @@ import app.vitune.android.utils.disabled
 import app.vitune.android.utils.medium
 import app.vitune.android.utils.semiBold
 import app.vitune.android.utils.toast
-import app.vitune.core.ui.DefaultDarkColorPalette
 import app.vitune.core.ui.LocalAppearance
-import app.vitune.core.ui.PureBlackColorPalette
+import app.vitune.core.ui.onOverlay
 import app.vitune.core.ui.onOverlayShimmer
+import app.vitune.core.ui.overlay
 import app.vitune.providers.innertube.Innertube
 import app.vitune.providers.innertube.models.bodies.NextBody
 import app.vitune.providers.innertube.requests.lyrics
@@ -301,7 +301,7 @@ fun Lyrics(
                     detectTapGestures(onTap = { onDismiss() })
                 }
                 .fillMaxSize()
-                .background(Color.Black.copy(0.8f))
+                .background(colorPalette.overlay)
         ) {
             AnimatedVisibility(
                 visible = isError && text == null,
@@ -312,7 +312,7 @@ fun Lyrics(
                 BasicText(
                     text = if (isShowingSynchronizedLyrics) stringResource(R.string.error_load_synchronized_lyrics)
                     else stringResource(R.string.error_load_lyrics),
-                    style = typography.xs.center.medium.color(PureBlackColorPalette.text),
+                    style = typography.xs.center.medium.color(colorPalette.onOverlay),
                     modifier = Modifier
                         .background(Color.Black.copy(0.4f))
                         .padding(all = 8.dp)
@@ -329,7 +329,7 @@ fun Lyrics(
                 BasicText(
                     text = if (isShowingSynchronizedLyrics) stringResource(R.string.synchronized_lyrics_not_available)
                     else stringResource(R.string.lyrics_not_available),
-                    style = typography.xs.center.medium.color(PureBlackColorPalette.text),
+                    style = typography.xs.center.medium.color(colorPalette.onOverlay),
                     modifier = Modifier
                         .background(Color.Black.copy(0.4f))
                         .padding(all = 8.dp)
@@ -345,7 +345,7 @@ fun Lyrics(
             ) {
                 BasicText(
                     text = stringResource(R.string.invalid_synchronized_lyrics),
-                    style = typography.xs.center.medium.color(PureBlackColorPalette.text),
+                    style = typography.xs.center.medium.color(colorPalette.onOverlay),
                     modifier = Modifier
                         .background(Color.Black.copy(0.4f))
                         .padding(all = 8.dp)
@@ -424,7 +424,7 @@ fun Lyrics(
                     }
                 } else BasicText(
                     text = text,
-                    style = typography.xs.center.medium.color(PureBlackColorPalette.text),
+                    style = typography.xs.center.medium.color(colorPalette.onOverlay),
                     modifier = Modifier
                         .verticalFadingEdge()
                         .verticalScroll(rememberScrollState())
@@ -448,7 +448,7 @@ fun Lyrics(
             Image(
                 painter = painterResource(R.drawable.ellipsis_horizontal),
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(DefaultDarkColorPalette.text),
+                colorFilter = ColorFilter.tint(colorPalette.onOverlay),
                 modifier = Modifier
                     .padding(all = 4.dp)
                     .clickable(
