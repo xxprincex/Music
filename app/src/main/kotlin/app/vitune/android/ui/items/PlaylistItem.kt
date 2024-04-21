@@ -39,6 +39,7 @@ import app.vitune.core.ui.onOverlay
 import app.vitune.core.ui.overlay
 import app.vitune.core.ui.shimmer
 import app.vitune.core.ui.utils.px
+import app.vitune.core.ui.utils.roundedShape
 import app.vitune.providers.innertube.Innertube
 import coil.compose.AsyncImage
 import kotlinx.coroutines.Dispatchers
@@ -166,6 +167,8 @@ fun PlaylistItem(
     alternative = alternative
 )
 
+private const val GAP_DP = 4
+
 @Composable
 fun PlaylistItem(
     thumbnailContent: @Composable BoxScope.(modifier: Modifier) -> Unit,
@@ -180,13 +183,11 @@ fun PlaylistItem(
     thumbnailSize = thumbnailSize,
     modifier = modifier
 ) { centeredModifier ->
-    val colorPalette = LocalAppearance.current.colorPalette
-    val typography = LocalAppearance.current.typography
-    val thumbnailShape = LocalAppearance.current.thumbnailShape
+    val (colorPalette, typography, thumbnailShapeCorners) = LocalAppearance.current
 
     Box(
         modifier = centeredModifier
-            .clip(thumbnailShape)
+            .clip(thumbnailShapeCorners.roundedShape)
             .background(color = colorPalette.background1)
             .requiredSize(thumbnailSize)
     ) {
@@ -199,8 +200,11 @@ fun PlaylistItem(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .padding(all = 4.dp)
-                    .background(color = colorPalette.overlay, shape = RoundedCornerShape(2.dp))
+                    .padding(all = GAP_DP.dp)
+                    .background(
+                        color = colorPalette.overlay,
+                        shape = (thumbnailShapeCorners - GAP_DP.dp).coerceAtLeast(0.dp).roundedShape
+                    )
                     .padding(horizontal = 4.dp, vertical = 2.dp)
                     .align(Alignment.BottomEnd)
             )
@@ -239,8 +243,7 @@ fun PlaylistItemPlaceholder(
     thumbnailSize = thumbnailSize,
     modifier = modifier
 ) {
-    val colorPalette = LocalAppearance.current.colorPalette
-    val thumbnailShape = LocalAppearance.current.thumbnailShape
+    val (colorPalette, _, _, thumbnailShape) = LocalAppearance.current
 
     Spacer(
         modifier = Modifier
