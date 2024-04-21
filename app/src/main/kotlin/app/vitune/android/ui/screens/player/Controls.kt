@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -74,6 +73,7 @@ import app.vitune.android.utils.semiBold
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.favoritesIcon
 import app.vitune.core.ui.utils.px
+import app.vitune.core.ui.utils.roundedShape
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -205,9 +205,10 @@ private fun ClassicControls(
 
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(playButtonRadius))
+                    .clip(playButtonRadius.roundedShape)
                     .clickable {
-                        if (shouldBePlaying) binder.player.pause() else {
+                        if (shouldBePlaying) binder.player.pause()
+                        else {
                             if (binder.player.playbackState == Player.STATE_IDLE) binder.player.prepare()
                             binder.player.play()
                         }
@@ -368,12 +369,12 @@ private fun PlayButton(
     shouldBePlaying: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val colorPalette = LocalAppearance.current.colorPalette
+    val (colorPalette) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(radius))
+            .clip(radius.roundedShape)
             .clickable {
                 if (shouldBePlaying) binder?.player?.pause() else {
                     if (binder?.player?.playbackState == Player.STATE_IDLE) binder.player.prepare()

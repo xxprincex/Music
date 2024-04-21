@@ -107,6 +107,7 @@ import app.vitune.core.data.enums.SortOrder
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.onOverlay
+import app.vitune.core.ui.utils.roundedShape
 import app.vitune.providers.innertube.Innertube
 import app.vitune.providers.innertube.models.bodies.NextBody
 import app.vitune.providers.innertube.requests.nextPage
@@ -469,7 +470,7 @@ fun Queue(
                     ),
                     style = typography.xxs.medium,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(16.dp.roundedShape)
                         .clickable {
                             fun addToPlaylist(playlist: Playlist, index: Int) = transaction {
                                 val playlistId = Database

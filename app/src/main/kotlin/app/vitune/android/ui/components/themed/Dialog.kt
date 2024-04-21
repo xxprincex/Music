@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -49,6 +48,7 @@ import app.vitune.android.utils.drawCircle
 import app.vitune.android.utils.medium
 import app.vitune.android.utils.semiBold
 import app.vitune.core.ui.LocalAppearance
+import app.vitune.core.ui.utils.roundedShape
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.delay
 
@@ -208,7 +208,7 @@ fun DefaultDialog(
             .padding(all = 48.dp)
             .background(
                 color = LocalAppearance.current.colorPalette.background1,
-                shape = RoundedCornerShape(8.dp)
+                shape = 8.dp.roundedShape
             )
             .padding(
                 horizontal = horizontalPadding,
@@ -238,7 +238,7 @@ fun <T> ValueSelectorDialog(
             .padding(all = 48.dp)
             .background(
                 color = LocalAppearance.current.colorPalette.background1,
-                shape = RoundedCornerShape(8.dp)
+                shape = 8.dp.roundedShape
             )
             .padding(vertical = 16.dp),
         valueText = valueText
@@ -378,7 +378,7 @@ fun SliderDialog(
     Column(
         modifier = modifier
             .padding(all = 48.dp)
-            .background(color = colorPalette.background1, shape = RoundedCornerShape(8.dp))
+            .background(color = colorPalette.background1, shape = 8.dp.roundedShape)
             .padding(vertical = 16.dp)
     ) {
         BasicText(

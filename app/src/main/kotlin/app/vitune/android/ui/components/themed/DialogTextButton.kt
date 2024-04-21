@@ -3,7 +3,6 @@ package app.vitune.android.ui.components.themed
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,6 +13,7 @@ import app.vitune.android.utils.disabled
 import app.vitune.android.utils.medium
 import app.vitune.android.utils.primary
 import app.vitune.core.ui.LocalAppearance
+import app.vitune.core.ui.utils.roundedShape
 
 @Composable
 fun DialogTextButton(
@@ -35,7 +35,7 @@ fun DialogTextButton(
             }
         },
         modifier = modifier
-            .clip(RoundedCornerShape(36.dp))
+            .clip(36.dp.roundedShape)
             .background(if (primary) colorPalette.accent else Color.Transparent)
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 16.dp)

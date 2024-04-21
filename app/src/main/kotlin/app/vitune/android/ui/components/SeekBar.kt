@@ -59,6 +59,7 @@ import app.vitune.android.service.PlayerService
 import app.vitune.android.utils.formatAsDuration
 import app.vitune.android.utils.semiBold
 import app.vitune.core.ui.LocalAppearance
+import app.vitune.core.ui.utils.roundedShape
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -70,7 +71,7 @@ fun SeekBar(
     modifier: Modifier = Modifier,
     color: Color = LocalAppearance.current.colorPalette.text,
     backgroundColor: Color = LocalAppearance.current.colorPalette.background2,
-    shape: Shape = RoundedCornerShape(8.dp),
+    shape: Shape = 8.dp.roundedShape,
     isActive: Boolean = binder.player.isPlaying,
     alwaysShowDuration: Boolean = false,
     scrubberRadius: Dp = 6.dp,

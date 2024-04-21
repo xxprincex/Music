@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,6 +33,7 @@ import app.vitune.android.utils.medium
 import app.vitune.android.utils.secondary
 import app.vitune.android.utils.semiBold
 import app.vitune.android.utils.thumbnail
+import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.onOverlay
 import app.vitune.core.ui.overlay
@@ -167,8 +167,6 @@ fun PlaylistItem(
     alternative = alternative
 )
 
-private const val GAP_DP = 4
-
 @Composable
 fun PlaylistItem(
     thumbnailContent: @Composable BoxScope.(modifier: Modifier) -> Unit,
@@ -200,10 +198,10 @@ fun PlaylistItem(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .padding(all = GAP_DP.dp)
+                    .padding(all = Dimensions.items.gap)
                     .background(
                         color = colorPalette.overlay,
-                        shape = (thumbnailShapeCorners - GAP_DP.dp).coerceAtLeast(0.dp).roundedShape
+                        shape = (thumbnailShapeCorners - Dimensions.items.gap).coerceAtLeast(0.dp).roundedShape
                     )
                     .padding(horizontal = 4.dp, vertical = 2.dp)
                     .align(Alignment.BottomEnd)

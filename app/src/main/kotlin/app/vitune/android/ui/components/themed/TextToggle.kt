@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import app.vitune.android.R
 import app.vitune.android.utils.medium
 import app.vitune.core.ui.LocalAppearance
+import app.vitune.core.ui.utils.roundedShape
 
 @Composable
 fun TextToggle(
@@ -34,8 +34,8 @@ fun TextToggle(
 
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { toggleState() }
+            .clip(16.dp.roundedShape)
+            .clickable(onClick = toggleState)
             .background(colorPalette.background1)
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .animateContentSize()

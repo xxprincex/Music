@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,10 +19,12 @@ import app.vitune.android.utils.color
 import app.vitune.android.utils.medium
 import app.vitune.android.utils.secondary
 import app.vitune.android.utils.semiBold
+import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.onOverlay
 import app.vitune.core.ui.overlay
 import app.vitune.core.ui.shimmer
+import app.vitune.core.ui.utils.roundedShape
 import app.vitune.providers.innertube.Innertube
 import coil.compose.AsyncImage
 
@@ -59,9 +60,7 @@ fun VideoItem(
     thumbnailSize = 0.dp,
     modifier = modifier
 ) {
-    val colorPalette = LocalAppearance.current.colorPalette
-    val typography = LocalAppearance.current.typography
-    val thumbnailShape = LocalAppearance.current.thumbnailShape
+    val (colorPalette, typography, thumbnailShapeCorners) = LocalAppearance.current
 
     Box {
         AsyncImage(
@@ -69,7 +68,7 @@ fun VideoItem(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .clip(thumbnailShape)
+                .clip(thumbnailShapeCorners.roundedShape)
                 .size(width = thumbnailWidth, height = thumbnailHeight)
         )
 
@@ -80,8 +79,11 @@ fun VideoItem(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .padding(all = 4.dp)
-                    .background(color = colorPalette.overlay, shape = RoundedCornerShape(2.dp))
+                    .padding(all = Dimensions.items.gap)
+                    .background(
+                        color = colorPalette.overlay,
+                        shape = (thumbnailShapeCorners - Dimensions.items.gap).coerceAtLeast(0.dp).roundedShape
+                    )
                     .padding(horizontal = 4.dp, vertical = 2.dp)
                     .align(Alignment.BottomEnd)
             )

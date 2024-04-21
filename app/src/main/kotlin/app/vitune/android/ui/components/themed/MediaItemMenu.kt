@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -82,6 +81,7 @@ import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.favoritesIcon
 import app.vitune.core.ui.utils.px
+import app.vitune.core.ui.utils.roundedShape
 import app.vitune.providers.innertube.models.NavigationEndpoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -672,7 +672,7 @@ fun MediaItemMenu(
                             modifier = Modifier
                                 .background(
                                     color = colorPalette.background0,
-                                    shape = RoundedCornerShape(16.dp)
+                                    shape = 16.dp.roundedShape
                                 )
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                                 .animateContentSize()

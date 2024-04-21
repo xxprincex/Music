@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -39,6 +38,7 @@ import app.vitune.android.utils.semiBold
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.utils.isLandscape
+import app.vitune.core.ui.utils.roundedShape
 
 @Composable
 inline fun NavigationRail(
@@ -132,27 +132,21 @@ inline fun NavigationRail(
                 }
 
                 val contentModifier = Modifier
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(24.dp.roundedShape)
                     .clickable(onClick = { onTabIndexChanged(index) })
 
-                if (isLandscape) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = contentModifier
-                            .padding(vertical = 8.dp)
-                    ) {
-                        iconContent()
-                        textContent()
-                    }
-                } else {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = contentModifier
-                            .padding(horizontal = 8.dp)
-                    ) {
-                        iconContent()
-                        textContent()
-                    }
+                if (isLandscape) Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = contentModifier.padding(vertical = 8.dp)
+                ) {
+                    iconContent()
+                    textContent()
+                } else Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = contentModifier.padding(horizontal = 8.dp)
+                ) {
+                    iconContent()
+                    textContent()
                 }
             }
         }
