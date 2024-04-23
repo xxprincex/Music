@@ -10,6 +10,7 @@ import app.vitune.android.ui.screens.playlist.PlaylistScreen
 import app.vitune.compose.routing.Route0
 import app.vitune.compose.routing.Route1
 import app.vitune.compose.routing.Route3
+import app.vitune.compose.routing.Route4
 import app.vitune.compose.routing.RouteHandlerScope
 import app.vitune.core.data.enums.BuiltInPlaylist
 import io.ktor.http.Url
@@ -28,7 +29,7 @@ val artistRoute = Route1<String?>("artistRoute")
 val builtInPlaylistRoute = Route1<BuiltInPlaylist>("builtInPlaylistRoute")
 val localPlaylistRoute = Route1<Long?>("localPlaylistRoute")
 val pipedPlaylistRoute = Route3<String?, String?, String?>("pipedPlaylistRoute")
-val playlistRoute = Route3<String?, String?, Int?>("playlistRoute")
+val playlistRoute = Route4<String?, String?, Int?, Boolean?>("playlistRoute")
 val moodRoute = Route1<Mood>("moodRoute")
 val searchResultRoute = Route1<String>("searchResultRoute")
 val searchRoute = Route1<String>("searchRoute")
@@ -60,11 +61,12 @@ fun RouteHandlerScope.GlobalRoutes() {
         )
     }
 
-    playlistRoute { browseId, params, maxDepth ->
+    playlistRoute { browseId, params, maxDepth, shouldDedup ->
         PlaylistScreen(
             browseId = browseId ?: error("browseId cannot be null"),
             params = params,
-            maxDepth = maxDepth
+            maxDepth = maxDepth,
+            shouldDedup = shouldDedup ?: false
         )
     }
 

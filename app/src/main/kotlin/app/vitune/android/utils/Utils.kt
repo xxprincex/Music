@@ -141,32 +141,31 @@ fun formatAsDuration(millis: Long) = DateUtils.formatElapsedTime(millis / 1000).
 
 @Suppress("LoopWithTooManyJumpStatements")
 suspend fun Result<Innertube.PlaylistOrAlbumPage>.completed(
-    maxDepth: Int = Int.MAX_VALUE
+    maxDepth: Int = Int.MAX_VALUE,
+    shouldDedup: Boolean = false
 ) = runCatching {
     val page = getOrThrow()
-    val songs = page.songsPage?.items.orEmpty().toMutableSet()
+    val songs = page.songsPage?.items.orEmpty().toMutableList()
     var continuation = page.songsPage?.continuation
 
     var depth = 0
 
     while (continuation != null && depth++ < maxDepth) {
-        val newSongs = Innertube.playlistPage(
-            body = ContinuationBody(continuation = continuation)
-        )?.getOrNull()?.takeUnless { it.items.isNullOrEmpty() } ?: break
+        val newSongs = Innertube
+            .playlistPage(
+                body = ContinuationBody(continuation = continuation)
+            )
+            ?.getOrNull()
+            ?.takeUnless { it.items.isNullOrEmpty() } ?: break
 
-        if (newSongs.items?.any { it in songs } != false) break
+        if (shouldDedup && newSongs.items?.any { it in songs } != false) break
 
         newSongs.items?.let { songs += it }
         continuation = newSongs.continuation
     }
 
-    page.copy(
-        songsPage = Innertube.ItemsPage(
-            items = songs.toList(),
-            continuation = null
-        )
-    )
-}
+    page.copy(songsPage = Innertube.ItemsPage(items = songs, continuation = null))
+}.also { it.exceptionOrNull()?.printStackTrace() }
 
 fun <T> Flow<T>.onFirst(block: suspend (T) -> Unit): Flow<T> {
     var isFirst = true

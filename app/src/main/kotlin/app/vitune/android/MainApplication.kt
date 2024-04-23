@@ -325,15 +325,20 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
                 "playlist" -> uri.getQueryParameter("list")?.let { playlistId ->
                     val browseId = "VL$playlistId"
 
-                    if (playlistId.startsWith("OLAK5uy_")) {
-                        Innertube.playlistPage(BrowseBody(browseId = browseId))?.getOrNull()?.let {
-                            it.songsPage?.items?.firstOrNull()?.album?.endpoint?.browseId?.let { browseId ->
-                                albumRoute.ensureGlobal(browseId)
-                            }
+                    if (playlistId.startsWith("OLAK5uy_")) Innertube.playlistPage(
+                        body = BrowseBody(browseId = browseId)
+                    )
+                        ?.getOrNull()
+                        ?.let { page ->
+                            page.songsPage?.items?.firstOrNull()?.album?.endpoint?.browseId
+                                ?.let { albumRoute.ensureGlobal(it) }
                         }
-                    } else {
-                        playlistRoute.ensureGlobal(browseId, uri.getQueryParameter("params"), null)
-                    }
+                    else playlistRoute.ensureGlobal(
+                        p0 = browseId,
+                        p1 = uri.getQueryParameter("params"),
+                        p2 = null,
+                        p3 = playlistId.startsWith("RDCLAK5uy_")
+                    )
                 }
 
                 "channel", "c" -> uri.lastPathSegment?.let { channelId ->

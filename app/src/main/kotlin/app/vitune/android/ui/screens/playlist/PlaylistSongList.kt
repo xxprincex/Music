@@ -70,6 +70,7 @@ fun PlaylistSongList(
     browseId: String,
     params: String?,
     maxDepth: Int?,
+    shouldDedup: Boolean,
     modifier: Modifier = Modifier
 ) {
     val (colorPalette) = LocalAppearance.current
@@ -83,8 +84,13 @@ fun PlaylistSongList(
         if (playlistPage != null && playlistPage?.songsPage?.continuation == null) return@LaunchedEffect
 
         playlistPage = withContext(Dispatchers.IO) {
-            Innertube.playlistPage(BrowseBody(browseId = browseId, params = params))
-                ?.completed(maxDepth = maxDepth ?: Int.MAX_VALUE)?.getOrNull()
+            Innertube
+                .playlistPage(BrowseBody(browseId = browseId, params = params))
+                ?.completed(
+                    maxDepth = maxDepth ?: Int.MAX_VALUE,
+                    shouldDedup = shouldDedup
+                )
+                ?.getOrNull()
         }
     }
 

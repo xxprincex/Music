@@ -15,7 +15,8 @@ import app.vitune.compose.routing.RouteHandler
 fun PlaylistScreen(
     browseId: String,
     params: String?,
-    maxDepth: Int? = null
+    maxDepth: Int? = null,
+    shouldDedup: Boolean
 ) {
     val saveableStateHolder = rememberSaveableStateHolder()
     PersistMapCleanup(prefix = "playlist/$browseId")
@@ -38,7 +39,8 @@ fun PlaylistScreen(
                         0 -> PlaylistSongList(
                             browseId = browseId,
                             params = params,
-                            maxDepth = maxDepth
+                            maxDepth = maxDepth,
+                            shouldDedup = shouldDedup
                         )
                     }
                 }

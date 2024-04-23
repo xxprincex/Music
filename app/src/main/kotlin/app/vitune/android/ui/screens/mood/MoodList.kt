@@ -54,122 +54,130 @@ internal const val DEFAULT_BROWSE_ID = "FEmusic_moods_and_genres_category"
 fun MoodList(
     mood: Mood,
     modifier: Modifier = Modifier
-) {
+) = Column(modifier = modifier) {
     val (colorPalette, typography) = LocalAppearance.current
     val windowInsets = LocalPlayerAwareWindowInsets.current
 
     val browseId = mood.browseId ?: DEFAULT_BROWSE_ID
-    var moodPage by persist<Result<BrowseResult>>("playlist/$browseId${mood.params?.let { "/$it" }.orEmpty()}")
+    var moodPage by persist<Result<BrowseResult>>(
+        tag = "playlist/$browseId${mood.params?.let { "/$it" }.orEmpty()}"
+    )
 
     LaunchedEffect(Unit) {
-        if (moodPage?.isSuccess != true)
+        if (moodPage?.isSuccess == true) return@LaunchedEffect
+
         moodPage = Innertube.browse(BrowseBody(browseId = browseId, params = mood.params))
     }
 
     val lazyListState = rememberLazyListState()
 
-    val endPaddingValues = windowInsets.only(WindowInsetsSides.End).asPaddingValues()
+    val endPaddingValues = windowInsets
+        .only(WindowInsetsSides.End)
+        .asPaddingValues()
 
     val sectionTextModifier = Modifier
         .padding(horizontal = 16.dp)
         .padding(top = 24.dp, bottom = 8.dp)
         .padding(endPaddingValues)
 
-    Column(modifier = modifier) {
-        moodPage?.getOrNull()?.let { moodResult ->
-            LazyColumn(
-                state = lazyListState,
-                contentPadding = LocalPlayerAwareWindowInsets.current
-                    .only(WindowInsetsSides.Vertical + WindowInsetsSides.End).asPaddingValues(),
-                modifier = Modifier
-                    .background(colorPalette.background0)
-                    .fillMaxSize()
+    moodPage?.getOrNull()?.let { moodResult ->
+        LazyColumn(
+            state = lazyListState,
+            contentPadding = LocalPlayerAwareWindowInsets.current
+                .only(WindowInsetsSides.Vertical + WindowInsetsSides.End).asPaddingValues(),
+            modifier = Modifier
+                .background(colorPalette.background0)
+                .fillMaxSize()
+        ) {
+            item(
+                key = "header",
+                contentType = 0
             ) {
-                item(
-                    key = "header",
-                    contentType = 0
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Header(title = mood.name)
-                    }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Header(title = mood.name)
                 }
+            }
 
-                moodResult.items.forEach { item ->
-                    item {
-                        BasicText(
-                            text = item.title,
-                            style = typography.m.semiBold,
-                            modifier = sectionTextModifier
-                        )
-                    }
-                    item {
-                        LazyRow {
-                            items(items = item.items, key = { it.key }) { childItem ->
-                                if (childItem.key == DEFAULT_BROWSE_ID) return@items
-                                when (childItem) {
-                                    is Innertube.AlbumItem -> AlbumItem(
-                                        album = childItem,
-                                        thumbnailSize = Dimensions.thumbnails.album,
-                                        alternative = true,
-                                        modifier = Modifier.clickable {
-                                            childItem.info?.endpoint?.browseId?.let {
-                                                albumRoute.global(it)
-                                            }
+            moodResult.items.forEach { item ->
+                item {
+                    BasicText(
+                        text = item.title,
+                        style = typography.m.semiBold,
+                        modifier = sectionTextModifier
+                    )
+                }
+                item {
+                    LazyRow {
+                        items(
+                            items = item.items,
+                            key = { it.key }
+                        ) { childItem ->
+                            if (childItem.key == DEFAULT_BROWSE_ID) return@items
+
+                            when (childItem) {
+                                is Innertube.AlbumItem -> AlbumItem(
+                                    album = childItem,
+                                    thumbnailSize = Dimensions.thumbnails.album,
+                                    alternative = true,
+                                    modifier = Modifier.clickable {
+                                        childItem.info?.endpoint?.browseId?.let {
+                                            albumRoute.global(it)
                                         }
-                                    )
+                                    }
+                                )
 
-                                    is Innertube.ArtistItem -> ArtistItem(
-                                        artist = childItem,
-                                        thumbnailSize = Dimensions.thumbnails.album,
-                                        alternative = true,
-                                        modifier = Modifier.clickable {
-                                            childItem.info?.endpoint?.browseId?.let {
-                                                artistRoute.global(it)
-                                            }
+                                is Innertube.ArtistItem -> ArtistItem(
+                                    artist = childItem,
+                                    thumbnailSize = Dimensions.thumbnails.album,
+                                    alternative = true,
+                                    modifier = Modifier.clickable {
+                                        childItem.info?.endpoint?.browseId?.let {
+                                            artistRoute.global(it)
                                         }
-                                    )
+                                    }
+                                )
 
-                                    is Innertube.PlaylistItem -> PlaylistItem(
-                                        playlist = childItem,
-                                        thumbnailSize = Dimensions.thumbnails.album,
-                                        alternative = true,
-                                        modifier = Modifier.clickable {
-                                            childItem.info?.endpoint?.let { endpoint ->
-                                                playlistRoute.global(
-                                                    p0 = endpoint.browseId,
-                                                    p1 = endpoint.params,
-                                                    p2 = childItem.songCount?.let { it / 100 }
-                                                )
-                                            }
+                                is Innertube.PlaylistItem -> PlaylistItem(
+                                    playlist = childItem,
+                                    thumbnailSize = Dimensions.thumbnails.album,
+                                    alternative = true,
+                                    modifier = Modifier.clickable {
+                                        childItem.info?.endpoint?.let { endpoint ->
+                                            playlistRoute.global(
+                                                p0 = endpoint.browseId,
+                                                p1 = endpoint.params,
+                                                p2 = childItem.songCount?.let { it / 100 },
+                                                p3 = true
+                                            )
                                         }
-                                    )
+                                    }
+                                )
 
-                                    else -> {}
-                                }
+                                else -> {}
                             }
                         }
                     }
                 }
             }
-        } ?: moodPage?.exceptionOrNull()?.let {
-            BasicText(
-                text = stringResource(R.string.error_message),
-                style = typography.s.secondary.center,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(all = 16.dp)
-            )
-        } ?: ShimmerHost {
-            HeaderPlaceholder(modifier = Modifier.shimmer())
-            repeat(4) {
-                TextPlaceholder(modifier = sectionTextModifier)
-                Row {
-                    repeat(6) {
-                        AlbumItemPlaceholder(
-                            thumbnailSize = Dimensions.thumbnails.album,
-                            alternative = true
-                        )
-                    }
+        }
+    } ?: moodPage?.exceptionOrNull()?.let {
+        BasicText(
+            text = stringResource(R.string.error_message),
+            style = typography.s.secondary.center,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(all = 16.dp)
+        )
+    } ?: ShimmerHost {
+        HeaderPlaceholder(modifier = Modifier.shimmer())
+        repeat(4) {
+            TextPlaceholder(modifier = sectionTextModifier)
+            Row {
+                repeat(6) {
+                    AlbumItemPlaceholder(
+                        thumbnailSize = Dimensions.thumbnails.album,
+                        alternative = true
+                    )
                 }
             }
         }

@@ -64,7 +64,7 @@ fun RouteHandler(
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
-    val parameters = rememberSaveable { arrayOfNulls<Any?>(3) }
+    val parameters = rememberSaveable { arrayOfNulls<Any?>(4) }
     val scope = remember(route) {
         RouteHandlerScope(
             route = route,
