@@ -151,7 +151,8 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
             setContent()
         }
 
-        onNewIntent(intent)
+        intent?.let { handleIntent(it) }
+        addOnNewIntentListener(::handleIntent)
     }
 
     @Composable
@@ -309,19 +310,14 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
         }
     }
 
-    @Suppress("CyclomaticComplexMethod")
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
+    private fun handleIntent(intent: Intent) {
+        val uri = intent.data ?: intent.getStringExtra(Intent.EXTRA_TEXT)?.toUri() ?: return
+        val path = uri.pathSegments.firstOrNull()
 
-        val uri = intent?.data ?: intent?.getStringExtra(Intent.EXTRA_TEXT)?.toUri() ?: return
-
-        intent?.data = null
-        this.intent = null
-
-        Log.d(TAG, "Opening url: $uri")
+        Log.d(TAG, "Opening url: $uri ($path)")
 
         lifecycleScope.launch(Dispatchers.IO) {
-            when (val path = uri.pathSegments.firstOrNull()) {
+            when (path) {
                 "playlist" -> uri.getQueryParameter("list")?.let { playlistId ->
                     val browseId = "VL$playlistId"
 
@@ -369,6 +365,8 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
         super.onDestroy()
         monet.removeMonetColorsChangedListener(this)
         _monet = null
+
+        removeOnNewIntentListener(::handleIntent)
     }
 
     override fun onStop() {

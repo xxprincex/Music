@@ -176,17 +176,17 @@ fun Thumbnail(
             PlaybackError(
                 isDisplayed = error != null,
                 messageProvider = {
-                    if (currentWindow.mediaItem.isLocal) stringResource(R.string.error_local_music_deleted) else
-                        when (error?.cause?.cause) {
-                            is UnresolvedAddressException, is UnknownHostException ->
-                                stringResource(R.string.error_network)
+                    if (currentWindow.mediaItem.isLocal) stringResource(R.string.error_local_music_deleted)
+                    else when (error?.cause?.cause) {
+                        is UnresolvedAddressException, is UnknownHostException ->
+                            stringResource(R.string.error_network)
 
-                            is PlayableFormatNotFoundException -> stringResource(R.string.error_unplayable)
-                            is UnplayableException -> stringResource(R.string.error_source_deleted)
-                            is LoginRequiredException -> stringResource(R.string.error_server_restrictions)
-                            is VideoIdMismatchException -> stringResource(R.string.error_id_mismatch)
-                            else -> stringResource(R.string.error_unknown_playback)
-                        }
+                        is PlayableFormatNotFoundException -> stringResource(R.string.error_unplayable)
+                        is UnplayableException -> stringResource(R.string.error_source_deleted)
+                        is LoginRequiredException -> stringResource(R.string.error_server_restrictions)
+                        is VideoIdMismatchException -> stringResource(R.string.error_id_mismatch)
+                        else -> stringResource(R.string.error_unknown_playback)
+                    }
                 },
                 onDismiss = player::prepare
             )

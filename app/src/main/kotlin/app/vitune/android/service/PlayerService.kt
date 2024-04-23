@@ -1142,22 +1142,21 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             findMediaItem: (videoId: String) -> MediaItem?,
             context: Context,
             cache: Cache,
-            chunkLength: Long? = DEFAULT_CHUNK_LENGTH
-        ): ResolvingDataSource.Factory {
-            val ringBuffer = RingBuffer<Pair<String, Uri>?>(2) { null }
-
-            return ResolvingDataSource.Factory(
-                ConditionalCacheDataSourceFactory(
-                    cacheDataSourceFactory = CacheDataSource.Factory().setCache(cache),
-                    upstreamDataSourceFactory = DefaultDataSource.Factory(
-                        context,
-                        DefaultHttpDataSource.Factory()
-                            .setConnectTimeoutMs(16000)
-                            .setReadTimeoutMs(8000)
-                            .setUserAgent("Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0")
-                    )
-                ) { !it.isLocal }
-            ) { dataSpec ->
+            chunkLength: Long? = DEFAULT_CHUNK_LENGTH,
+            ringBuffer: RingBuffer<Pair<String, Uri>?> = RingBuffer(2) { null }
+        ): ResolvingDataSource.Factory = ResolvingDataSource.Factory(
+            ConditionalCacheDataSourceFactory(
+                cacheDataSourceFactory = CacheDataSource.Factory().setCache(cache),
+                upstreamDataSourceFactory = DefaultDataSource.Factory(
+                    /* context = */ context,
+                    /* baseDataSourceFactory = */ DefaultHttpDataSource.Factory()
+                        .setConnectTimeoutMs(16000)
+                        .setReadTimeoutMs(8000)
+                        .setUserAgent("Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0")
+                )
+            ) { !it.isLocal }
+        ) { dataSpec ->
+            runCatching {
                 // Thank you Android, for enforcing a Uri in the download request
                 val videoId = dataSpec.key?.removePrefix("https://youtube.com/watch?v=")
                     ?: error("A key must be set")
@@ -1185,7 +1184,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         val format = body.streamingData?.highestQualityFormat
                         val url = when (val status = body.playabilityStatus?.status) {
                             "OK" -> format?.let { _ ->
-                                val mediaItem = findMediaItem(videoId)
+                                val mediaItem = runCatching { findMediaItem(videoId) }.getOrNull()
 
                                 if (mediaItem?.mediaMetadata?.extras?.getString("durationText") == null)
                                     format.approxDurationMs?.div(1000)
@@ -1239,6 +1238,14 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                             }
                     }
                 }
+            }.getOrElse {
+                it.printStackTrace()
+
+                if (it is PlaybackException) throw it else throw PlaybackException(
+                    /* message = */ "Unknown playback error",
+                    /* cause = */ it,
+                    /* errorCode = */ PlaybackException.ERROR_CODE_UNSPECIFIED
+                )
             }
         }
     }

@@ -84,12 +84,12 @@ fun Player.enqueue(mediaItems: List<MediaItem>) = when (playbackState) {
     else -> addMediaItems(mediaItemCount, mediaItems)
 }
 
-fun Player.findNextMediaItemById(mediaId: String): MediaItem? {
+fun Player.findNextMediaItemById(mediaId: String): MediaItem? = runCatching {
     for (i in currentMediaItemIndex until mediaItemCount) {
         if (getMediaItemAt(i).mediaId == mediaId) return getMediaItemAt(i)
     }
     return null
-}
+}.getOrNull()
 
 fun Player.setPlaybackPitch(pitch: Float) {
     playbackParameters = PlaybackParameters(playbackParameters.speed, pitch)
