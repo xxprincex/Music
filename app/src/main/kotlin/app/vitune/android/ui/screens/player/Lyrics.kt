@@ -109,6 +109,8 @@ fun Lyrics(
     onMenuLaunched: () -> Unit = { }
 ) = with(PlayerPreferences) {
     val currentMediaMetadataProvider by rememberUpdatedState(mediaMetadataProvider)
+    val currentDurationProvider by rememberUpdatedState(durationProvider)
+
     val (colorPalette, typography) = LocalAppearance.current
     val context = LocalContext.current
     val menuState = LocalMenuState.current
@@ -131,20 +133,21 @@ fun Lyrics(
             runCatching {
                 withContext(Dispatchers.IO) {
                     Database.lyrics(mediaId).collect { currentLyrics ->
+                        val mediaMetadata = currentMediaMetadataProvider()
+                        var duration = withContext(Dispatchers.Main) { currentDurationProvider() }
+
+                        while (duration == C.TIME_UNSET) {
+                            delay(100)
+                            duration = withContext(Dispatchers.Main) { currentDurationProvider() }
+                        }
+
+                        val album = mediaMetadata.albumTitle?.toString()
+                        val artist = mediaMetadata.artist?.toString().orEmpty()
+                        val title = mediaMetadata.title?.toString().orEmpty()
+
                         when {
                             isShowingSynchronizedLyrics && currentLyrics?.synced == null -> {
                                 lyrics = null
-                                val mediaMetadata = currentMediaMetadataProvider()
-                                var duration = withContext(Dispatchers.Main) { durationProvider() }
-
-                                while (duration == C.TIME_UNSET) {
-                                    delay(100)
-                                    duration = withContext(Dispatchers.Main) { durationProvider() }
-                                }
-
-                                val album = mediaMetadata.albumTitle?.toString()
-                                val artist = mediaMetadata.artist?.toString().orEmpty()
-                                val title = mediaMetadata.title?.toString().orEmpty()
 
                                 LrcLib.lyrics(
                                     artist = artist,
@@ -189,7 +192,23 @@ fun Lyrics(
                                         )
                                     )
                                 }?.onFailure {
-                                    isError = true
+                                    LrcLib.lyrics(
+                                        artist = artist,
+                                        title = title,
+                                        duration = duration.milliseconds,
+                                        album = album,
+                                        synced = false
+                                    )?.onSuccess {
+                                        Database.upsert(
+                                            Lyrics(
+                                                songId = mediaId,
+                                                fixed = it?.text.orEmpty(),
+                                                synced = currentLyrics?.synced
+                                            )
+                                        )
+                                    }?.onFailure {
+                                        isError = true
+                                    }
                                 }
                             }
 

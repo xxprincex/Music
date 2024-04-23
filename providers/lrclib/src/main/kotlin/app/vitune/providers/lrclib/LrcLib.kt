@@ -45,11 +45,13 @@ object LrcLib {
         artist: String,
         title: String,
         duration: Duration,
-        album: String? = null
+        album: String? = null,
+        synced: Boolean = true
     ) = runCatchingCancellable {
-        val tracks = queryLyrics(artist, title, album)
-
-        tracks.bestMatchingFor(title, duration)?.syncedLyrics?.let(LrcLib::Lyrics)
+        queryLyrics(artist, title, album)
+            .bestMatchingFor(title, duration)
+            ?.let { if (synced) it.syncedLyrics else it.plainLyrics }
+            ?.let(LrcLib::Lyrics)
     }
 
     suspend fun lyrics(artist: String, title: String) = runCatchingCancellable {
@@ -62,6 +64,8 @@ object LrcLib {
             get() = runCatching {
                 buildMap {
                     put(0L, "")
+
+                    // TODO: fix this mess
                     text.trim().lines().filter { it.length >= 10 }.forEach {
                         put(
                             it[8].digitToInt() * 10L +
