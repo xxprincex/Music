@@ -3,6 +3,7 @@ package app.vitune.providers.innertube.utils
 import app.vitune.providers.innertube.Innertube
 import app.vitune.providers.innertube.models.MusicResponsiveListItemRenderer
 import app.vitune.providers.innertube.models.NavigationEndpoint
+import app.vitune.providers.innertube.models.isExplicit
 
 fun Innertube.SongItem.Companion.from(renderer: MusicResponsiveListItemRenderer) =
     Innertube.SongItem(
@@ -44,6 +45,7 @@ fun Innertube.SongItem.Companion.from(renderer: MusicResponsiveListItemRenderer)
             ?.runs
             ?.firstOrNull()
             ?.let(Innertube::Info),
+        explicit = renderer.badges.isExplicit,
         thumbnail = renderer
             .thumbnail
             ?.musicThumbnailRenderer

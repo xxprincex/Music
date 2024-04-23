@@ -66,11 +66,11 @@ object Innertube {
     internal const val SEARCH = "/youtubei/v1/search"
     internal const val SEARCH_SUGGESTIONS = "/youtubei/v1/music/get_search_suggestions"
     internal const val MUSIC_RESPONSIVE_LIST_ITEM_RENDERER_MASK =
-        "musicResponsiveListItemRenderer(flexColumns,fixedColumns,thumbnail,navigationEndpoint)"
+        "musicResponsiveListItemRenderer(flexColumns,fixedColumns,thumbnail,navigationEndpoint,badges)"
     internal const val MUSIC_TWO_ROW_ITEM_RENDERER_MASK =
         "musicTwoRowItemRenderer(thumbnailRenderer,title,subtitle,navigationEndpoint)"
     internal const val PLAYLIST_PANEL_VIDEO_RENDERER_MASK =
-        "playlistPanelVideoRenderer(title,navigationEndpoint,longBylineText,shortBylineText,thumbnail,lengthText)"
+        "playlistPanelVideoRenderer(title,navigationEndpoint,longBylineText,shortBylineText,thumbnail,lengthText,badges)"
 
     internal fun HttpRequestBuilder.mask(value: String = "*") =
         header("X-Goog-FieldMask", value)
@@ -107,6 +107,7 @@ object Innertube {
         val authors: List<Info<NavigationEndpoint.Endpoint.Browse>>?,
         val album: Info<NavigationEndpoint.Endpoint.Browse>?,
         val durationText: String?,
+        val explicit: Boolean,
         override val thumbnail: Thumbnail?
     ) : Item() {
         override val key get() = info!!.endpoint!!.videoId!!

@@ -40,7 +40,8 @@ val Innertube.SongItem.asMediaItem: MediaItem
                         "durationText" to durationText,
                         "artistNames" to authors?.filter { it.endpoint != null }
                             ?.mapNotNull { it.name },
-                        "artistIds" to authors?.mapNotNull { it.endpoint?.browseId }
+                        "artistIds" to authors?.mapNotNull { it.endpoint?.browseId },
+                        "explicit" to explicit
                     )
                 )
                 .build()
@@ -106,7 +107,8 @@ val Song.asMediaItem: MediaItem
                 .setArtworkUri(thumbnailUrl?.toUri())
                 .setExtras(
                     bundleOf(
-                        "durationText" to durationText
+                        "durationText" to durationText,
+                        "explicit" to explicit
                     )
                 )
                 .build()

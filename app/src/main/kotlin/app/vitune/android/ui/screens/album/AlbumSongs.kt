@@ -61,7 +61,7 @@ fun AlbumSongs(
     modifier: Modifier = Modifier,
     afterHeaderContent: (@Composable () -> Unit)? = null
 ) {
-    val (colorPalette, typography) = LocalAppearance.current
+    val (colorPalette) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
 
@@ -119,21 +119,9 @@ fun AlbumSongs(
                     key = { _, song -> song.id }
                 ) { index, song ->
                     SongItem(
-                        title = song.title,
-                        authors = song.artistsText,
-                        duration = song.durationText,
+                        song = song,
+                        index = index,
                         thumbnailSize = Dimensions.thumbnails.song,
-                        thumbnailContent = {
-                            BasicText(
-                                text = "${index + 1}",
-                                style = typography.s.semiBold.center.disabled,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier
-                                    .width(Dimensions.thumbnails.song)
-                                    .align(Alignment.Center)
-                            )
-                        },
                         modifier = Modifier.combinedClickable(
                             onLongClick = {
                                 menuState.display {

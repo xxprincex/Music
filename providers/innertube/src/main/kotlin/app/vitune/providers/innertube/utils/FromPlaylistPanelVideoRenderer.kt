@@ -2,6 +2,7 @@ package app.vitune.providers.innertube.utils
 
 import app.vitune.providers.innertube.Innertube
 import app.vitune.providers.innertube.models.PlaylistPanelVideoRenderer
+import app.vitune.providers.innertube.models.isExplicit
 
 fun Innertube.SongItem.Companion.from(renderer: PlaylistPanelVideoRenderer) = Innertube.SongItem(
     info = Innertube.Info(
@@ -29,5 +30,6 @@ fun Innertube.SongItem.Companion.from(renderer: PlaylistPanelVideoRenderer) = In
         ?.getOrNull(0),
     durationText = renderer
         .lengthText
-        ?.text
+        ?.text,
+    explicit = renderer.badges.isExplicit
 ).takeIf { it.info?.endpoint?.videoId != null }

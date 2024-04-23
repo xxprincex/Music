@@ -3,6 +3,7 @@ package app.vitune.providers.innertube.utils
 import app.vitune.providers.innertube.Innertube
 import app.vitune.providers.innertube.models.MusicShelfRenderer
 import app.vitune.providers.innertube.models.NavigationEndpoint
+import app.vitune.providers.innertube.models.isExplicit
 
 fun Innertube.SongItem.Companion.from(content: MusicShelfRenderer.Content): Innertube.SongItem? {
     val (mainRuns, otherRuns) = content.runs
@@ -41,6 +42,7 @@ fun Innertube.SongItem.Companion.from(content: MusicShelfRenderer.Content): Inne
                 .getOrNull(otherRuns.size - 2)
                 ?.firstOrNull()
                 ?.text,
+        explicit = content.musicResponsiveListItemRenderer?.badges.isExplicit,
         thumbnail = content.thumbnail
     ).takeIf { it.info?.endpoint?.videoId != null }
 }

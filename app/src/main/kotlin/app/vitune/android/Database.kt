@@ -557,7 +557,8 @@ interface Database {
             title = mediaItem.mediaMetadata.title!!.toString(),
             artistsText = mediaItem.mediaMetadata.artist?.toString(),
             durationText = mediaItem.mediaMetadata.extras?.getString("durationText"),
-            thumbnailUrl = mediaItem.mediaMetadata.artworkUri?.toString()
+            thumbnailUrl = mediaItem.mediaMetadata.artworkUri?.toString(),
+            explicit = mediaItem.mediaMetadata.extras?.getBoolean("explicit") == true
         ).let(block).also { song ->
             if (insert(song) == -1L) return
         }
@@ -643,7 +644,7 @@ interface Database {
         PipedSession::class
     ],
     views = [SortedSongPlaylistMap::class],
-    version = 28,
+    version = 29,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -668,7 +669,8 @@ interface Database {
         AutoMigration(from = 24, to = 25),
         AutoMigration(from = 25, to = 26),
         AutoMigration(from = 26, to = 27),
-        AutoMigration(from = 27, to = 28)
+        AutoMigration(from = 27, to = 28),
+        AutoMigration(from = 28, to = 29)
     ]
 )
 @TypeConverters(Converters::class)
@@ -938,6 +940,7 @@ abstract class DatabaseInitializer protected constructor() : RoomDatabase() {
     }
 }
 
+@Suppress("unused")
 @TypeConverters
 object Converters {
     @TypeConverter

@@ -310,13 +310,14 @@ fun LocalPlaylistSongs(
                             )
                             .background(colorPalette.background0),
                         song = song,
-                        thumbnailSize = Dimensions.thumbnails.song
-                    ) {
-                        ReorderHandle(
-                            reorderingState = reorderingState,
-                            index = index
-                        )
-                    }
+                        thumbnailSize = Dimensions.thumbnails.song,
+                        trailingContent = {
+                            ReorderHandle(
+                                reorderingState = reorderingState,
+                                index = index
+                            )
+                        }
+                    )
                 }
             }
         }

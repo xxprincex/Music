@@ -411,13 +411,10 @@ fun MediaItemMenu(
                 modifier = Modifier.padding(end = 12.dp)
             ) {
                 SongItem(
+                    song = mediaItem,
+                    thumbnailSize = Dimensions.thumbnails.song,
                     modifier = Modifier.weight(1f),
-                    thumbnailUrl = mediaItem.mediaMetadata.artworkUri
-                        .thumbnail(Dimensions.thumbnails.song.px)?.toString(),
-                    title = mediaItem.mediaMetadata.title?.toString().orEmpty(),
-                    authors = mediaItem.mediaMetadata.artist?.toString().orEmpty(),
-                    duration = null,
-                    thumbnailSize = Dimensions.thumbnails.song
+                    showDuration = false
                 )
 
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {

@@ -373,32 +373,33 @@ fun Queue(
                                             onPlayNext = { binder.player.addNext(it) }
                                         )
                                     }
+                                },
+                                trailingContent = {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(
+                                            space = 12.dp,
+                                            alignment = Alignment.End
+                                        )
+                                    ) {
+                                        IconButton(
+                                            icon = R.drawable.play_skip_forward,
+                                            color = colorPalette.text,
+                                            onClick = {
+                                                binder.player.addNext(it)
+                                            },
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        IconButton(
+                                            icon = R.drawable.enqueue,
+                                            color = colorPalette.text,
+                                            onClick = {
+                                                binder.player.enqueue(it)
+                                            },
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
                                 }
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(
-                                        space = 12.dp,
-                                        alignment = Alignment.End
-                                    )
-                                ) {
-                                    IconButton(
-                                        icon = R.drawable.play_skip_forward,
-                                        color = colorPalette.text,
-                                        onClick = {
-                                            binder.player.addNext(it)
-                                        },
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    IconButton(
-                                        icon = R.drawable.enqueue,
-                                        color = colorPalette.text,
-                                        onClick = {
-                                            binder.player.enqueue(it)
-                                        },
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
-                            }
+                            )
                         }
 
                         item(

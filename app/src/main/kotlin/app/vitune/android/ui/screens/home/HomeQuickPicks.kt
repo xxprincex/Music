@@ -196,15 +196,17 @@ fun QuickPicks(
                                     .animateItemPlacement()
                                     .width(itemInHorizontalGridWidth),
                                 song = song,
-                                thumbnailSize = Dimensions.thumbnails.song
-                            ) {
-                                Image(
-                                    painter = painterResource(R.drawable.star),
-                                    contentDescription = null,
-                                    colorFilter = ColorFilter.tint(colorPalette.accent),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
+                                thumbnailSize = Dimensions.thumbnails.song,
+                                trailingContent = {
+                                    Image(
+                                        painter = painterResource(R.drawable.star),
+                                        contentDescription = null,
+                                        colorFilter = ColorFilter.tint(colorPalette.accent),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                },
+                                showDuration = false
+                            )
                         }
                     }
 
@@ -236,7 +238,8 @@ fun QuickPicks(
                                     }
                                 )
                                 .animateItemPlacement()
-                                .width(itemInHorizontalGridWidth)
+                                .width(itemInHorizontalGridWidth),
+                            showDuration = false
                         )
                     }
                 }

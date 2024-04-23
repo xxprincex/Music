@@ -17,7 +17,9 @@ data class Song(
     val totalPlayTimeMs: Long = 0,
     val loudnessBoost: Float? = null,
     @ColumnInfo(defaultValue = "false")
-    val blacklisted: Boolean = false
+    val blacklisted: Boolean = false,
+    @ColumnInfo(defaultValue = "false")
+    val explicit: Boolean = false
 ) {
     fun toggleLike() = copy(likedAt = if (likedAt == null) System.currentTimeMillis() else null)
 }

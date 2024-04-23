@@ -180,7 +180,9 @@ class AudioMediaCursor(cursor: Cursor) : CursorDao(cursor) {
     val name by string(DISPLAY_NAME)
     val duration by int(DURATION)
     val artist by string(ARTIST)
-    val albumId by long(ALBUM_ID)
+    private val albumId by long(ALBUM_ID)
 
     val albumUri get() = ContentUris.withAppendedId(ALBUM_URI_BASE, albumId)
 }
+
+// TODO: bundle accessors?
