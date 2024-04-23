@@ -5,7 +5,6 @@ import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,19 +14,23 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 
-@OptIn(ExperimentalAnimationApi::class)
+typealias TransitionScope<T> = AnimatedContentTransitionScope<T>
+typealias TransitionSpec<T> = TransitionScope<T>.() -> ContentTransform
+
+private val defaultTransitionSpec: TransitionSpec<RouteHandlerScope> = {
+    when {
+        isStacking -> defaultStacking
+        isStill -> defaultStill
+        else -> defaultUnstacking
+    }
+}
+
 @Composable
 fun RouteHandler(
     modifier: Modifier = Modifier,
     listenToGlobalEmitter: Boolean = false,
     handleBackPress: Boolean = true,
-    transitionSpec: AnimatedContentTransitionScope<RouteHandlerScope>.() -> ContentTransform = {
-        when {
-            isStacking -> defaultStacking
-            isStill -> defaultStill
-            else -> defaultUnstacking
-        }
-    },
+    transitionSpec: TransitionSpec<RouteHandlerScope> = defaultTransitionSpec,
     content: @Composable RouteHandlerScope.() -> Unit
 ) {
     var route by rememberSaveable(stateSaver = Route.Saver) {
@@ -45,7 +48,6 @@ fun RouteHandler(
     )
 }
 
-@ExperimentalAnimationApi
 @Composable
 fun RouteHandler(
     route: Route?,
@@ -53,13 +55,7 @@ fun RouteHandler(
     modifier: Modifier = Modifier,
     listenToGlobalEmitter: Boolean = false,
     handleBackPress: Boolean = true,
-    transitionSpec: AnimatedContentTransitionScope<RouteHandlerScope>.() -> ContentTransform = {
-        when {
-            isStacking -> defaultStacking
-            isStill -> defaultStill
-            else -> defaultUnstacking
-        }
-    },
+    transitionSpec: TransitionSpec<RouteHandlerScope> = defaultTransitionSpec,
     content: @Composable RouteHandlerScope.() -> Unit
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
