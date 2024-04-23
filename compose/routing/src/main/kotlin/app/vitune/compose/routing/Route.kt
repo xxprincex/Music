@@ -33,12 +33,12 @@ class Route0(tag: String) : Route(tag) {
     }
 
     fun global() {
-        globalRouteFlow.tryEmit(this to emptyArray())
+        globalRouteFlow.tryEmit(RouteRequest(route = this, args = emptyArray()))
     }
 
     suspend fun ensureGlobal() {
         globalRouteFlow.subscriptionCount.filter { it > 0 }.first()
-        globalRouteFlow.emit(this to arrayOf())
+        globalRouteFlow.emit(RouteRequest(route = this, args = emptyArray()))
     }
 }
 
@@ -51,12 +51,12 @@ class Route1<P0>(tag: String) : Route(tag) {
     }
 
     fun global(p0: P0) {
-        globalRouteFlow.tryEmit(this to arrayOf(p0))
+        globalRouteFlow.tryEmit(RouteRequest(route = this, args = arrayOf(p0)))
     }
 
     suspend fun ensureGlobal(p0: P0) {
         globalRouteFlow.subscriptionCount.filter { it > 0 }.first()
-        globalRouteFlow.emit(this to arrayOf(p0))
+        globalRouteFlow.emit(RouteRequest(route = this, args = arrayOf(p0)))
     }
 }
 
@@ -69,12 +69,12 @@ class Route2<P0, P1>(tag: String) : Route(tag) {
     }
 
     fun global(p0: P0, p1: P1) {
-        globalRouteFlow.tryEmit(this to arrayOf(p0, p1))
+        globalRouteFlow.tryEmit(RouteRequest(route = this, args = arrayOf(p0, p1)))
     }
 
     suspend fun ensureGlobal(p0: P0, p1: P1) {
         globalRouteFlow.subscriptionCount.filter { it > 0 }.first()
-        globalRouteFlow.emit(this to arrayOf(p0, p1))
+        globalRouteFlow.emit(RouteRequest(route = this, args = arrayOf(p0, p1)))
     }
 }
 
@@ -87,11 +87,11 @@ class Route3<P0, P1, P2>(tag: String) : Route(tag) {
     }
 
     fun global(p0: P0, p1: P1, p2: P2) {
-        globalRouteFlow.tryEmit(this to arrayOf(p0, p1, p2))
+        globalRouteFlow.tryEmit(RouteRequest(route = this, args = arrayOf(p0, p1, p2)))
     }
 
     suspend fun ensureGlobal(p0: P0, p1: P1, p2: P2) {
         globalRouteFlow.subscriptionCount.filter { it > 0 }.first()
-        globalRouteFlow.emit(this to arrayOf(p0, p1, p2))
+        globalRouteFlow.emit(RouteRequest(route = this, args = arrayOf(p0, p1, p2)))
     }
 }

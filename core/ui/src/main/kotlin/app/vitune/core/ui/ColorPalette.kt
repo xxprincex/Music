@@ -237,7 +237,7 @@ fun ColorPalette.amoled() = if (isDark) {
             hue = hue,
             saturation = saturation.coerceAtMost(0.4f),
             lightness = 0.2f
-        ),
+        )
     )
 } else this
 

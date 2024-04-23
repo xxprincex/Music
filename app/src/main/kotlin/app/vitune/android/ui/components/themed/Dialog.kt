@@ -326,6 +326,7 @@ fun <T> ValueSelectorDialogBody(
     }
 }
 
+@Suppress("ModifierMissing") // intentional, I guess
 @Composable
 fun ColumnScope.SliderDialogBody(
     provideState: @Composable () -> MutableState<Float>,

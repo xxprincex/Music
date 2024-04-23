@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import app.vitune.android.Database
 import app.vitune.android.LocalPlayerAwareWindowInsets
 import app.vitune.android.LocalPlayerServiceBinder
@@ -37,12 +34,9 @@ import app.vitune.android.ui.items.SongItem
 import app.vitune.android.ui.items.SongItemPlaceholder
 import app.vitune.android.utils.PlaylistDownloadIcon
 import app.vitune.android.utils.asMediaItem
-import app.vitune.android.utils.center
-import app.vitune.android.utils.disabled
 import app.vitune.android.utils.enqueue
 import app.vitune.android.utils.forcePlayAtIndex
 import app.vitune.android.utils.forcePlayFromBeginning
-import app.vitune.android.utils.semiBold
 import app.vitune.compose.persist.persistList
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance

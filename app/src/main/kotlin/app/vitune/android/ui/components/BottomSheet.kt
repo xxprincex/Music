@@ -131,18 +131,16 @@ class BottomSheetState(
         animatable.animateTo(newValue, spec)
     }
 
-    fun collapse(spec: AnimationSpec<Dp>) {
+    private fun collapse(spec: AnimationSpec<Dp> = spring()) {
         onAnchorChanged(Anchor.Collapsed)
         deferAnimateTo(collapsedBound, spec)
     }
 
-    fun expand(spec: AnimationSpec<Dp>) {
+    private fun expand(spec: AnimationSpec<Dp> = spring()) {
         onAnchorChanged(Anchor.Expanded)
         deferAnimateTo(animatable.upperBound!!, spec)
     }
 
-    private fun collapse() = collapse(spring())
-    private fun expand() = expand(spring())
     fun collapseSoft() = collapse(tween(300))
     fun expandSoft() = expand(tween(300))
 

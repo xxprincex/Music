@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -112,7 +111,7 @@ fun SongItem(
     trailingContent: @Composable (() -> Unit)? = null,
     showDuration: Boolean = true
 ) {
-    val (colorPalette, typography) = LocalAppearance.current
+    val (colorPalette, typography, _, thumbnailShape) = LocalAppearance.current
 
     SongItem(
         title = title,
@@ -123,7 +122,7 @@ fun SongItem(
         thumbnailContent = {
             Box(
                 modifier = Modifier
-                    .clip(LocalAppearance.current.thumbnailShape)
+                    .clip(thumbnailShape)
                     .background(colorPalette.background1)
                     .fillMaxSize()
             ) {

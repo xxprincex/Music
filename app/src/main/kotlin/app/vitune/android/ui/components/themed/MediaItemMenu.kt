@@ -73,14 +73,12 @@ import app.vitune.android.utils.isCached
 import app.vitune.android.utils.launchYouTubeMusic
 import app.vitune.android.utils.medium
 import app.vitune.android.utils.semiBold
-import app.vitune.android.utils.thumbnail
 import app.vitune.android.utils.toast
 import app.vitune.core.data.enums.PlaylistSortBy
 import app.vitune.core.data.enums.SortOrder
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.favoritesIcon
-import app.vitune.core.ui.utils.px
 import app.vitune.core.ui.utils.roundedShape
 import app.vitune.providers.innertube.models.NavigationEndpoint
 import kotlinx.coroutines.Dispatchers

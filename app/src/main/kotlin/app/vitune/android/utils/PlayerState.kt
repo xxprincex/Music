@@ -19,6 +19,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 
+@Suppress("LambdaParameterInRestartableEffect") // Invalid: crossinline param
 @Composable
 inline fun Player.DisposableListener(
     key: Any = this,

@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -107,17 +108,18 @@ fun Lyrics(
     modifier: Modifier = Modifier,
     onMenuLaunched: () -> Unit = { }
 ) = with(PlayerPreferences) {
+    val currentMediaMetadataProvider by rememberUpdatedState(mediaMetadataProvider)
+    val (colorPalette, typography) = LocalAppearance.current
+    val context = LocalContext.current
+    val menuState = LocalMenuState.current
+    val currentView = LocalView.current
+    val binder = LocalPlayerServiceBinder.current
+
     AnimatedVisibility(
         visible = isDisplayed,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        val (colorPalette, typography) = LocalAppearance.current
-        val context = LocalContext.current
-        val menuState = LocalMenuState.current
-        val currentView = LocalView.current
-        val binder = LocalPlayerServiceBinder.current
-
         var isEditing by remember(mediaId, isShowingSynchronizedLyrics) { mutableStateOf(false) }
         var isPicking by remember(mediaId, isShowingSynchronizedLyrics) { mutableStateOf(false) }
         var lyrics by remember { mutableStateOf<Lyrics?>(null) }
@@ -132,7 +134,7 @@ fun Lyrics(
                         when {
                             isShowingSynchronizedLyrics && currentLyrics?.synced == null -> {
                                 lyrics = null
-                                val mediaMetadata = mediaMetadataProvider()
+                                val mediaMetadata = currentMediaMetadataProvider()
                                 var duration = withContext(Dispatchers.Main) { durationProvider() }
 
                                 while (duration == C.TIME_UNSET) {
@@ -230,7 +232,7 @@ fun Lyrics(
             var error by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
-                val mediaMetadata = mediaMetadataProvider()
+                val mediaMetadata = currentMediaMetadataProvider()
 
                 LrcLib.lyrics(
                     artist = mediaMetadata.artist?.toString().orEmpty(),
@@ -486,7 +488,7 @@ fun Lyrics(
                                         text = stringResource(R.string.search_lyrics_online),
                                         onClick = {
                                             menuState.hide()
-                                            val mediaMetadata = mediaMetadataProvider()
+                                            val mediaMetadata = currentMediaMetadataProvider()
 
                                             try {
                                                 context.startActivity(

@@ -5,14 +5,14 @@ import app.vitune.providers.innertube.models.MusicShelfRenderer
 import app.vitune.providers.innertube.models.NavigationEndpoint
 import app.vitune.providers.innertube.models.isExplicit
 
-fun Innertube.SongItem.Companion.from(content: MusicShelfRenderer.Content): Innertube.SongItem? {
-    val (mainRuns, otherRuns) = content.runs
+// Possible configurations:
+// "song" • author(s) • album • duration
+// "song" • author(s) • duration
+// author(s) • album • duration
+// author(s) • duration
 
-    // Possible configurations:
-    // "song" • author(s) • album • duration
-    // "song" • author(s) • duration
-    // author(s) • album • duration
-    // author(s) • duration
+fun Innertube.SongItem.Companion.from(content: MusicShelfRenderer.Content) = runCatching {
+    val (mainRuns, otherRuns) = content.runs
 
     val album: Innertube.Info<NavigationEndpoint.Endpoint.Browse>? = otherRuns
         .getOrNull(otherRuns.lastIndex - 1)
@@ -25,7 +25,7 @@ fun Innertube.SongItem.Companion.from(content: MusicShelfRenderer.Content): Inne
         }
         ?.let(Innertube::Info)
 
-    return Innertube.SongItem(
+    Innertube.SongItem(
         info = mainRuns
             .firstOrNull()
             ?.let(Innertube::Info),
@@ -45,36 +45,34 @@ fun Innertube.SongItem.Companion.from(content: MusicShelfRenderer.Content): Inne
         explicit = content.musicResponsiveListItemRenderer?.badges.isExplicit,
         thumbnail = content.thumbnail
     ).takeIf { it.info?.endpoint?.videoId != null }
-}
+}.getOrNull()
 
-fun Innertube.VideoItem.Companion.from(content: MusicShelfRenderer.Content): Innertube.VideoItem? {
+fun Innertube.VideoItem.Companion.from(content: MusicShelfRenderer.Content) = runCatching {
     val (mainRuns, otherRuns) = content.runs
 
-    return runCatching {
-        Innertube.VideoItem(
-            info = mainRuns
-                .firstOrNull()
-                ?.let(Innertube::Info),
-            authors = otherRuns
-                .getOrNull(otherRuns.lastIndex - 2)
-                ?.map(Innertube::Info),
-            viewsText = otherRuns
-                .getOrNull(otherRuns.lastIndex - 1)
-                ?.firstOrNull()
-                ?.text,
-            durationText = otherRuns
-                .getOrNull(otherRuns.lastIndex)
-                ?.firstOrNull()
-                ?.text,
-            thumbnail = content.thumbnail
-        ).takeIf { it.info?.endpoint?.videoId != null }
-    }.getOrNull()
-}
+    Innertube.VideoItem(
+        info = mainRuns
+            .firstOrNull()
+            ?.let(Innertube::Info),
+        authors = otherRuns
+            .getOrNull(otherRuns.lastIndex - 2)
+            ?.map(Innertube::Info),
+        viewsText = otherRuns
+            .getOrNull(otherRuns.lastIndex - 1)
+            ?.firstOrNull()
+            ?.text,
+        durationText = otherRuns
+            .getOrNull(otherRuns.lastIndex)
+            ?.firstOrNull()
+            ?.text,
+        thumbnail = content.thumbnail
+    ).takeIf { it.info?.endpoint?.videoId != null }
+}.getOrNull()
 
-fun Innertube.AlbumItem.Companion.from(content: MusicShelfRenderer.Content): Innertube.AlbumItem? {
+fun Innertube.AlbumItem.Companion.from(content: MusicShelfRenderer.Content) = runCatching {
     val (mainRuns, otherRuns) = content.runs
 
-    return Innertube.AlbumItem(
+    Innertube.AlbumItem(
         info = Innertube.Info(
             name = mainRuns
                 .firstOrNull()
@@ -93,12 +91,12 @@ fun Innertube.AlbumItem.Companion.from(content: MusicShelfRenderer.Content): Inn
             ?.text,
         thumbnail = content.thumbnail
     ).takeIf { it.info?.endpoint?.browseId != null }
-}
+}.getOrNull()
 
-fun Innertube.ArtistItem.Companion.from(content: MusicShelfRenderer.Content): Innertube.ArtistItem? {
+fun Innertube.ArtistItem.Companion.from(content: MusicShelfRenderer.Content) = runCatching {
     val (mainRuns, otherRuns) = content.runs
 
-    return Innertube.ArtistItem(
+    Innertube.ArtistItem(
         info = Innertube.Info(
             name = mainRuns
                 .firstOrNull()
@@ -114,12 +112,12 @@ fun Innertube.ArtistItem.Companion.from(content: MusicShelfRenderer.Content): In
             ?.text,
         thumbnail = content.thumbnail
     ).takeIf { it.info?.endpoint?.browseId != null }
-}
+}.getOrNull()
 
-fun Innertube.PlaylistItem.Companion.from(content: MusicShelfRenderer.Content): Innertube.PlaylistItem? {
+fun Innertube.PlaylistItem.Companion.from(content: MusicShelfRenderer.Content) = runCatching {
     val (mainRuns, otherRuns) = content.runs
 
-    return Innertube.PlaylistItem(
+    Innertube.PlaylistItem(
         info = Innertube.Info(
             name = mainRuns
                 .firstOrNull()
@@ -142,4 +140,4 @@ fun Innertube.PlaylistItem.Companion.from(content: MusicShelfRenderer.Content): 
             ?.toIntOrNull(),
         thumbnail = content.thumbnail
     ).takeIf { it.info?.endpoint?.browseId != null }
-}
+}.getOrNull()

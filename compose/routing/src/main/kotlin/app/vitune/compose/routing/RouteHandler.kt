@@ -64,10 +64,7 @@ fun RouteHandler(
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
-    val parameters = rememberSaveable {
-        arrayOfNulls<Any?>(3)
-    }
-
+    val parameters = rememberSaveable { arrayOfNulls<Any?>(3) }
     val scope = remember(route) {
         RouteHandlerScope(
             route = route,
@@ -77,11 +74,9 @@ fun RouteHandler(
         )
     }
 
-    if (listenToGlobalEmitter && route == null) {
-        OnGlobalRoute { (newRoute, newParameters) ->
-            newParameters.forEachIndexed(parameters::set)
-            onRouteChanged(newRoute)
-        }
+    if (listenToGlobalEmitter && route == null) OnGlobalRoute { request ->
+        request.args.forEachIndexed(parameters::set)
+        onRouteChanged(request.route)
     }
 
     BackHandler(enabled = handleBackPress && route != null) {
