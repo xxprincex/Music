@@ -1,17 +1,23 @@
 package app.vitune.android.ui.screens.player
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.Companion.Left
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.Companion.Right
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -29,6 +35,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import app.vitune.android.Database
 import app.vitune.android.LocalPlayerServiceBinder
@@ -61,8 +68,7 @@ fun Thumbnail(
     val binder = LocalPlayerServiceBinder.current
     val player = binder?.player ?: return
 
-    val (colorPalette) = LocalAppearance.current
-    val thumbnailShape = LocalAppearance.current.thumbnailShape
+    val (colorPalette, _, _, thumbnailShape) = LocalAppearance.current
     val thumbnailSize = Dimensions.thumbnails.player.song
 
     val (nullableWindow, error) = windowState()
@@ -72,36 +78,25 @@ fun Thumbnail(
         targetState = window,
         transitionSpec = {
             if (initialState.mediaItem.mediaId == targetState.mediaItem.mediaId)
-                return@AnimatedContent ContentTransform(
-                    EnterTransition.None,
-                    ExitTransition.None
-                )
+                return@AnimatedContent EnterTransition.None togetherWith ExitTransition.None
 
             val duration = 500
-            val slideDirection = if (targetState.firstPeriodIndex > initialState.firstPeriodIndex)
-                AnimatedContentTransitionScope.SlideDirection.Left
-            else AnimatedContentTransitionScope.SlideDirection.Right
+            val direction =
+                if (targetState.firstPeriodIndex > initialState.firstPeriodIndex) Left else Right
 
             ContentTransform(
-                targetContentEnter = slideIntoContainer(
-                    towards = slideDirection,
-                    animationSpec = tween(duration)
-                ) + fadeIn(
-                    animationSpec = tween(duration)
-                ) + scaleIn(
-                    initialScale = 0.85f,
-                    animationSpec = tween(duration)
-                ),
-                initialContentExit = slideOutOfContainer(
-                    towards = slideDirection,
-                    animationSpec = tween(duration)
-                ) + fadeOut(
-                    animationSpec = tween(duration)
-                ) + scaleOut(
-                    targetScale = 0.85f,
-                    animationSpec = tween(duration)
-                ),
-                sizeTransform = null
+                targetContentEnter = slideIntoContainer(direction, tween(duration)) +
+                        fadeIn(tween(duration)) +
+                        scaleIn(tween(duration), 0.85f),
+                initialContentExit = slideOutOfContainer(direction, tween(duration)) +
+                        fadeOut(tween(duration)) +
+                        scaleOut(tween(duration), 0.85f),
+                sizeTransform = SizeTransform(clip = false) { _, _ ->
+                    tween(
+                        durationMillis = duration,
+                        delayMillis = 500
+                    )
+                }
             )
         },
         modifier = modifier.onSwipe(
@@ -118,7 +113,7 @@ fun Thumbnail(
     ) { currentWindow ->
         val shadowElevation by animateDpAsState(
             targetValue = if (window == currentWindow) 8.dp else 0.dp,
-            animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
+            animationSpec = tween(500),
             label = ""
         )
 
