@@ -260,9 +260,9 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                                 PlaylistItem(
                                     playlist = playlist,
                                     thumbnailSize = Dimensions.thumbnails.playlist,
-                                    modifier = Modifier.clickable(onClick = {
-                                        playlistRoute(playlist.key)
-                                    })
+                                    modifier = Modifier.clickable {
+                                        playlistRoute(playlist.key, null, null, false)
+                                    }
                                 )
                             },
                             itemPlaceholderContent = {

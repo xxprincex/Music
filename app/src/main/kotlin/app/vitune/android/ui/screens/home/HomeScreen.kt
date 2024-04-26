@@ -1,6 +1,5 @@
 package app.vitune.android.ui.screens.home
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.res.stringResource
@@ -38,7 +37,6 @@ import app.vitune.compose.routing.isStacking
 import app.vitune.compose.routing.isUnknown
 import app.vitune.compose.routing.isUnstacking
 
-@OptIn(ExperimentalAnimationApi::class)
 @Route
 @Composable
 fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
@@ -69,15 +67,11 @@ fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
         }
 
         localPlaylistRoute { playlistId ->
-            LocalPlaylistScreen(
-                playlistId = playlistId ?: error("playlistId cannot be null")
-            )
+            LocalPlaylistScreen(playlistId = playlistId)
         }
 
         builtInPlaylistRoute { builtInPlaylist ->
-            BuiltInPlaylistScreen(
-                builtInPlaylist = builtInPlaylist
-            )
+            BuiltInPlaylistScreen(builtInPlaylist = builtInPlaylist)
         }
 
         searchResultRoute { query ->
@@ -124,7 +118,7 @@ fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
                         0 -> QuickPicks(
                             onAlbumClick = { albumRoute(it) },
                             onArtistClick = { artistRoute(it) },
-                            onPlaylistClick = { playlistRoute(it) },
+                            onPlaylistClick = { playlistRoute(it, null, null, false) },
                             onSearchClick = onSearchClick
                         )
 

@@ -24,12 +24,12 @@ import java.util.UUID
 @Target(AnnotationTarget.FUNCTION)
 annotation class Route
 
-val albumRoute = Route1<String?>("albumRoute")
-val artistRoute = Route1<String?>("artistRoute")
+val albumRoute = Route1<String>("albumRoute")
+val artistRoute = Route1<String>("artistRoute")
 val builtInPlaylistRoute = Route1<BuiltInPlaylist>("builtInPlaylistRoute")
-val localPlaylistRoute = Route1<Long?>("localPlaylistRoute")
-val pipedPlaylistRoute = Route3<String?, String?, String?>("pipedPlaylistRoute")
-val playlistRoute = Route4<String?, String?, Int?, Boolean?>("playlistRoute")
+val localPlaylistRoute = Route1<Long>("localPlaylistRoute")
+val pipedPlaylistRoute = Route3<String, String, String>("pipedPlaylistRoute")
+val playlistRoute = Route4<String, String?, Int?, Boolean>("playlistRoute")
 val moodRoute = Route1<Mood>("moodRoute")
 val searchResultRoute = Route1<String>("searchResultRoute")
 val searchRoute = Route1<String>("searchRoute")
@@ -38,35 +38,30 @@ val settingsRoute = Route0("settingsRoute")
 @Composable
 fun RouteHandlerScope.GlobalRoutes() {
     albumRoute { browseId ->
-        AlbumScreen(
-            browseId = browseId ?: error("browseId cannot be null")
-        )
+        AlbumScreen(browseId = browseId)
     }
 
     artistRoute { browseId ->
-        ArtistScreen(
-            browseId = browseId ?: error("browseId cannot be null")
-        )
+        ArtistScreen(browseId = browseId)
     }
 
     pipedPlaylistRoute { apiBaseUrl, sessionToken, playlistId ->
         PipedPlaylistScreen(
-            apiBaseUrl = apiBaseUrl?.let {
-                runCatching { Url(it) }.getOrNull()
-            } ?: error("apiBaseUrl cannot be null"),
-            sessionToken = sessionToken ?: error("sessionToken cannot be null"),
+            apiBaseUrl = runCatching { Url(apiBaseUrl) }.getOrNull()
+                ?: error("Invalid apiBaseUrl: $apiBaseUrl is not a valid Url"),
+            sessionToken = sessionToken,
             playlistId = runCatching {
                 UUID.fromString(playlistId)
-            }.getOrNull() ?: error("playlistId cannot be null")
+            }.getOrNull() ?: error("Invalid playlistId: $playlistId is not a valid UUID")
         )
     }
 
     playlistRoute { browseId, params, maxDepth, shouldDedup ->
         PlaylistScreen(
-            browseId = browseId ?: error("browseId cannot be null"),
+            browseId = browseId,
             params = params,
             maxDepth = maxDepth,
-            shouldDedup = shouldDedup ?: false
+            shouldDedup = shouldDedup
         )
     }
 

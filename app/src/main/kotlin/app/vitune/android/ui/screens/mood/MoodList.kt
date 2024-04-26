@@ -144,7 +144,7 @@ fun MoodList(
                                     modifier = Modifier.clickable {
                                         childItem.info?.endpoint?.let { endpoint ->
                                             playlistRoute.global(
-                                                p0 = endpoint.browseId,
+                                                p0 = endpoint.browseId ?: return@clickable,
                                                 p1 = endpoint.params,
                                                 p2 = childItem.songCount?.let { it / 100 },
                                                 p3 = true
