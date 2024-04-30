@@ -140,6 +140,7 @@ dependencies {
     implementation(projects.providers.kugou)
     implementation(projects.providers.lrclib)
     implementation(projects.providers.piped)
+    implementation(projects.providers.translate)
     implementation(projects.core.data)
     implementation(projects.core.ui)
 
