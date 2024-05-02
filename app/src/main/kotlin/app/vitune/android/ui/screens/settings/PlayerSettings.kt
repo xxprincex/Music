@@ -67,6 +67,13 @@ fun PlayerSettings() = with(PlayerPreferences) {
                 isChecked = stopWhenClosed,
                 onCheckedChange = { stopWhenClosed = it }
             )
+
+            SwitchSettingsEntry(
+                title = stringResource(R.string.skip_on_error),
+                text = stringResource(R.string.skip_on_error_description),
+                isChecked = skipOnError,
+                onCheckedChange = { skipOnError = it }
+            )
         }
         SettingsGroup(title = stringResource(R.string.audio)) {
             SwitchSettingsEntry(

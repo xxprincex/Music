@@ -381,6 +381,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     audioManager == null -> 0
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ->
                         audioManager.getStreamMinVolume(stream)
+
                     else -> 0
                 }
 
@@ -492,6 +493,41 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         if (reason != Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) return
         updateMediaSessionQueue(timeline)
         maybeSavePlayerQueue()
+    }
+
+    override fun onPlayerError(error: PlaybackException) {
+        super.onPlayerError(error)
+
+        if (!PlayerPreferences.skipOnError || !player.hasNextMediaItem()) return
+
+        val prev = player.currentMediaItem ?: return
+        player.seekToNextMediaItem()
+
+        if (isAtLeastAndroid8) notificationManager?.createNotificationChannel(
+            NotificationChannel(
+                /* id = */ AUTOSKIP_NOTIFICATION_CHANNEL_ID,
+                /* name = */ getString(R.string.skip_on_error),
+                /* importance = */ NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                enableVibration(true)
+                enableLights(true)
+            }
+        )
+
+        val notification = NotificationCompat.Builder(this, AUTOSKIP_NOTIFICATION_CHANNEL_ID)
+            .setSmallIcon(R.drawable.app_icon)
+            .setCategory(NotificationCompat.CATEGORY_ERROR)
+            .setOnlyAlertOnce(false)
+            .setContentIntent(activityPendingIntent<MainActivity>())
+            .setContentText(
+                prev.mediaMetadata.title?.let {
+                    getString(R.string.skip_on_error_notification, it)
+                } ?: getString(R.string.skip_on_error_notification_unknown_song)
+            )
+            .setContentTitle(getString(R.string.skip_on_error))
+            .build()
+
+        notificationManager?.notify(AUTOSKIP_NOTIFICATION_ID, notification)
     }
 
     private fun updateMediaSessionQueue(timeline: Timeline) {

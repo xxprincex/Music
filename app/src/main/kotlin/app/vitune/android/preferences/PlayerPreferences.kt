@@ -45,6 +45,8 @@ object PlayerPreferences : GlobalPreferencesHolder() {
     var showLike by boolean(false)
     var showRemaining by boolean(false)
 
+    var skipOnError by boolean(false)
+
     enum class PlayerLayout(val displayName: @Composable () -> String) {
         Classic(displayName = { stringResource(R.string.classic_player_layout_name) }),
         New(displayName = { stringResource(R.string.new_player_layout_name) })

@@ -377,6 +377,11 @@
     <string name="weekly">Weekly</string>
     <string name="version_check">Automatically check for updates</string>
 
+    <string name="skip_on_error">Autoskip</string>
+    <string name="skip_on_error_description">Skips the current song when there is an error.</string>
+    <string name="skip_on_error_notification">Skipped %s because of an error</string>
+    <string name="skip_on_error_notification_unknown_song">Skipped the current song because of an error</string>
+
     <plurals name="format_reset_blacklist_description">
         <item quantity="one">Remove %1$s song from the blacklist</item>
         <item quantity="other">Remove all %1$s songs from the blacklist</item>

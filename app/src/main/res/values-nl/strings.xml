@@ -377,6 +377,11 @@
     <string name="weekly">Wekelijks</string>
     <string name="version_check">Check automatisch voor updates</string>
 
+    <string name="skip_on_error">Autoskip</string>
+    <string name="skip_on_error_description">De speler slaat het huidige nummer over wanneer er zich een error voordoet.</string>
+    <string name="skip_on_error_notification">%s overgeslagen vanwege een error</string>
+    <string name="skip_on_error_notification_unknown_song">Het huidige nummer is overgeslagen vanwege een error</string>
+
     <plurals name="format_reset_blacklist_description">
         <item quantity="one">Haal %1$s nummer van de zwarte lijst</item>
         <item quantity="other">Haal %1$s nummers van de zwarte lijst</item>
