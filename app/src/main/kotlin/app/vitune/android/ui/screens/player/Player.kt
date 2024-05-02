@@ -319,6 +319,7 @@ fun Player(
                 onShowLyrics = { isShowingLyrics = it },
                 isShowingStatsForNerds = isShowingStatsForNerds,
                 onShowStatsForNerds = { isShowingStatsForNerds = it },
+                onOpenDialog = { isShowingLyricsDialog = true },
                 modifier = innerModifier
                     .nestedScroll(layoutState.preUpPostDownNestedScrollConnection)
                     .pinchToToggle(

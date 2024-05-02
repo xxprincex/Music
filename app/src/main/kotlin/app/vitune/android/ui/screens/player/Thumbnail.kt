@@ -59,6 +59,7 @@ fun Thumbnail(
     onShowLyrics: (Boolean) -> Unit,
     isShowingStatsForNerds: Boolean,
     onShowStatsForNerds: (Boolean) -> Unit,
+    onOpenDialog: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val binder = LocalPlayerServiceBinder.current
@@ -163,7 +164,8 @@ fun Thumbnail(
                 ensureSongInserted = { Database.insert(currentWindow.mediaItem) },
                 height = thumbnailSize,
                 mediaMetadataProvider = currentWindow.mediaItem::mediaMetadata,
-                durationProvider = player::getDuration
+                durationProvider = player::getDuration,
+                onOpenDialog = onOpenDialog
             )
 
             StatsForNerds(

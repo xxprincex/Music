@@ -106,7 +106,8 @@ fun Lyrics(
     durationProvider: () -> Long,
     ensureSongInserted: () -> Unit,
     modifier: Modifier = Modifier,
-    onMenuLaunched: () -> Unit = { }
+    onMenuLaunched: () -> Unit = { },
+    onOpenDialog: (() -> Unit)? = null
 ) = with(PlayerPreferences) {
     val currentMediaMetadataProvider by rememberUpdatedState(mediaMetadataProvider)
     val currentDurationProvider by rememberUpdatedState(durationProvider)
@@ -465,6 +466,24 @@ fun Lyrics(
                     )
                 }
             }
+
+            if (onOpenDialog != null) Image(
+                painter = painterResource(R.drawable.expand),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(colorPalette.onOverlay),
+                modifier = Modifier
+                    .padding(all = 4.dp)
+                    .clickable(
+                        indication = rememberRipple(bounded = false),
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = {
+                            onOpenDialog()
+                        }
+                    )
+                    .padding(all = 8.dp)
+                    .size(20.dp)
+                    .align(Alignment.BottomStart)
+            )
 
             Image(
                 painter = painterResource(R.drawable.ellipsis_horizontal),
