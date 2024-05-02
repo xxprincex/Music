@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -107,6 +108,7 @@ fun LyricsDialog(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(colorPalette.background0)
+                    .blur(radius = 8.dp)
             )
 
             Lyrics(
