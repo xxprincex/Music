@@ -103,7 +103,13 @@ fun PlaylistSongList(
         onDone = { text ->
             query {
                 transaction {
-                    val playlistId = Database.insert(Playlist(name = text, browseId = browseId))
+                    val playlistId = Database.insert(
+                        Playlist(
+                            name = text,
+                            browseId = browseId,
+                            thumbnail = playlistPage?.thumbnail?.url
+                        )
+                    )
 
                     playlistPage?.songsPage?.items
                         ?.map(Innertube.SongItem::asMediaItem)

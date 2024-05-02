@@ -44,6 +44,7 @@ import app.vitune.providers.innertube.Innertube
 import coil.compose.AsyncImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 @Composable
@@ -83,12 +84,13 @@ fun PlaylistItem(
 ) {
     val thumbnailSizePx = thumbnailSize.px
     val thumbnails by remember {
-        Database
-            .playlistThumbnailUrls(playlist.playlist.id)
-            .distinctUntilChanged()
-            .map { urls ->
-                urls.map { it.thumbnail(thumbnailSizePx / 2) }
-            }
+        playlist.thumbnail?.let { flowOf(listOf(it)) }
+            ?: Database
+                .playlistThumbnailUrls(playlist.playlist.id)
+                .distinctUntilChanged()
+                .map { urls ->
+                    urls.map { it.thumbnail(thumbnailSizePx / 2) }
+                }
     }.collectAsState(initial = emptyList(), context = Dispatchers.IO)
 
     PlaylistItem(

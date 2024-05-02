@@ -298,7 +298,7 @@ interface Database {
     @Transaction
     @Query(
         """
-        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount FROM Playlist 
+        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount, thumbnail FROM Playlist 
         ORDER BY name ASC
         """
     )
@@ -307,7 +307,7 @@ interface Database {
     @Transaction
     @Query(
         """
-        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount FROM Playlist
+        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount, thumbnail FROM Playlist
         ORDER BY ROWID ASC
         """
     )
@@ -316,7 +316,7 @@ interface Database {
     @Transaction
     @Query(
         """
-        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount FROM Playlist
+        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount, thumbnail FROM Playlist
         ORDER BY songCount ASC
         """
     )
@@ -325,7 +325,7 @@ interface Database {
     @Transaction
     @Query(
         """
-        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount FROM Playlist
+        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount, thumbnail FROM Playlist
         ORDER BY name DESC
         """
     )
@@ -334,7 +334,7 @@ interface Database {
     @Transaction
     @Query(
         """
-        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount FROM Playlist
+        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount, thumbnail FROM Playlist
         ORDER BY ROWID DESC
         """
     )
@@ -343,7 +343,7 @@ interface Database {
     @Transaction
     @Query(
         """
-        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount FROM Playlist
+        SELECT id, name, (SELECT COUNT(*) FROM SongPlaylistMap WHERE playlistId = id) as songCount, thumbnail FROM Playlist
         ORDER BY songCount DESC
         """
     )
@@ -644,7 +644,7 @@ interface Database {
         PipedSession::class
     ],
     views = [SortedSongPlaylistMap::class],
-    version = 29,
+    version = 30,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -670,7 +670,8 @@ interface Database {
         AutoMigration(from = 25, to = 26),
         AutoMigration(from = 26, to = 27),
         AutoMigration(from = 27, to = 28),
-        AutoMigration(from = 28, to = 29)
+        AutoMigration(from = 28, to = 29),
+        AutoMigration(from = 29, to = 30)
     ]
 )
 @TypeConverters(Converters::class)

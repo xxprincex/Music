@@ -54,7 +54,7 @@ suspend fun Innertube.playlistPage(body: BrowseBody) = runCatchingCancellable {
             ?.musicThumbnailRenderer
             ?.thumbnail
             ?.thumbnails
-            ?.firstOrNull(),
+            ?.maxByOrNull { (it.width ?: 0) * (it.height ?: 0) },
         authors = musicDetailHeaderRenderer
             ?.subtitle
             ?.splitBySeparator()

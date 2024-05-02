@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -14,11 +15,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +41,7 @@ import app.vitune.android.ui.components.themed.FloatingActionsContainerWithScrol
 import app.vitune.android.ui.components.themed.Header
 import app.vitune.android.ui.components.themed.HeaderIconButton
 import app.vitune.android.ui.components.themed.InPlaylistMediaItemMenu
+import app.vitune.android.ui.components.themed.LayoutWithAdaptiveThumbnail
 import app.vitune.android.ui.components.themed.Menu
 import app.vitune.android.ui.components.themed.MenuEntry
 import app.vitune.android.ui.components.themed.ReorderHandle
@@ -54,27 +56,30 @@ import app.vitune.android.utils.forcePlayAtIndex
 import app.vitune.android.utils.forcePlayFromBeginning
 import app.vitune.android.utils.launchYouTubeMusic
 import app.vitune.android.utils.toast
-import app.vitune.compose.persist.persist
 import app.vitune.compose.reordering.animateItemPlacement
 import app.vitune.compose.reordering.draggedItem
 import app.vitune.compose.reordering.rememberReorderingState
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
+import app.vitune.core.ui.utils.isLandscape
 import app.vitune.providers.innertube.Innertube
 import app.vitune.providers.innertube.models.bodies.BrowseBody
 import app.vitune.providers.innertube.requests.playlistPage
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LocalPlaylistSongs(
-    playlistId: Long,
+    playlist: Playlist,
+    songs: List<Song>,
     onDelete: () -> Unit,
+    thumbnailContent: @Composable () -> Unit,
     modifier: Modifier = Modifier
+) = LayoutWithAdaptiveThumbnail(
+    thumbnailContent = thumbnailContent,
+    modifier = modifier
 ) {
     val (colorPalette) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
@@ -82,33 +87,14 @@ fun LocalPlaylistSongs(
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
 
-    var playlist by persist<Playlist?>("localPlaylist/$playlistId/playlist")
-    var songs by persist<List<Song>?>("localPlaylist/$playlistId/Songs")
-
-    LaunchedEffect(Unit) {
-        Database
-            .playlist(playlistId)
-            .filterNotNull()
-            .distinctUntilChanged()
-            .collect { playlist = it }
-    }
-
-    LaunchedEffect(Unit) {
-        Database
-            .playlistSongs(playlistId)
-            .filterNotNull()
-            .distinctUntilChanged()
-            .collect { songs = it }
-    }
-
     val lazyListState = rememberLazyListState()
 
     val reorderingState = rememberReorderingState(
         lazyListState = lazyListState,
-        key = songs ?: emptyList<Any>(),
+        key = songs,
         onDragEnd = { fromIndex, toIndex ->
             query {
-                Database.move(playlistId, fromIndex, toIndex)
+                Database.move(playlist.id, fromIndex, toIndex)
             }
         },
         extraItemCount = 1
@@ -118,11 +104,11 @@ fun LocalPlaylistSongs(
 
     if (isRenaming) TextFieldDialog(
         hintText = stringResource(R.string.enter_playlist_name_prompt),
-        initialTextInput = playlist?.name.orEmpty(),
+        initialTextInput = playlist.name,
         onDismiss = { isRenaming = false },
         onDone = { text ->
             query {
-                playlist?.copy(name = text)?.let(Database::update)
+                Database.update(playlist.copy(name = text))
             }
         }
     )
@@ -134,18 +120,19 @@ fun LocalPlaylistSongs(
         onDismiss = { isDeleting = false },
         onConfirm = {
             query {
-                playlist?.let(Database::delete)
+                Database.delete(playlist)
             }
             onDelete()
         }
     )
 
-    Box(modifier = modifier) {
+    Box {
         LookaheadScope {
             LazyColumn(
                 state = reorderingState.lazyListState,
                 contentPadding = LocalPlayerAwareWindowInsets.current
-                    .only(WindowInsetsSides.Vertical + WindowInsetsSides.End).asPaddingValues(),
+                    .only(WindowInsetsSides.Vertical + WindowInsetsSides.End)
+                    .asPaddingValues(),
                 modifier = Modifier
                     .background(colorPalette.background0)
                     .fillMaxSize()
@@ -154,130 +141,126 @@ fun LocalPlaylistSongs(
                     key = "header",
                     contentType = 0
                 ) {
-                    Header(
-                        title = playlist?.name
-                            ?: stringResource(R.string.unknown),
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    ) {
-                        SecondaryTextButton(
-                            text = stringResource(R.string.enqueue),
-                            enabled = songs?.isNotEmpty() == true,
-                            onClick = {
-                                songs?.map(Song::asMediaItem)
-                                    ?.let { mediaItems ->
-                                        binder?.player?.enqueue(mediaItems)
-                                    }
-                            }
-                        )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Header(
+                            title = playlist.name,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) {
+                            SecondaryTextButton(
+                                text = stringResource(R.string.enqueue),
+                                enabled = songs.isNotEmpty(),
+                                onClick = {
+                                    binder?.player?.enqueue(songs.map { it.asMediaItem })
+                                }
+                            )
 
-                        Spacer(modifier = Modifier.weight(1f))
+                            Spacer(modifier = Modifier.weight(1f))
 
-                        songs?.map(Song::asMediaItem)
-                            ?.let { PlaylistDownloadIcon(songs = it.toImmutableList()) }
+                            PlaylistDownloadIcon(songs = songs.map { it.asMediaItem }
+                                .toImmutableList())
 
-                        HeaderIconButton(
-                            icon = R.drawable.ellipsis_horizontal,
-                            color = colorPalette.text,
-                            onClick = {
-                                menuState.display {
-                                    Menu {
-                                        playlist?.browseId?.let { browseId ->
-                                            MenuEntry(
-                                                icon = R.drawable.sync,
-                                                text = stringResource(R.string.sync),
-                                                onClick = {
-                                                    menuState.hide()
-                                                    transaction {
-                                                        runBlocking(Dispatchers.IO) {
-                                                            Innertube.playlistPage(
-                                                                BrowseBody(
-                                                                    browseId = browseId
-                                                                )
-                                                            )?.completed()
-                                                        }?.getOrNull()?.let { remotePlaylist ->
-                                                            Database.clearPlaylist(playlistId)
+                            HeaderIconButton(
+                                icon = R.drawable.ellipsis_horizontal,
+                                color = colorPalette.text,
+                                onClick = {
+                                    menuState.display {
+                                        Menu {
+                                            playlist.browseId?.let { browseId ->
+                                                MenuEntry(
+                                                    icon = R.drawable.sync,
+                                                    text = stringResource(R.string.sync),
+                                                    onClick = {
+                                                        menuState.hide()
+                                                        transaction {
+                                                            runBlocking(Dispatchers.IO) {
+                                                                Innertube.playlistPage(
+                                                                    BrowseBody(browseId = browseId)
+                                                                )?.completed()
+                                                            }?.getOrNull()?.let { remotePlaylist ->
+                                                                Database.clearPlaylist(playlist.id)
 
-                                                            remotePlaylist.songsPage
-                                                                ?.items
-                                                                ?.map(Innertube.SongItem::asMediaItem)
-                                                                ?.onEach(Database::insert)
-                                                                ?.mapIndexed { position, mediaItem ->
-                                                                    SongPlaylistMap(
-                                                                        songId = mediaItem.mediaId,
-                                                                        playlistId = playlistId,
-                                                                        position = position
-                                                                    )
-                                                                }
-                                                                ?.let(Database::insertSongPlaylistMaps)
+                                                                remotePlaylist.songsPage
+                                                                    ?.items
+                                                                    ?.map { it.asMediaItem }
+                                                                    ?.onEach { Database.insert(it) }
+                                                                    ?.mapIndexed { position, mediaItem ->
+                                                                        SongPlaylistMap(
+                                                                            songId = mediaItem.mediaId,
+                                                                            playlistId = playlist.id,
+                                                                            position = position
+                                                                        )
+                                                                    }
+                                                                    ?.let(Database::insertSongPlaylistMaps)
+                                                            }
                                                         }
                                                     }
+                                                )
+
+                                                songs.firstOrNull()?.id?.let { firstSongId ->
+                                                    MenuEntry(
+                                                        icon = R.drawable.play,
+                                                        text = stringResource(R.string.watch_playlist_on_youtube),
+                                                        onClick = {
+                                                            menuState.hide()
+                                                            binder?.player?.pause()
+                                                            uriHandler.openUri(
+                                                                "https://youtube.com/watch?v=$firstSongId&list=${
+                                                                    playlist.browseId.drop(2)
+                                                                }"
+                                                            )
+                                                        }
+                                                    )
+
+                                                    MenuEntry(
+                                                        icon = R.drawable.musical_notes,
+                                                        text = stringResource(R.string.open_in_youtube_music),
+                                                        onClick = {
+                                                            menuState.hide()
+                                                            binder?.player?.pause()
+                                                            if (
+                                                                !launchYouTubeMusic(
+                                                                    context = context,
+                                                                    endpoint = "watch?v=$firstSongId&list=${
+                                                                        playlist.browseId.drop(2)
+                                                                    }"
+                                                                )
+                                                            ) context.toast(
+                                                                context.getString(R.string.youtube_music_not_installed)
+                                                            )
+                                                        }
+                                                    )
+                                                }
+                                            }
+
+                                            MenuEntry(
+                                                icon = R.drawable.pencil,
+                                                text = stringResource(R.string.rename),
+                                                onClick = {
+                                                    menuState.hide()
+                                                    isRenaming = true
                                                 }
                                             )
 
-                                            songs?.firstOrNull()?.id?.let { firstSongId ->
-                                                MenuEntry(
-                                                    icon = R.drawable.play,
-                                                    text = stringResource(R.string.watch_playlist_on_youtube),
-                                                    onClick = {
-                                                        menuState.hide()
-                                                        binder?.player?.pause()
-                                                        uriHandler.openUri(
-                                                            "https://youtube.com/watch?v=$firstSongId&list=${
-                                                                playlist?.browseId
-                                                                    ?.drop(2)
-                                                            }"
-                                                        )
-                                                    }
-                                                )
-
-                                                MenuEntry(
-                                                    icon = R.drawable.musical_notes,
-                                                    text = stringResource(R.string.open_in_youtube_music),
-                                                    onClick = {
-                                                        menuState.hide()
-                                                        binder?.player?.pause()
-                                                        if (
-                                                            !launchYouTubeMusic(
-                                                                context = context,
-                                                                endpoint = "watch?v=$firstSongId&list=${
-                                                                    playlist?.browseId
-                                                                        ?.drop(2)
-                                                                }"
-                                                            )
-                                                        ) context.toast(
-                                                            context.getString(R.string.youtube_music_not_installed)
-                                                        )
-                                                    }
-                                                )
-                                            }
+                                            MenuEntry(
+                                                icon = R.drawable.trash,
+                                                text = stringResource(R.string.delete),
+                                                onClick = {
+                                                    menuState.hide()
+                                                    isDeleting = true
+                                                }
+                                            )
                                         }
-
-                                        MenuEntry(
-                                            icon = R.drawable.pencil,
-                                            text = stringResource(R.string.rename),
-                                            onClick = {
-                                                menuState.hide()
-                                                isRenaming = true
-                                            }
-                                        )
-
-                                        MenuEntry(
-                                            icon = R.drawable.trash,
-                                            text = stringResource(R.string.delete),
-                                            onClick = {
-                                                menuState.hide()
-                                                isDeleting = true
-                                            }
-                                        )
                                     }
                                 }
-                            }
-                        )
+                            )
+                        }
+
+                        if (!isLandscape) thumbnailContent()
                     }
                 }
 
                 itemsIndexed(
-                    items = songs ?: emptyList(),
+                    items = songs,
                     key = { _, song -> song.id },
                     contentType = { _, song -> song }
                 ) { index, song ->
@@ -287,7 +270,7 @@ fun LocalPlaylistSongs(
                                 onLongClick = {
                                     menuState.display {
                                         InPlaylistMediaItemMenu(
-                                            playlistId = playlistId,
+                                            playlistId = playlist.id,
                                             positionInPlaylist = index,
                                             song = song,
                                             onDismiss = menuState::hide
@@ -295,12 +278,11 @@ fun LocalPlaylistSongs(
                                     }
                                 },
                                 onClick = {
-                                    songs
-                                        ?.map(Song::asMediaItem)
-                                        ?.let { mediaItems ->
-                                            binder?.stopRadio()
-                                            binder?.player?.forcePlayAtIndex(mediaItems, index)
-                                        }
+                                    binder?.stopRadio()
+                                    binder?.player?.forcePlayAtIndex(
+                                        items = songs.map { it.asMediaItem },
+                                        index = index
+                                    )
                                 }
                             )
                             .animateItemPlacement(reorderingState)
@@ -327,14 +309,12 @@ fun LocalPlaylistSongs(
             icon = R.drawable.shuffle,
             visible = !reorderingState.isDragging,
             onClick = {
-                songs?.let { songs ->
-                    if (songs.isNotEmpty()) {
-                        binder?.stopRadio()
-                        binder?.player?.forcePlayFromBeginning(
-                            songs.shuffled().map(Song::asMediaItem)
-                        )
-                    }
-                }
+                if (songs.isEmpty()) return@FloatingActionsContainerWithScrollToTop
+
+                binder?.stopRadio()
+                binder?.player?.forcePlayFromBeginning(
+                    songs.shuffled().map { it.asMediaItem }
+                )
             }
         )
     }
