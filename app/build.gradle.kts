@@ -118,6 +118,7 @@ dependencies {
     implementation(libs.compose.ripple)
     implementation(libs.compose.shimmer)
     implementation(libs.compose.coil)
+    implementation(libs.compose.lottie)
     implementation(libs.compose.material3)
 
     implementation(libs.palette)

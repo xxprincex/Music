@@ -11,7 +11,6 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -41,11 +40,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
@@ -216,13 +213,11 @@ private fun ClassicControls(
                     .background(colorPalette.background2)
                     .size(64.dp)
             ) {
-                Image(
-                    painter = painterResource(if (shouldBePlaying) R.drawable.pause else R.drawable.play),
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(colorPalette.text),
+                AnimatedPlayPauseButton(
+                    playing = shouldBePlaying,
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .size(28.dp)
+                        .size(32.dp)
                 )
             }
 
@@ -383,13 +378,11 @@ private fun PlayButton(
             }
             .background(colorPalette.accent)
     ) {
-        Image(
-            painter = painterResource(if (shouldBePlaying) R.drawable.pause else R.drawable.play),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(colorPalette.text),
+        AnimatedPlayPauseButton(
+            playing = shouldBePlaying,
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(28.dp)
+                .size(32.dp)
         )
     }
 }

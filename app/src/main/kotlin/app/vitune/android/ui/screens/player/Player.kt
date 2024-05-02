@@ -10,6 +10,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +30,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -260,19 +265,28 @@ fun Player(
                         )
                     }
 
-                    IconButton(
-                        icon = if (shouldBePlaying) R.drawable.pause else R.drawable.play,
-                        color = colorPalette.text,
-                        onClick = {
-                            if (shouldBePlaying) binder.player.pause() else {
-                                if (binder.player.playbackState == Player.STATE_IDLE) binder.player.prepare()
-                                binder.player.play()
-                            }
-                        },
+                    Box(
                         modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 8.dp)
-                            .size(20.dp)
-                    )
+                            .clickable(
+                                onClick = {
+                                    if (shouldBePlaying) binder.player.pause() else {
+                                        if (binder.player.playbackState == Player.STATE_IDLE) binder.player.prepare()
+                                        binder.player.play()
+                                    }
+                                },
+                                indication = rememberRipple(bounded = false),
+                                interactionSource = remember { MutableInteractionSource() }
+                            )
+                            .clip(CircleShape)
+                    ) {
+                        AnimatedPlayPauseButton(
+                            playing = shouldBePlaying,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(horizontal = 4.dp, vertical = 8.dp)
+                                .size(23.dp)
+                        )
+                    }
 
                     IconButton(
                         icon = R.drawable.play_skip_forward,
