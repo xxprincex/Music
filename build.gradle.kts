@@ -34,7 +34,7 @@ subprojects {
 
 allprojects {
     group = "app.vitune"
-    version = "1.0.2"
+    version = "1.0.3"
 
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
