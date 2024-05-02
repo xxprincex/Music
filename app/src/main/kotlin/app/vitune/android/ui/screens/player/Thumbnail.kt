@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
@@ -111,6 +112,11 @@ fun Thumbnail(
             animationSpec = tween(500),
             label = ""
         )
+        val blurRadius by animateDpAsState(
+            targetValue = if (isShowingLyrics || error != null) 8.dp else 0.dp,
+            animationSpec = tween(500),
+            label = ""
+        )
 
         Box(
             modifier = Modifier
@@ -137,6 +143,9 @@ fun Thumbnail(
                     }
                     .fillMaxSize()
                     .background(colorPalette.background0)
+                    .let {
+                        if (blurRadius == 0.dp) it else it.blur(radius = blurRadius)
+                    }
             ) else Icon(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = null,
