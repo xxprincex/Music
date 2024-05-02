@@ -137,6 +137,7 @@
     <string name="related_albums">Gerelateerde albums</string>
     <string name="similar_artists">Vergelijkbare artiesten</string>
     <string name="recommended_playlists">Afspeelijsten die je misschien leuk vindt</string>
+    <string name="format_subscribers">%s abonnees</string>
 
     <string name="enter_lyrics">Voer de songtekst in</string>
     <string name="no_lyrics_found">Geen songtekst gevonden</string>

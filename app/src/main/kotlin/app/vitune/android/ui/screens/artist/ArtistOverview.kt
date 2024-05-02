@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ import app.vitune.android.ui.items.SongItem
 import app.vitune.android.ui.items.SongItemPlaceholder
 import app.vitune.android.utils.asMediaItem
 import app.vitune.android.utils.forcePlay
+import app.vitune.android.utils.medium
 import app.vitune.android.utils.secondary
 import app.vitune.android.utils.semiBold
 import app.vitune.core.ui.Dimensions
@@ -99,6 +101,12 @@ fun ArtistOverview(
                                 binder?.stopRadio()
                                 binder?.playRadio(endpoint)
                             }
+                        )
+                    }
+                    youtubeArtistPage?.subscribersCountText?.let { subscribers ->
+                        BasicText(
+                            text = stringResource(R.string.format_subscribers, subscribers),
+                            style = typography.xxs.medium
                         )
                     }
                 }

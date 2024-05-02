@@ -6,3 +6,8 @@ import kotlinx.serialization.Serializable
 data class ButtonRenderer(
     val navigationEndpoint: NavigationEndpoint?
 )
+
+@Serializable
+data class SubscribeButtonRenderer(
+    val subscriberCountText: Runs?
+)

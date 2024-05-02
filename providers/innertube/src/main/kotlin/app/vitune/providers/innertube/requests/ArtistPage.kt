@@ -122,6 +122,13 @@ suspend fun Innertube.artistPage(body: BrowseBody) = runCatchingCancellable {
             ?.moreContentButton
             ?.buttonRenderer
             ?.navigationEndpoint
-            ?.browseEndpoint
+            ?.browseEndpoint,
+        subscribersCountText = response
+            .header
+            ?.musicImmersiveHeaderRenderer
+            ?.subscriptionButton
+            ?.subscribeButtonRenderer
+            ?.subscriberCountText
+            ?.text
     )
 }

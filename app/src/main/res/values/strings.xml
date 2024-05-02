@@ -137,6 +137,7 @@
     <string name="related_albums">Related albums</string>
     <string name="similar_artists">Similar artists</string>
     <string name="recommended_playlists">Playlists you might like</string>
+    <string name="format_subscribers">%s subscribers</string>
 
     <string name="enter_lyrics">Enter the lyrics</string>
     <string name="no_lyrics_found">No lyric tracks could be found</string>
