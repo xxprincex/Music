@@ -23,6 +23,7 @@ import android.media.audiofx.LoudnessEnhancer
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.format.DateUtils
 import androidx.annotation.OptIn
@@ -103,6 +104,7 @@ import app.vitune.core.ui.utils.isAtLeastAndroid12
 import app.vitune.core.ui.utils.isAtLeastAndroid13
 import app.vitune.core.ui.utils.isAtLeastAndroid6
 import app.vitune.core.ui.utils.isAtLeastAndroid8
+import app.vitune.core.ui.utils.streamVolumeFlow
 import app.vitune.providers.innertube.Innertube
 import app.vitune.providers.innertube.models.NavigationEndpoint
 import app.vitune.providers.innertube.models.bodies.PlayerBody
@@ -369,6 +371,21 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             subscribe(PlayerPreferences.skipSilenceProperty.stateFlow) {
                 {
                     player.skipSilenceEnabled = it
+                }
+            }
+            launch {
+                val audioManager = getSystemService<AudioManager>()
+                val stream = AudioManager.STREAM_MUSIC
+
+                val min = when {
+                    audioManager == null -> 0
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ->
+                        audioManager.getStreamMinVolume(stream)
+                    else -> 0
+                }
+
+                streamVolumeFlow(stream).collectLatest {
+                    handler.post { if (it == min) player.pause() }
                 }
             }
         }
