@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.vitune.android.ui.components.FadingRow
 import app.vitune.android.utils.medium
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
@@ -30,12 +31,13 @@ fun Header(
 ) = Header(
     modifier = modifier,
     titleContent = {
-        BasicText(
-            text = title,
-            style = LocalAppearance.current.typography.xxl.medium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        FadingRow {
+            BasicText(
+                text = title,
+                style = LocalAppearance.current.typography.xxl.medium,
+                maxLines = 1
+            )
+        }
     },
     actionsContent = actionsContent
 )

@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
@@ -13,7 +12,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +24,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,10 +54,10 @@ import app.vitune.android.preferences.PlayerPreferences
 import app.vitune.android.query
 import app.vitune.android.service.PlayerService
 import app.vitune.android.transaction
+import app.vitune.android.ui.components.FadingRow
 import app.vitune.android.ui.components.SeekBar
 import app.vitune.android.ui.components.themed.BigIconButton
 import app.vitune.android.ui.components.themed.IconButton
-import app.vitune.android.ui.modifiers.horizontalFadingEdge
 import app.vitune.android.ui.screens.artistRoute
 import app.vitune.android.utils.bold
 import app.vitune.android.utils.forceSeekToNext
@@ -388,33 +385,6 @@ private fun PlayButton(
 }
 
 @Composable
-private inline fun MediaInfoEntry(
-    maxHeight: Dp? = null,
-    content: @Composable RowScope.() -> Unit
-) {
-    val scrollState = rememberScrollState()
-    val alphaLeft by animateFloatAsState(
-        targetValue = if (scrollState.canScrollBackward) 1f else 0f,
-        label = ""
-    )
-    val alphaRight by animateFloatAsState(
-        targetValue = if (scrollState.canScrollForward) 1f else 0f,
-        label = ""
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(0.75f)
-            .let { if (maxHeight == null) it else it.heightIn(max = maxHeight) }
-            .horizontalFadingEdge(right = false, alpha = alphaLeft, middle = 10)
-            .horizontalFadingEdge(left = false, alpha = alphaRight, middle = 10)
-            .horizontalScroll(scrollState),
-        horizontalArrangement = Arrangement.Center,
-        content = content
-    )
-}
-
-@Composable
 private fun MediaInfo(media: UiMedia) {
     val (_, typography) = LocalAppearance.current
 
@@ -435,7 +405,7 @@ private fun MediaInfo(media: UiMedia) {
             transitionSpec = { fadeIn() togetherWith fadeOut() },
             label = ""
         ) { title ->
-            MediaInfoEntry {
+            FadingRow(modifier = Modifier.fillMaxWidth(0.75f)) {
                 BasicText(
                     text = title,
                     style = typography.l.bold,
@@ -450,7 +420,11 @@ private fun MediaInfo(media: UiMedia) {
             label = ""
         ) { state ->
             state?.let { artists ->
-                MediaInfoEntry(maxHeight = maxHeight.px.dp) {
+                FadingRow(
+                    modifier = Modifier
+                        .fillMaxWidth(0.75f)
+                        .heightIn(maxHeight.px.dp)
+                ) {
                     artists.fastForEachIndexed { i, artist ->
                         if (i == artists.lastIndex && artists.size > 1) BasicText(
                             text = " & ",
@@ -467,7 +441,7 @@ private fun MediaInfo(media: UiMedia) {
                         )
                     }
                 }
-            } ?: MediaInfoEntry {
+            } ?: FadingRow(modifier = Modifier.fillMaxWidth(0.75f)) {
                 BasicText(
                     text = media.artist,
                     style = typography.s.semiBold.secondary,
