@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun BottomSheet(
     state: BottomSheetState,
-    collapsedContent: @Composable BoxScope.() -> Unit,
+    collapsedContent: @Composable BoxScope.(Modifier) -> Unit,
     modifier: Modifier = Modifier,
     onDismiss: (() -> Unit)? = null,
     indication: Indication? = LocalIndication.current,
@@ -93,14 +93,17 @@ fun BottomSheet(
             .graphicsLayer {
                 alpha = 1f - (state.progress * 16).coerceAtMost(1f)
             }
-            .clickable(
-                onClick = state::expandSoft,
-                indication = indication,
-                interactionSource = remember { MutableInteractionSource() }
-            )
             .fillMaxWidth()
             .height(state.collapsedBound),
-        content = collapsedContent
+        content = {
+            collapsedContent(
+                Modifier.clickable(
+                    onClick = state::expandSoft,
+                    indication = indication,
+                    interactionSource = remember { MutableInteractionSource() }
+                )
+            )
+        }
     )
 }
 

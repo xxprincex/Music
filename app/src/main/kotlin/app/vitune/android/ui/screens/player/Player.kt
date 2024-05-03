@@ -164,8 +164,7 @@ fun Player(
         state = layoutState,
         modifier = modifier,
         onDismiss = { onDismiss(binder) },
-        indication = null,
-        collapsedContent = {
+        collapsedContent = { innerModifier ->
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.Top,
@@ -194,6 +193,7 @@ fun Player(
                             )
                         )
                     }
+                    .then(innerModifier)
                     .padding(horizontalBottomPaddingValues)
             ) {
                 Spacer(modifier = Modifier.width(2.dp))

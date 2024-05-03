@@ -216,12 +216,13 @@ fun Queue(
     BottomSheet(
         state = layoutState,
         modifier = modifier,
-        collapsedContent = {
+        collapsedContent = { innerModifier ->
             Row(
                 modifier = Modifier
                     .clip(shape)
                     .background(colorPalette.background2)
                     .fillMaxSize()
+                    .then(innerModifier)
                     .padding(horizontalBottomPaddingValues),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
