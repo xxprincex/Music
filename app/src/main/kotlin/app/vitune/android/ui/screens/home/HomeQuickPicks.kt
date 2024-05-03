@@ -79,9 +79,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @Route
 @Composable
 fun QuickPicks(
-    onAlbumClick: (String) -> Unit,
-    onArtistClick: (String) -> Unit,
-    onPlaylistClick: (String) -> Unit,
+    onAlbumClick: (Innertube.AlbumItem) -> Unit,
+    onArtistClick: (Innertube.ArtistItem) -> Unit,
+    onPlaylistClick: (Innertube.PlaylistItem) -> Unit,
     onSearchClick: () -> Unit
 ) {
     val (colorPalette, typography) = LocalAppearance.current
@@ -260,7 +260,7 @@ fun QuickPicks(
                                 album = album,
                                 thumbnailSize = Dimensions.thumbnails.album,
                                 alternative = true,
-                                modifier = Modifier.clickable(onClick = { onAlbumClick(album.key) })
+                                modifier = Modifier.clickable { onAlbumClick(album) }
                             )
                         }
                     }
@@ -282,7 +282,7 @@ fun QuickPicks(
                                 artist = artist,
                                 thumbnailSize = Dimensions.thumbnails.artist,
                                 alternative = true,
-                                modifier = Modifier.clickable(onClick = { onArtistClick(artist.key) })
+                                modifier = Modifier.clickable { onArtistClick(artist) }
                             )
                         }
                     }
@@ -306,7 +306,7 @@ fun QuickPicks(
                                 playlist = playlist,
                                 thumbnailSize = Dimensions.thumbnails.playlist,
                                 alternative = true,
-                                modifier = Modifier.clickable(onClick = { onPlaylistClick(playlist.key) })
+                                modifier = Modifier.clickable { onPlaylistClick(playlist) }
                             )
                         }
                     }

@@ -116,9 +116,16 @@ fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
                     val onSearchClick = { searchRoute("") }
                     when (currentTabIndex) {
                         0 -> QuickPicks(
-                            onAlbumClick = { albumRoute(it) },
-                            onArtistClick = { artistRoute(it) },
-                            onPlaylistClick = { playlistRoute(it, null, null, false) },
+                            onAlbumClick = { albumRoute(it.key) },
+                            onArtistClick = { artistRoute(it.key) },
+                            onPlaylistClick = {
+                                playlistRoute(
+                                    p0 = it.key,
+                                    p1 = null,
+                                    p2 = null,
+                                    p3 = it.channel?.name == "YouTube Music"
+                                )
+                            },
                             onSearchClick = onSearchClick
                         )
 
