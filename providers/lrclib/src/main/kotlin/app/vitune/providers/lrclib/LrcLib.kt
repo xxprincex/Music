@@ -6,6 +6,7 @@ import app.vitune.providers.utils.runCatchingCancellable
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.get
@@ -28,6 +29,10 @@ object LrcLib {
 
             defaultRequest {
                 url("https://lrclib.net")
+            }
+
+            install(UserAgent) {
+                agent = "ViTune (https://github.com/25huizengek1/ViTune)"
             }
 
             expectSuccess = true
