@@ -34,28 +34,59 @@ object LrcLib {
         }
     }
 
-    private suspend fun queryLyrics(artist: String, title: String, album: String? = null) =
-        client.get("/api/search") {
-            parameter("track_name", title)
-            parameter("artist_name", artist)
-            if (album != null) parameter("album_name", album)
-        }.body<List<Track>>().filter { it.syncedLyrics != null }
+    private suspend fun queryLyrics(
+        artist: String,
+        title: String,
+        album: String? = null
+    ) = client.get("/api/search") {
+        parameter("track_name", title)
+        parameter("artist_name", artist)
+        if (album != null) parameter("album_name", album)
+    }.body<List<Track>>()
+
+    private suspend fun queryLyrics(query: String) = client.get("/api/search") {
+        parameter("q", query)
+    }.body<List<Track>>()
 
     suspend fun lyrics(
+        artist: String,
+        title: String,
+        album: String? = null,
+        synced: Boolean = true
+    ) = runCatchingCancellable {
+        queryLyrics(
+            artist = artist,
+            title = title,
+            album = album
+        ).let { list ->
+            list.filter { if (synced) it.syncedLyrics != null else it.plainLyrics != null }
+        }
+    }
+
+    suspend fun lyrics(
+        query: String,
+        synced: Boolean = true
+    ) = runCatchingCancellable {
+        queryLyrics(query = query).let { list ->
+            list.filter { if (synced) it.syncedLyrics != null else it.plainLyrics != null }
+        }
+    }
+
+    suspend fun bestLyrics(
         artist: String,
         title: String,
         duration: Duration,
         album: String? = null,
         synced: Boolean = true
-    ) = runCatchingCancellable {
-        queryLyrics(artist, title, album)
-            .bestMatchingFor(title, duration)
+    ) = lyrics(
+        artist = artist,
+        title = title,
+        album = album,
+        synced = synced
+    )?.mapCatching { tracks ->
+        tracks.bestMatchingFor(title, duration)
             ?.let { if (synced) it.syncedLyrics else it.plainLyrics }
             ?.let(LrcLib::Lyrics)
-    }
-
-    suspend fun lyrics(artist: String, title: String) = runCatchingCancellable {
-        queryLyrics(artist = artist, title = title, album = null)
     }
 
     @JvmInline

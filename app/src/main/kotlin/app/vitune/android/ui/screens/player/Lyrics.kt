@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
@@ -37,6 +38,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +51,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
@@ -65,6 +68,7 @@ import app.vitune.android.ui.components.themed.CircularProgressIndicator
 import app.vitune.android.ui.components.themed.DefaultDialog
 import app.vitune.android.ui.components.themed.Menu
 import app.vitune.android.ui.components.themed.MenuEntry
+import app.vitune.android.ui.components.themed.TextField
 import app.vitune.android.ui.components.themed.TextFieldDialog
 import app.vitune.android.ui.components.themed.TextPlaceholder
 import app.vitune.android.ui.components.themed.ValueSelectorDialogBody
@@ -150,35 +154,41 @@ fun Lyrics(
                             isShowingSynchronizedLyrics && currentLyrics?.synced == null -> {
                                 lyrics = null
 
-                                LrcLib.lyrics(
-                                    artist = artist,
-                                    title = title,
-                                    duration = duration.milliseconds,
-                                    album = album
-                                )?.onSuccess {
+                                fun tryLyrics(lyrics: Result<String?>?) = lyrics?.onSuccess {
                                     Database.upsert(
                                         Lyrics(
                                             songId = mediaId,
                                             fixed = currentLyrics?.fixed,
-                                            synced = it?.text.orEmpty()
+                                            synced = it.orEmpty()
                                         )
                                     )
-                                }?.onFailure {
-                                    KuGou.lyrics(
+                                }?.isSuccess == true
+
+                                when {
+                                    tryLyrics(LrcLib.bestLyrics(
+                                        artist = artist,
+                                        title = title,
+                                        duration = duration.milliseconds,
+                                        album = album
+                                    )?.map { it?.text }) -> {
+                                    }
+
+                                    tryLyrics(KuGou.lyrics(
                                         artist = artist,
                                         title = title,
                                         duration = duration / 1000
-                                    )?.onSuccess {
-                                        Database.upsert(
-                                            Lyrics(
-                                                songId = mediaId,
-                                                fixed = currentLyrics?.fixed,
-                                                synced = it?.value.orEmpty()
-                                            )
-                                        )
-                                    }?.onFailure {
-                                        isError = true
+                                    )?.map { it?.value }) -> {
                                     }
+
+                                    tryLyrics(LrcLib.bestLyrics(
+                                        artist = artist,
+                                        title = title.split("(")[0].trim(),
+                                        duration = duration.milliseconds,
+                                        album = album
+                                    )?.map { it?.text }) -> {
+                                    }
+
+                                    else -> isError = true
                                 }
                             }
 
@@ -193,7 +203,7 @@ fun Lyrics(
                                         )
                                     )
                                 }?.onFailure {
-                                    LrcLib.lyrics(
+                                    LrcLib.bestLyrics(
                                         artist = artist,
                                         title = title,
                                         duration = duration.milliseconds,
@@ -251,13 +261,17 @@ fun Lyrics(
             var loading by remember { mutableStateOf(true) }
             var error by remember { mutableStateOf(false) }
 
-            LaunchedEffect(Unit) {
-                val mediaMetadata = currentMediaMetadataProvider()
+            var query by rememberSaveable {
+                mutableStateOf(currentMediaMetadataProvider().title?.toString().orEmpty())
+            }
 
-                LrcLib.lyrics(
-                    artist = mediaMetadata.artist?.toString().orEmpty(),
-                    title = mediaMetadata.title?.toString().orEmpty()
-                )?.onSuccess {
+            LaunchedEffect(query) {
+                loading = true
+                error = false
+
+                delay(500)
+
+                LrcLib.lyrics(query = query)?.onSuccess {
                     tracks.clear()
                     tracks.addAll(it)
                     loading = false
@@ -267,6 +281,16 @@ fun Lyrics(
                     error = true
                 } ?: run { loading = false }
             }
+            TextField(
+                value = query,
+                onValueChange = { query = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                maxLines = 1,
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(8.dp))
 
             when {
                 loading -> CircularProgressIndicator(
