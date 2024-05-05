@@ -137,7 +137,8 @@
     <string name="related_albums">Ähnliche Alben</string>
     <string name="similar_artists">Ähnliche Künstler</string>
     <string name="recommended_playlists">Wiedergabelisten, die Ihnen gefallen könnten</string>
-
+    <string name="format_subscribers">%s Abonnenten</string>
+    
     <string name="enter_lyrics">Geben Sie den Liedtext ein</string>
     <string name="no_lyrics_found">Es konnten kein Liedtext gefunden werden</string>
     <string name="choose_lyric_track">Liedtext auswählen</string>
@@ -370,6 +371,16 @@
     <string name="dynamic_thumbnails">Dynamische Miniaturbilder</string>
     <string name="max_dynamic_thumbnail_size">Maximale dynamische Miniaturbildgröße</string>
     <string name="max_dynamic_thumbnail_size_description">Die maximale Größe einer Miniaturansicht, wenn eine dynamische Miniaturansicht verwendet wird.</string>
+
+    <string name="hourly">Stündlich</string>
+    <string name="daily">Täglich</string>
+    <string name="weekly">Wöchentlich</string>
+    <string name="version_check">Automatisch nach Aktualisierungen suchen</string>
+
+    <string name="skip_on_error">Automatisch überspringen</string>
+    <string name="skip_on_error_description">Überspringt das aktuelle Lied, wenn ein Fehler auftritt.</string>
+    <string name="skip_on_error_notification">%s wegen eines Fehlers übersprungen</string>
+    <string name="skip_on_error_notification_unknown_song">Das aktuelle Lied wurde aufgrund eines Fehlers übersprungen.</string>
     
     <plurals name="format_reset_blacklist_description">
         <item quantity="one">Entferne %1$s Lied von der schwarzen Liste</item>
