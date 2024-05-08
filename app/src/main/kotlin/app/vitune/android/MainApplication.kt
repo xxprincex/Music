@@ -152,6 +152,7 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
         }
 
         intent?.let { handleIntent(it) }
+        intent = null
         addOnNewIntentListener(::handleIntent)
     }
 
@@ -312,6 +313,9 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
 
     private fun handleIntent(intent: Intent) {
         val uri = intent.data ?: intent.getStringExtra(Intent.EXTRA_TEXT)?.toUri() ?: return
+        intent.data = null
+        intent.putExtra(Intent.EXTRA_TEXT, null as String?)
+
         val path = uri.pathSegments.firstOrNull()
 
         Log.d(TAG, "Opening url: $uri ($path)")
