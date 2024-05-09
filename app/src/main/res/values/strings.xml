@@ -55,6 +55,7 @@
 
     <string name="sleep_timer">Sleep timer</string>
     <string name="sleep_timer_ended">Sleep timer ended</string>
+    <string name="sleep_timer_until_song_end">Until song ends</string>
     <string name="stop_sleep_timer_prompt">Do you want to stop the sleep timer?</string>
     <string name="equalizer">Equalizer</string>
     <string name="set_sleep_timer">Set sleep timer</string>

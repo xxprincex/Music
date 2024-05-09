@@ -5,10 +5,13 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.Companion.Left
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.Companion.Right
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -542,13 +545,22 @@ fun MediaItemMenu(
                 LaunchedEffect(binder, binder?.sleepTimerMillisLeft) {
                     binder?.sleepTimerMillisLeft?.collectLatest {
                         sleepTimerMillisLeft = it ?: 0L
+                    } ?: run { sleepTimerMillisLeft = 0L }
+                }
+
+                val stopAfterSong = {
+                    runCatching {
+                        binder?.startSleepTimer(
+                            binder.player.duration - binder.player.contentPosition
+                        )
                     }
+                    isShowingSleepTimerDialog = false
                 }
 
                 if (isShowingSleepTimerDialog) {
-                    if (sleepTimerMillisLeft == 0L) DefaultDialog(onDismiss = {
-                        isShowingSleepTimerDialog = false
-                    }) {
+                    if (sleepTimerMillisLeft == 0L) DefaultDialog(
+                        onDismiss = { isShowingSleepTimerDialog = false }
+                    ) {
                         var amount by remember { mutableIntStateOf(1) }
 
                         BasicText(
@@ -563,7 +575,7 @@ fun MediaItemMenu(
                                 space = 16.dp,
                                 alignment = Alignment.CenterHorizontally
                             ),
-                            modifier = Modifier.padding(vertical = 16.dp)
+                            modifier = Modifier.padding(vertical = 8.dp)
                         ) {
                             Box(
                                 contentAlignment = Alignment.Center,
@@ -613,6 +625,12 @@ fun MediaItemMenu(
                             }
                         }
 
+                        SecondaryTextButton(
+                            text = stringResource(R.string.sleep_timer_until_song_end),
+                            onClick = stopAfterSong,
+                            modifier = Modifier.padding(vertical = 12.dp)
+                        )
+
                         Row(
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             modifier = Modifier.fillMaxWidth()
@@ -637,10 +655,7 @@ fun MediaItemMenu(
                         cancelText = stringResource(R.string.no),
                         confirmText = stringResource(R.string.stop),
                         onDismiss = { isShowingSleepTimerDialog = false },
-                        onConfirm = {
-                            binder?.cancelSleepTimer()
-                            onDismiss()
-                        }
+                        onConfirm = { binder?.cancelSleepTimer() }
                     )
                 }
 
@@ -648,30 +663,29 @@ fun MediaItemMenu(
                     icon = R.drawable.alarm,
                     text = stringResource(R.string.sleep_timer),
                     onClick = { isShowingSleepTimerDialog = true },
-                    onLongClick = {
-                        runCatching {
-                            binder?.startSleepTimer(
-                                binder.player.duration - binder.player.contentPosition
+                    onLongClick = stopAfterSong,
+                    trailingContent = {
+                        AnimatedVisibility(
+                            visible = sleepTimerMillisLeft != 0L,
+                            label = "",
+                            enter = fadeIn() + expandIn(),
+                            exit = fadeOut() + shrinkOut()
+                        ) {
+                            BasicText(
+                                text = stringResource(
+                                    R.string.format_time_left,
+                                    formatAsDuration(sleepTimerMillisLeft)
+                                ),
+                                style = typography.xxs.medium,
+                                modifier = Modifier
+                                    .background(
+                                        color = colorPalette.background0,
+                                        shape = 16.dp.roundedShape
+                                    )
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .animateContentSize()
                             )
                         }
-                        isShowingSleepTimerDialog = false
-                        onDismiss()
-                    },
-                    trailingContent = {
-                        if (sleepTimerMillisLeft != 0L) BasicText(
-                            text = stringResource(
-                                R.string.format_time_left,
-                                formatAsDuration(sleepTimerMillisLeft)
-                            ),
-                            style = typography.xxs.medium,
-                            modifier = Modifier
-                                .background(
-                                    color = colorPalette.background0,
-                                    shape = 16.dp.roundedShape
-                                )
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .animateContentSize()
-                        )
                     }
                 )
             }
