@@ -307,6 +307,7 @@
     <string name="loudness_normalization_description">Pas het volume van de audio aan naar een vast niveau</string>
     <string name="loudness_base_gain">Basisversterking</string>
     <string name="loudness_base_gain_description">De doelwaarde voor de normalisering</string>
+    <string name="loudness_normalization_extreme">Extreme versterking gedetecteerd (%s), normalisatie wordt uitgeschakeld voor dit nummer</string>
     <string name="bass_boost">Bass boost</string>
     <string name="bass_boost_description">Versterk lage frequenties om luisterervaring te verbeteren</string>
     <string name="bass_boost_level">Bass boost niveau</string>

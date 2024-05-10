@@ -71,6 +71,4 @@ object PlayerPreferences : GlobalPreferencesHolder() {
             displayName = { stringResource(R.string.seek_bar_quality_subpixel) }
         )
     }
-
-    val volumeNormalizationBaseGainRounded get() = (volumeNormalizationBaseGain * 100).toInt()
 }

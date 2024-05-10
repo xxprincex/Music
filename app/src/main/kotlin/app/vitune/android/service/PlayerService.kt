@@ -648,13 +648,29 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         volumeNormalizationJob?.cancel()
         volumeNormalizationJob = coroutineScope.launch {
             runCatching {
+                fun Float?.toMb() = ((this ?: 0f) * 100).toInt()
+
                 Database.loudnessDb(songId).cancellable().collectLatest { loudness ->
+                    val loudnessMb = loudness.toMb().let {
+                        if (it !in -2000..2000) {
+                            withContext(Dispatchers.Main) {
+                                toast(
+                                    getString(
+                                        R.string.loudness_normalization_extreme,
+                                        getString(R.string.format_db, (it / 100f).toString())
+                                    )
+                                )
+                            }
+
+                            0
+                        } else it
+                    }
+
+
                     Database.loudnessBoost(songId).cancellable().collectLatest { boost ->
                         withContext(Dispatchers.Main) {
                             loudnessEnhancer?.setTargetGain(
-                                PlayerPreferences.volumeNormalizationBaseGainRounded +
-                                        ((boost ?: 0f) * 100).toInt() -
-                                        ((loudness ?: 0f) * 100).toInt()
+                                PlayerPreferences.volumeNormalizationBaseGain.toMb() + boost.toMb() - loudnessMb
                             )
                             loudnessEnhancer?.enabled = true
                         }
