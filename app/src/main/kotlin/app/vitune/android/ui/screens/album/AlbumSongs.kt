@@ -13,13 +13,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import app.vitune.android.Database
 import app.vitune.android.LocalPlayerAwareWindowInsets
 import app.vitune.android.LocalPlayerServiceBinder
 import app.vitune.android.R
@@ -37,16 +33,16 @@ import app.vitune.android.utils.asMediaItem
 import app.vitune.android.utils.enqueue
 import app.vitune.android.utils.forcePlayAtIndex
 import app.vitune.android.utils.forcePlayFromBeginning
-import app.vitune.compose.persist.persistList
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.utils.isLandscape
 import kotlinx.collections.immutable.toImmutableList
 
+// TODO: migrate to single impl for all 'song lists'
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AlbumSongs(
-    browseId: String,
+    songs: List<Song>,
     headerContent: @Composable (
         beforeContent: (@Composable () -> Unit)?,
         afterContent: (@Composable () -> Unit)?
@@ -58,13 +54,6 @@ fun AlbumSongs(
     val (colorPalette) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
-
-    var songs by persistList<Song>("album/$browseId/songs")
-
-    LaunchedEffect(Unit) {
-        Database.albumSongs(browseId).collect { songs = it }
-    }
-
     val lazyListState = rememberLazyListState()
 
     LayoutWithAdaptiveThumbnail(

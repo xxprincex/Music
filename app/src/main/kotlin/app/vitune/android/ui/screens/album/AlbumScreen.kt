@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import app.vitune.android.Database
 import app.vitune.android.R
 import app.vitune.android.models.Album
+import app.vitune.android.models.Song
 import app.vitune.android.models.SongAlbumMap
 import app.vitune.android.query
 import app.vitune.android.ui.components.themed.Header
@@ -33,6 +34,7 @@ import app.vitune.android.ui.screens.searchresult.ItemsPage
 import app.vitune.android.utils.asMediaItem
 import app.vitune.compose.persist.PersistMapCleanup
 import app.vitune.compose.persist.persist
+import app.vitune.compose.persist.persistList
 import app.vitune.compose.routing.RouteHandler
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
@@ -43,6 +45,8 @@ import app.vitune.providers.innertube.requests.albumPage
 import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
@@ -56,52 +60,56 @@ fun AlbumScreen(browseId: String) {
 
     var album by persist<Album?>("album/$browseId/album")
     var albumPage by persist<Innertube.PlaylistOrAlbumPage?>("album/$browseId/albumPage")
+    var songs by persistList<Song>("album/$browseId/songs")
 
     PersistMapCleanup(prefix = "album/$browseId/")
 
     LaunchedEffect(Unit) {
-        Database.album(browseId).collect { currentAlbum ->
-            album = currentAlbum
+        Database
+            .album(browseId)
+            .combine(Database.albumSongs(browseId)) { currentAlbum, currentSongs ->
+                album = currentAlbum
+                songs = currentSongs
 
-            if (albumPage?.songsPage?.items?.isNotEmpty() == true) return@collect
+                if (currentAlbum?.timestamp != null && currentSongs.isNotEmpty()) return@combine
 
-            withContext(Dispatchers.IO) {
-                Innertube.albumPage(BrowseBody(browseId = browseId))
-                    ?.onSuccess { newAlbumPage ->
-                        albumPage = newAlbumPage
+                withContext(Dispatchers.IO) {
+                    Innertube.albumPage(BrowseBody(browseId = browseId))
+                        ?.onSuccess { newAlbumPage ->
+                            albumPage = newAlbumPage
 
-                        Database.clearAlbum(browseId)
+                            Database.clearAlbum(browseId)
 
-                        Database.upsert(
-                            album = Album(
-                                id = browseId,
-                                title = newAlbumPage.title,
-                                description = newAlbumPage.description,
-                                thumbnailUrl = newAlbumPage.thumbnail?.url,
-                                year = newAlbumPage.year,
-                                authorsText = newAlbumPage.authors
-                                    ?.joinToString("") { it.name.orEmpty() },
-                                shareUrl = newAlbumPage.url,
-                                timestamp = System.currentTimeMillis(),
-                                bookmarkedAt = album?.bookmarkedAt,
-                                otherInfo = newAlbumPage.otherInfo
-                            ),
-                            songAlbumMaps = newAlbumPage
-                                .songsPage
-                                ?.items
-                                ?.map { it.asMediaItem }
-                                ?.onEach { Database.insert(it) }
-                                ?.mapIndexed { position, mediaItem ->
-                                    SongAlbumMap(
-                                        songId = mediaItem.mediaId,
-                                        albumId = browseId,
-                                        position = position
-                                    )
-                                } ?: emptyList()
-                        )
-                    }?.exceptionOrNull()?.printStackTrace()
-            }
-        }
+                            Database.upsert(
+                                album = Album(
+                                    id = browseId,
+                                    title = newAlbumPage.title,
+                                    description = newAlbumPage.description,
+                                    thumbnailUrl = newAlbumPage.thumbnail?.url,
+                                    year = newAlbumPage.year,
+                                    authorsText = newAlbumPage.authors
+                                        ?.joinToString("") { it.name.orEmpty() },
+                                    shareUrl = newAlbumPage.url,
+                                    timestamp = System.currentTimeMillis(),
+                                    bookmarkedAt = album?.bookmarkedAt,
+                                    otherInfo = newAlbumPage.otherInfo
+                                ),
+                                songAlbumMaps = newAlbumPage
+                                    .songsPage
+                                    ?.items
+                                    ?.map { it.asMediaItem }
+                                    ?.onEach { Database.insert(it) }
+                                    ?.mapIndexed { position, mediaItem ->
+                                        SongAlbumMap(
+                                            songId = mediaItem.mediaId,
+                                            albumId = browseId,
+                                            position = position
+                                        )
+                                    } ?: emptyList()
+                            )
+                        }?.exceptionOrNull()?.printStackTrace()
+                }
+            }.collect()
     }
 
     RouteHandler(listenToGlobalEmitter = true) {
@@ -179,7 +187,7 @@ fun AlbumScreen(browseId: String) {
                 saveableStateHolder.SaveableStateProvider(key = currentTabIndex) {
                     when (currentTabIndex) {
                         0 -> AlbumSongs(
-                            browseId = browseId,
+                            songs = songs,
                             headerContent = headerContent,
                             thumbnailContent = thumbnailContent,
                             afterHeaderContent = {
