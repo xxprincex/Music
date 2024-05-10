@@ -114,7 +114,10 @@ fun Thumbnail(
             label = ""
         )
         val blurRadius by animateDpAsState(
-            targetValue = if (isShowingLyrics || error != null) 8.dp else 0.dp,
+            targetValue = if (
+                (isShowingLyrics && !currentWindow.mediaItem.isLocal) ||
+                error != null || isShowingStatsForNerds
+            ) 8.dp else 0.dp,
             animationSpec = tween(500),
             label = ""
         )
@@ -138,7 +141,7 @@ fun Thumbnail(
                 modifier = Modifier
                     .pointerInput(Unit) {
                         detectTapGestures(
-                            onTap = { onShowLyrics(true) },
+                            onTap = { if (!currentWindow.mediaItem.isLocal) onShowLyrics(true) },
                             onLongPress = { onShowStatsForNerds(true) }
                         )
                     }
