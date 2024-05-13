@@ -1,5 +1,6 @@
 package app.vitune.android.ui.components.themed
 
+import androidx.annotation.FloatRange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,11 +18,13 @@ import kotlin.random.Random
 @Composable
 fun TextPlaceholder(
     modifier: Modifier = Modifier,
-    color: Color = LocalAppearance.current.colorPalette.shimmer
+    color: Color = LocalAppearance.current.colorPalette.shimmer,
+    @FloatRange(from = 0.0, to = 1.0)
+    width: Float = remember { 0.25f + Random.nextFloat() * 0.5f }
 ) = Spacer(
     modifier = modifier
         .padding(vertical = 4.dp)
         .background(color)
-        .fillMaxWidth(remember { 0.25f + Random.nextFloat() * 0.5f })
+        .fillMaxWidth(width)
         .height(16.dp)
 )

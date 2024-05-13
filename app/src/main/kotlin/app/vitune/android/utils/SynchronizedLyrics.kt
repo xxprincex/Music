@@ -1,11 +1,14 @@
 package app.vitune.android.utils
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.collections.immutable.ImmutableMap
 
+@Stable
 class SynchronizedLyrics(
-    val sentences: Map<Long, String>,
+    val sentences: ImmutableMap<Long, String>,
     private val positionProvider: () -> Long
 ) {
     var index by mutableIntStateOf(currentIndex)
