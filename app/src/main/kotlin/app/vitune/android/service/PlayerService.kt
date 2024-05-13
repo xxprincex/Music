@@ -183,7 +183,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private val metadataBuilder = MediaMetadata.Builder()
 
     private var notificationManager: NotificationManager? = null
-    private var timerJob: TimerJob? = null
+    private var timerJob: TimerJob? by mutableStateOf(null)
     private var radio: YouTubeRadio? = null
 
     private lateinit var bitmapProvider: BitmapProvider
