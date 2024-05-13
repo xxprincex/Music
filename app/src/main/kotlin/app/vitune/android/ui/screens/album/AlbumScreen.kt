@@ -45,8 +45,10 @@ import app.vitune.providers.innertube.requests.albumPage
 import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
@@ -67,7 +69,13 @@ fun AlbumScreen(browseId: String) {
     LaunchedEffect(Unit) {
         Database
             .album(browseId)
-            .combine(Database.albumSongs(browseId)) { currentAlbum, currentSongs ->
+            .distinctUntilChanged()
+            .combine(
+                Database
+                    .albumSongs(browseId)
+                    .distinctUntilChanged()
+                    .cancellable()
+            ) { currentAlbum, currentSongs ->
                 album = currentAlbum
                 songs = currentSongs
 
