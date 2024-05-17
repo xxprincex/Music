@@ -1301,8 +1301,12 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                             .setUri(url.toUri())
                             .build()
                             .let { spec ->
-                                (chunkLength ?: format.contentLength)?.let {
-                                    spec.subrange(dataSpec.uriPositionOffset, it)
+                                (chunkLength ?: format.contentLength)?.let { length ->
+                                    val start = dataSpec.uriPositionOffset
+
+                                    spec
+                                        .subrange(start, length)
+                                        .withAdditionalHeaders(mapOf("Range" to "$start-${start + length}"))
                                 } ?: spec
                             }
                     }
