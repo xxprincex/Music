@@ -93,7 +93,19 @@ fun QuickPicks(
 
     var relatedPageResult by persist<Result<Innertube.RelatedPage?>?>(tag = "home/relatedPageResult")
 
+    LaunchedEffect(relatedPageResult, DataPreferences.shouldCacheQuickPicks) {
+        if (DataPreferences.shouldCacheQuickPicks)
+            relatedPageResult?.getOrNull()?.let { DataPreferences.cachedQuickPicks = it }
+        else DataPreferences.cachedQuickPicks = Innertube.RelatedPage()
+    }
+
     LaunchedEffect(DataPreferences.quickPicksSource) {
+        if (
+            DataPreferences.shouldCacheQuickPicks && !DataPreferences.cachedQuickPicks.let {
+                it.albums.isNullOrEmpty() && it.artists.isNullOrEmpty() && it.playlists.isNullOrEmpty() && it.songs.isNullOrEmpty()
+            }
+        ) relatedPageResult = Result.success(DataPreferences.cachedQuickPicks)
+
         suspend fun handleSong(song: Song?) {
             if (relatedPageResult == null || trending?.id != song?.id) relatedPageResult =
                 Innertube.relatedPage(
