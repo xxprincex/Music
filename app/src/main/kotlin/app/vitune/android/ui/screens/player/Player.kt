@@ -1,8 +1,5 @@
 package app.vitune.android.ui.screens.player
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.media.audiofx.AudioEffect
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -51,7 +48,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.coerceAtMost
@@ -79,16 +75,15 @@ import app.vitune.android.ui.modifiers.PinchDirection
 import app.vitune.android.ui.modifiers.onSwipe
 import app.vitune.android.ui.modifiers.pinchToToggle
 import app.vitune.android.utils.DisposableListener
-import app.vitune.android.utils.findActivity
 import app.vitune.android.utils.forceSeekToNext
 import app.vitune.android.utils.forceSeekToPrevious
 import app.vitune.android.utils.positionAndDurationState
+import app.vitune.android.utils.rememberEqualizerLauncher
 import app.vitune.android.utils.seamlessPlay
 import app.vitune.android.utils.secondary
 import app.vitune.android.utils.semiBold
 import app.vitune.android.utils.shouldBePlaying
 import app.vitune.android.utils.thumbnail
-import app.vitune.android.utils.toast
 import app.vitune.compose.persist.PersistMapCleanup
 import app.vitune.compose.routing.OnGlobalRoute
 import app.vitune.core.ui.Dimensions
@@ -532,7 +527,7 @@ private fun PlayerMenu(
     onShowSpeedDialog: (() -> Unit)? = null,
     onShowNormalizationDialog: (() -> Unit)? = null
 ) {
-    val context = LocalContext.current
+    val launchEqualizer by rememberEqualizerLauncher(audioSessionId = { binder.player.audioSessionId })
 
     BaseMediaItemMenu(
         mediaItem = mediaItem,
@@ -541,19 +536,7 @@ private fun PlayerMenu(
             binder.player.seamlessPlay(mediaItem)
             binder.setupRadio(NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId))
         },
-        onGoToEqualizer = {
-            try {
-                context.findActivity().startActivity(
-                    Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL).apply {
-                        putExtra(AudioEffect.EXTRA_AUDIO_SESSION, binder.player.audioSessionId)
-                        putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.packageName)
-                        putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
-                    }
-                )
-            } catch (e: ActivityNotFoundException) {
-                context.toast(context.getString(R.string.no_equalizer_installed))
-            }
-        },
+        onGoToEqualizer = launchEqualizer,
         onShowSleepTimer = {},
         onDismiss = onDismiss,
         onShowSpeedDialog = onShowSpeedDialog,
