@@ -10,6 +10,10 @@ android {
     defaultConfig {
         minSdk = 21
     }
+
+    sourceSets.all {
+        kotlin.srcDir("src/$name/kotlin")
+    }
 }
 
 kotlin {

@@ -11,13 +11,6 @@ android {
         minSdk = 21
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-        }
-    }
-
     buildFeatures {
         compose = true
     }

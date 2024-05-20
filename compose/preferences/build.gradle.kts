@@ -11,13 +11,6 @@ android {
         minSdk = 21
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-        }
-    }
-
     sourceSets.all {
         kotlin.srcDir("src/$name/kotlin")
     }
