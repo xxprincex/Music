@@ -11,10 +11,16 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.PowerManager
 import android.widget.Toast
+import androidx.annotation.OptIn
 import androidx.core.app.PendingIntentCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.offline.DownloadRequest
+import androidx.media3.exoplayer.offline.DownloadService
+import androidx.media3.exoplayer.offline.DownloadService.sendAddDownload
 import app.vitune.android.BuildConfig
+import app.vitune.android.service.PrecacheService
 import app.vitune.core.ui.utils.isAtLeastAndroid11
 import app.vitune.core.ui.utils.isAtLeastAndroid6
 
@@ -108,3 +114,20 @@ fun Context.hasPermission(permission: String) = ContextCompat.checkSelfPermissio
     applicationContext,
     permission
 ) == PackageManager.PERMISSION_GRANTED
+
+@OptIn(UnstableApi::class)
+inline fun <reified T : DownloadService> Context.download(request: DownloadRequest) = runCatching {
+    sendAddDownload(
+        /* context         = */ this,
+        /* clazz           = */ T::class.java,
+        /* downloadRequest = */ request,
+        /* foreground      = */ true
+    )
+}.recoverCatching {
+    sendAddDownload(
+        /* context         = */ this,
+        /* clazz           = */ T::class.java,
+        /* downloadRequest = */ request,
+        /* foreground      = */ false
+    )
+}
