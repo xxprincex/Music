@@ -142,8 +142,6 @@
     <string name="enter_lyrics">Geben Sie den Liedtext ein</string>
     <string name="no_lyrics_found">Es konnten kein Liedtext gefunden werden</string>
     <string name="choose_lyric_track">Liedtext auswählen</string>
-    <string name="error_load_synchronized_lyrics">Beim Abrufen des synchronisierten Liedtextes ist ein Fehler aufgetreten</string>
-    <string name="error_load_lyrics">Beim Abrufen des Liedtextes ist ein Fehler aufgetreten</string>
     <string name="synchronized_lyrics_not_available">Für dieses Lied sind keine synchronisierten Liedtexte verfügbar. </string>
     <string name="lyrics_not_available">Für dieses Lied ist kein Text verfügbar</string>
     <string name="invalid_synchronized_lyrics">Ungültiger synchronisierter Liedtext, rufen Sie den Text erneut ab oder bearbeiten Sie ihn und versuchen Sie es erneut</string>

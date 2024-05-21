@@ -143,8 +143,6 @@
     <string name="enter_lyrics">Voer de songtekst in</string>
     <string name="no_lyrics_found">Geen songtekst gevonden</string>
     <string name="choose_lyric_track">Kies songtekst</string>
-    <string name="error_load_synchronized_lyrics">Er heeft zich een error voorgedaan bij het laden van de gesynchroniseerde songtekst</string>
-    <string name="error_load_lyrics">Er heeft zich een error voorgedaan bij het laden van de songtekst</string>
     <string name="synchronized_lyrics_not_available">Gesynchroniseerde songtekst niet beschikbaar</string>
     <string name="lyrics_not_available">Songtekst niet beschikbaar</string>
     <string name="invalid_synchronized_lyrics">Ongeldige gesynchroniseerde songtekst, laad opnieuw in of bewerk de songtekst en probeer het opnieuw</string>

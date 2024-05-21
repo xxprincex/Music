@@ -141,8 +141,6 @@
     <string name="enter_lyrics">Masukkan lirik</string>
     <string name="no_lyrics_found">Tidak ada trek lirik yang ditemukan</string>
     <string name="choose_lyric_track">Pilih trek lirik</string>
-    <string name="error_load_synchronized_lyrics">Terjadi kesalahan saat mengambil lirik yang disinkronkan</string>
-    <string name="error_load_lyrics">Terjadi kesalahan saat mengambil lirik</string>
     <string name="synchronized_lyrics_not_available">Lirik yang disinkronkan tidak tersedia untuk lagu ini</string>
     <string name="lyrics_not_available">Lirik tidak tersedia untuk lagu ini</string>
     <string name="invalid_synchronized_lyrics">Lirik yang disinkronkan tidak valid, ambil kembali atau edit lirik dan coba lagi</string>
