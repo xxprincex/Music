@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     implementation(libs.kotlin.coroutines)
-    implementation(libs.kotlin.datetime)
+    api(libs.kotlin.datetime)
 
     implementation(libs.ktor.http)
     implementation(libs.ktor.serialization.json)
