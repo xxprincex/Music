@@ -153,10 +153,10 @@
     <string name="social">Sosyal</string>
     <string name="contact">İletişim</string>
     <string name="github">GitHub</string>
-    <string name="view_source">Kaynak kodunu görüntüleyin</string>
-    <string name="report_bug">Sorun bildirin</string>
+    <string name="view_source">Kaynak kodunu görüntüle</string>
+    <string name="report_bug">Sorun bildir</string>
     <string name="report_bug_description">Bir hatayla ilgili yardıma ihtiyacınız varsa GitHub\'da bir sorun bildirebilirsiniz (yönlendirmek için tıklayın)</string>
-    <string name="request_feature">Bir özellik isteyin veya bir fikir önerin</string>
+    <string name="request_feature">Bir özellik istey veya bir fikir öner</string>
     <string name="redirect_github">GitHub\'a yönlendirileceksiniz</string>
     <string name="color_source">Vurgu rengi kaynağı</string>
     <string name="color_source_default">Varsayılan</string>
