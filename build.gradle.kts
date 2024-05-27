@@ -17,22 +17,6 @@ val clean by tasks.registering(Delete::class) {
     delete(rootProject.layout.buildDirectory.asFile)
 }
 
-subprojects {
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            if (project.findProperty("enableComposeCompilerReports") != "true") return@kotlinOptions
-            arrayOf("reports", "metrics").forEach {
-                freeCompilerArgs = freeCompilerArgs + listOf(
-                    "-P",
-                    "plugin:androidx.compose.compiler.plugins.kotlin:${it}Destination=${
-                        layout.buildDirectory.asFile.get().absolutePath
-                    }/compose_metrics"
-                )
-            }
-        }
-    }
-}
-
 allprojects {
     group = "app.vitune"
     version = "1.0.4"
