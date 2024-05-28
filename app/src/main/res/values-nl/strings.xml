@@ -95,7 +95,8 @@
 
     <string name="hide_from_quick_picks">Verberg van \"Snelle keuzes\"</string>
     <string name="confirm_hide_song">Wil je echt dit nummer verbergen? De afspeeltijd en cache worden weggegooid. Deze actie is onomkeerbaar.</string>
-    <string name="confirm_delete_playlist">Wil je deze afspeellijst echt verbergen?</string>
+    <string name="confirm_delete_playlist">Wil je deze afspeellijst echt verwijderen?</string>
+    <string name="confirm_delete_piped_session">Wil je deze Piped sessie echt verwijderen?</string>
 
     <string name="other_versions">Overige versies</string>
     <string name="no_alternative_version">Dit album heeft geen alternatieve versies</string>
@@ -338,6 +339,7 @@
     <string name="piped_sessions">Piped sessies</string>
     <string name="custom_instance">Gebruik andere instantie</string>
     <string name="base_api_url">API URL van de instantie</string>
+    <string name="piped_session_created_successfully">Piped sessie succesvol gestart</string>
 
     <string name="seek_bar_style">Stijl van de zoekbalk</string>
     <string name="static_seek_bar_name">Statisch</string>
