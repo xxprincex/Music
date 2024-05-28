@@ -17,7 +17,9 @@ import app.vitune.android.ui.screens.GlobalRoutes
 import app.vitune.android.ui.screens.Route
 import app.vitune.compose.persist.PersistMapCleanup
 import app.vitune.compose.persist.persist
+import app.vitune.compose.persist.persistList
 import app.vitune.compose.routing.RouteHandler
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 
@@ -33,7 +35,7 @@ fun LocalPlaylistScreen(playlistId: Long) {
 
         NavHost {
             var playlist by persist<Playlist?>("localPlaylist/$playlistId/playlist")
-            var songs by persist<List<Song>?>("localPlaylist/$playlistId/Songs")
+            var songs by persistList<Song>("localPlaylist/$playlistId/songs")
 
             LaunchedEffect(Unit) {
                 Database
@@ -48,7 +50,7 @@ fun LocalPlaylistScreen(playlistId: Long) {
                     .playlistSongs(playlistId)
                     .filterNotNull()
                     .distinctUntilChanged()
-                    .collect { songs = it }
+                    .collect { songs = it.toImmutableList() }
             }
 
             val thumbnailContent = remember(playlist) {
@@ -64,7 +66,7 @@ fun LocalPlaylistScreen(playlistId: Long) {
                 topIconButtonId = R.drawable.chevron_back,
                 onTopIconButtonClick = pop,
                 tabIndex = 0,
-                onTabChanged = { },
+                onTabChange = { },
                 tabColumnContent = { item ->
                     item(0, stringResource(R.string.songs), R.drawable.musical_notes)
                 }
@@ -74,7 +76,7 @@ fun LocalPlaylistScreen(playlistId: Long) {
                         when (currentTabIndex) {
                             0 -> LocalPlaylistSongs(
                                 playlist = it,
-                                songs = songs ?: emptyList(),
+                                songs = songs,
                                 thumbnailContent = thumbnailContent,
                                 onDelete = pop
                             )

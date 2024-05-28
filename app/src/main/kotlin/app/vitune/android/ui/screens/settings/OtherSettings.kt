@@ -155,7 +155,7 @@ fun OtherSettings() {
             EnumValueSelectorSettingsEntry(
                 title = stringResource(R.string.quick_picks_source),
                 selectedValue = DataPreferences.quickPicksSource,
-                onValueSelected = { DataPreferences.quickPicksSource = it },
+                onValueSelect = { DataPreferences.quickPicksSource = it },
                 valueText = { it.displayName() }
             )
 
@@ -185,7 +185,7 @@ fun OtherSettings() {
                             mutableFloatStateOf(AppearancePreferences.maxThumbnailSize.toFloat())
                         }
                     },
-                    onSlideCompleted = { AppearancePreferences.maxThumbnailSize = it.roundToInt() },
+                    onSlideComplete = { AppearancePreferences.maxThumbnailSize = it.roundToInt() },
                     min = 32f,
                     max = 1920f,
                     toDisplay = { stringResource(R.string.format_px, it.roundToInt()) },

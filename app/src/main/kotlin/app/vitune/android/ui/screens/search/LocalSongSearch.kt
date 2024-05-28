@@ -41,12 +41,13 @@ import app.vitune.compose.persist.persistList
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.providers.innertube.models.NavigationEndpoint
+import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LocalSongSearch(
     textFieldValue: TextFieldValue,
-    onTextFieldValueChanged: (TextFieldValue) -> Unit,
+    onTextFieldValueChange: (TextFieldValue) -> Unit,
     decorationBox: @Composable (@Composable () -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -58,7 +59,9 @@ fun LocalSongSearch(
 
     LaunchedEffect(textFieldValue.text) {
         if (textFieldValue.text.length > 1)
-            Database.search("%${textFieldValue.text}%").collect { items = it }
+            Database
+                .search("%${textFieldValue.text}%")
+                .collect { items = it.toImmutableList() }
     }
 
     val lazyListState = rememberLazyListState()
@@ -78,7 +81,7 @@ fun LocalSongSearch(
                     titleContent = {
                         BasicTextField(
                             value = textFieldValue,
-                            onValueChange = onTextFieldValueChanged,
+                            onValueChange = onTextFieldValueChange,
                             textStyle = typography.xxl.medium.align(TextAlign.End),
                             singleLine = true,
                             maxLines = 1,
@@ -90,7 +93,7 @@ fun LocalSongSearch(
                     actionsContent = {
                         if (textFieldValue.text.isNotEmpty()) SecondaryTextButton(
                             text = stringResource(R.string.clear),
-                            onClick = { onTextFieldValueChanged(TextFieldValue()) }
+                            onClick = { onTextFieldValueChange(TextFieldValue()) }
                         )
                     }
                 )

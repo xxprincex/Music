@@ -655,7 +655,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         } else it
                     }
 
-
                     Database.loudnessBoost(songId).cancellable().collectLatest { boost ->
                         withContext(Dispatchers.Main) {
                             loudnessEnhancer?.setTargetGain(

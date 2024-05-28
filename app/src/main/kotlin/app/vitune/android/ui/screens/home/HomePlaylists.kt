@@ -57,6 +57,7 @@ import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.providers.piped.Piped
 import app.vitune.providers.piped.models.Session
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.async
 import app.vitune.providers.piped.models.PlaylistPreview as PipedPlaylistPreview
 
@@ -76,7 +77,7 @@ fun HomePlaylists(
     if (isCreatingANewPlaylist) TextFieldDialog(
         hintText = stringResource(R.string.enter_playlist_name_prompt),
         onDismiss = { isCreatingANewPlaylist = false },
-        onDone = { text ->
+        onAccept = { text ->
             query {
                 Database.insert(Playlist(name = text))
             }
@@ -86,7 +87,9 @@ fun HomePlaylists(
     var pipedSessions by persist<Map<PipedSession, List<PipedPlaylistPreview>?>>("home/piped")
 
     LaunchedEffect(playlistSortBy, playlistSortOrder) {
-        Database.playlistPreviews(playlistSortBy, playlistSortOrder).collect { items = it }
+        Database
+            .playlistPreviews(playlistSortBy, playlistSortOrder)
+            .collect { items = it.toImmutableList() }
     }
 
     LaunchedEffect(Unit) {

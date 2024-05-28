@@ -43,6 +43,7 @@ import app.vitune.core.data.enums.ArtistSortBy
 import app.vitune.core.data.enums.SortOrder
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
+import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Route
@@ -58,7 +59,7 @@ fun HomeArtistList(
     LaunchedEffect(artistSortBy, artistSortOrder) {
         Database
             .artists(artistSortBy, artistSortOrder)
-            .collect { items = it }
+            .collect { items = it.toImmutableList() }
     }
 
     val sortOrderIconRotation by animateFloatAsState(

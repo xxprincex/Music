@@ -36,13 +36,14 @@ import app.vitune.android.utils.forcePlayFromBeginning
 import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.utils.isLandscape
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 // TODO: migrate to single impl for all 'song lists'
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AlbumSongs(
-    songs: List<Song>,
+    songs: ImmutableList<Song>,
     headerContent: @Composable (
         beforeContent: (@Composable () -> Unit)?,
         afterContent: (@Composable () -> Unit)?

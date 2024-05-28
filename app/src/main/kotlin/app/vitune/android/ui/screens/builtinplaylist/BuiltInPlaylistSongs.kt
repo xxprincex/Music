@@ -3,20 +3,20 @@ package app.vitune.android.ui.screens.builtinplaylist
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -26,9 +26,9 @@ import androidx.compose.ui.unit.dp
 import app.vitune.android.Database
 import app.vitune.android.LocalPlayerAwareWindowInsets
 import app.vitune.android.LocalPlayerServiceBinder
-import app.vitune.android.R
 import app.vitune.android.models.Song
 import app.vitune.android.preferences.DataPreferences
+import app.vitune.android.R
 import app.vitune.android.ui.components.LocalMenuState
 import app.vitune.android.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import app.vitune.android.ui.components.themed.Header
@@ -93,7 +93,7 @@ fun BuiltInPlaylistSongs(
                     .distinctUntilChanged()
                     .cancellable()
             }
-        }.collect { songs = it }
+        }.collect { songs = it.toImmutableList() }
     }
 
     val lazyListState = rememberLazyListState()
@@ -151,7 +151,7 @@ fun BuiltInPlaylistSongs(
                             ),
                             selectedValue = topListPeriod,
                             values = DataPreferences.TopListPeriod.entries.toImmutableList(),
-                            onValueSelected = { topListPeriod = it },
+                            onValueSelect = { topListPeriod = it },
                             valueText = { it.displayName() }
                         )
                     }

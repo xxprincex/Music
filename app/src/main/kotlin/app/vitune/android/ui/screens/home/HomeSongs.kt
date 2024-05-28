@@ -82,6 +82,7 @@ import app.vitune.core.ui.Dimensions
 import app.vitune.core.ui.LocalAppearance
 import app.vitune.core.ui.onOverlay
 import app.vitune.core.ui.overlay
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -129,9 +130,7 @@ fun HomeSongs(
     setSortOrder: (SortOrder) -> Unit,
     title: String
 ) {
-    val colorPalette = LocalAppearance.current.colorPalette
-    val typography = LocalAppearance.current.typography
-    val thumbnailShape = LocalAppearance.current.thumbnailShape
+    val (colorPalette, typography, _, thumbnailShape) = LocalAppearance.current
 
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
@@ -151,8 +150,8 @@ fun HomeSongs(
     }
     var hidingSong: String? by rememberSaveable { mutableStateOf(null) }
 
-    LaunchedEffect(sortBy, sortOrder) {
-        songProvider().collect { items = it }
+    LaunchedEffect(sortBy, sortOrder, songProvider) {
+        songProvider().collect { items = it.toPersistentList() }
     }
 
     val sortOrderIconRotation by animateFloatAsState(
