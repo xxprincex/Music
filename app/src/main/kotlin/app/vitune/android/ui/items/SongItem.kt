@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +27,7 @@ import androidx.media3.common.MediaItem
 import app.vitune.android.R
 import app.vitune.android.models.Song
 import app.vitune.android.ui.components.themed.TextPlaceholder
+import app.vitune.android.utils.SongBundleAccessor
 import app.vitune.android.utils.medium
 import app.vitune.android.utils.secondary
 import app.vitune.android.utils.semiBold
@@ -61,18 +63,24 @@ fun SongItem(
     onThumbnailContent: (@Composable BoxScope.() -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null,
     showDuration: Boolean = true
-) = SongItem(
-    modifier = modifier,
-    thumbnailUrl = song.mediaMetadata.artworkUri.thumbnail(thumbnailSize.px)?.toString(),
-    title = song.mediaMetadata.title?.toString(),
-    authors = song.mediaMetadata.artist?.toString(),
-    duration = song.mediaMetadata.extras?.getString("durationText"),
-    explicit = song.mediaMetadata.extras?.getBoolean("explicit") == true,
-    thumbnailSize = thumbnailSize,
-    onThumbnailContent = onThumbnailContent,
-    trailingContent = trailingContent,
-    showDuration = showDuration
-)
+) {
+    val extras = remember(song) {
+        song.mediaMetadata.extras?.let { SongBundleAccessor(it) }
+    }
+
+    SongItem(
+        modifier = modifier,
+        thumbnailUrl = song.mediaMetadata.artworkUri.thumbnail(thumbnailSize.px)?.toString(),
+        title = song.mediaMetadata.title?.toString(),
+        authors = song.mediaMetadata.artist?.toString(),
+        duration = extras?.durationText,
+        explicit = extras?.explicit == true,
+        thumbnailSize = thumbnailSize,
+        onThumbnailContent = onThumbnailContent,
+        trailingContent = trailingContent,
+        showDuration = showDuration
+    )
+}
 
 @Composable
 fun SongItem(

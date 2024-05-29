@@ -72,6 +72,7 @@ import app.vitune.android.ui.screens.player.Player
 import app.vitune.android.ui.screens.playlistRoute
 import app.vitune.android.utils.DisposableListener
 import app.vitune.android.utils.LocalMonetCompat
+import app.vitune.android.utils.SongBundleAccessor
 import app.vitune.android.utils.asMediaItem
 import app.vitune.android.utils.collectProvidedBitmapAsState
 import app.vitune.android.utils.forcePlay
@@ -301,8 +302,10 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
                             reason: Int
                         ) = when {
                             reason != Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED || mediaItem == null -> Unit
-                            mediaItem.mediaMetadata.extras?.getBoolean("isFromPersistentQueue") == true ->
-                                playerBottomSheetState.collapseSoft()
+
+                            mediaItem.mediaMetadata.extras
+                                ?.let { SongBundleAccessor(it) }
+                                ?.isFromPersistentQueue == true -> playerBottomSheetState.collapseSoft()
 
                             else -> playerBottomSheetState.expandSoft()
                         }

@@ -52,6 +52,7 @@ import app.vitune.android.models.SongPlaylistMap
 import app.vitune.android.models.SongWithContentLength
 import app.vitune.android.models.SortedSongPlaylistMap
 import app.vitune.android.service.LOCAL_KEY_PREFIX
+import app.vitune.android.utils.SongBundleAccessor
 import app.vitune.core.data.enums.AlbumSortBy
 import app.vitune.core.data.enums.ArtistSortBy
 import app.vitune.core.data.enums.PlaylistSortBy
@@ -552,36 +553,41 @@ interface Database {
 
     @Transaction
     fun insert(mediaItem: MediaItem, block: (Song) -> Song = { it }) {
+        val extras = mediaItem.mediaMetadata.extras?.let { SongBundleAccessor(it) }
         val song = Song(
             id = mediaItem.mediaId,
             title = mediaItem.mediaMetadata.title?.toString().orEmpty(),
             artistsText = mediaItem.mediaMetadata.artist?.toString(),
-            durationText = mediaItem.mediaMetadata.extras?.getString("durationText"),
+            durationText = extras?.durationText,
             thumbnailUrl = mediaItem.mediaMetadata.artworkUri?.toString(),
-            explicit = mediaItem.mediaMetadata.extras?.getBoolean("explicit") == true
+            explicit = extras?.explicit == true
         ).let(block).also { song ->
             if (insert(song) == -1L) return
         }
 
-        mediaItem.mediaMetadata.extras?.getString("albumId")?.let { albumId ->
+        extras?.albumId?.let { albumId ->
             insert(
                 Album(id = albumId, title = mediaItem.mediaMetadata.albumTitle?.toString()),
                 SongAlbumMap(songId = song.id, albumId = albumId, position = null)
             )
         }
 
-        mediaItem.mediaMetadata.extras?.getStringArrayList("artistNames")?.let { artistNames ->
-            mediaItem.mediaMetadata.extras?.getStringArrayList("artistIds")?.let { artistIds ->
-                if (artistNames.size == artistIds.size) {
-                    insert(
-                        artistNames.mapIndexed { index, artistName ->
-                            Artist(id = artistIds[index], name = artistName)
-                        },
-                        artistIds.map { artistId ->
-                            SongArtistMap(songId = song.id, artistId = artistId)
-                        }
-                    )
-                }
+        extras?.artistNames?.let { artistNames ->
+            extras.artistIds?.let { artistIds ->
+                if (artistNames.size == artistIds.size) insert(
+                    artistNames.mapIndexed { index, artistName ->
+                        Artist(
+                            id = artistIds[index],
+                            name = artistName
+                        )
+                    },
+                    artistIds.map { artistId ->
+                        SongArtistMap(
+                            songId = song.id,
+                            artistId = artistId
+                        )
+                    }
+                )
             }
         }
     }

@@ -8,7 +8,6 @@ import android.provider.MediaStore
 import android.text.format.DateUtils
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
-import androidx.core.os.bundleOf
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
@@ -35,14 +34,14 @@ val Innertube.SongItem.asMediaItem: MediaItem
                 .setAlbumTitle(album?.name)
                 .setArtworkUri(thumbnail?.url?.toUri())
                 .setExtras(
-                    bundleOf(
-                        "albumId" to album?.endpoint?.browseId,
-                        "durationText" to durationText,
-                        "artistNames" to authors?.filter { it.endpoint != null }
-                            ?.mapNotNull { it.name },
-                        "artistIds" to authors?.mapNotNull { it.endpoint?.browseId },
-                        "explicit" to explicit
-                    )
+                    SongBundleAccessor.bundle {
+                        albumId = album?.endpoint?.browseId
+                        durationText = this@asMediaItem.durationText
+                        artistNames = authors
+                            ?.filter { it.endpoint != null }
+                            ?.mapNotNull { it.name }
+                        explicit = this@asMediaItem.explicit
+                    }
                 )
                 .build()
         )
@@ -59,13 +58,16 @@ val Innertube.VideoItem.asMediaItem: MediaItem
                 .setArtist(authors?.joinToString("") { it.name.orEmpty() })
                 .setArtworkUri(thumbnail?.url?.toUri())
                 .setExtras(
-                    bundleOf(
-                        "durationText" to durationText,
-                        "artistNames" to if (isOfficialMusicVideo) authors?.filter { it.endpoint != null }
-                            ?.mapNotNull { it.name } else null,
-                        "artistIds" to if (isOfficialMusicVideo) authors?.mapNotNull { it.endpoint?.browseId }
+                    SongBundleAccessor.bundle {
+                        durationText = this@asMediaItem.durationText
+                        artistNames = if (isOfficialMusicVideo) authors
+                            ?.filter { it.endpoint != null }
+                            ?.mapNotNull { it.name }
                         else null
-                    )
+                        artistIds = if (isOfficialMusicVideo) authors
+                            ?.mapNotNull { it.endpoint?.browseId }
+                        else null
+                    }
                 )
                 .build()
         )
@@ -85,13 +87,13 @@ val Playlist.Video.asMediaItem: MediaItem?
                     .setArtist(uploaderName)
                     .setArtworkUri(Uri.parse(thumbnailUrl.toString()))
                     .setExtras(
-                        bundleOf(
-                            "durationText" to duration.toComponents { minutes, seconds, _ ->
+                        SongBundleAccessor.bundle {
+                            durationText = duration.toComponents { minutes, seconds, _ ->
                                 "$minutes:${seconds.toString().padStart(2, '0')}"
-                            },
-                            "artistNames" to listOf(uploaderName),
-                            "artistIds" to uploaderId?.let { listOf(it) }
-                        )
+                            }
+                            artistNames = listOf(uploaderName)
+                            artistIds = uploaderId?.let { listOf(it) }
+                        }
                     )
                     .build()
             )
@@ -106,10 +108,10 @@ val Song.asMediaItem: MediaItem
                 .setArtist(artistsText)
                 .setArtworkUri(thumbnailUrl?.toUri())
                 .setExtras(
-                    bundleOf(
-                        "durationText" to durationText,
-                        "explicit" to explicit
-                    )
+                    SongBundleAccessor.bundle {
+                        durationText = this@asMediaItem.durationText
+                        explicit = this@asMediaItem.explicit
+                    }
                 )
                 .build()
         )
