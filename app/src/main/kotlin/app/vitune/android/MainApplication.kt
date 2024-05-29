@@ -34,7 +34,6 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -72,13 +71,13 @@ import app.vitune.android.ui.screens.player.Player
 import app.vitune.android.ui.screens.playlistRoute
 import app.vitune.android.utils.DisposableListener
 import app.vitune.android.utils.LocalMonetCompat
-import app.vitune.android.utils.SongBundleAccessor
 import app.vitune.android.utils.asMediaItem
 import app.vitune.android.utils.collectProvidedBitmapAsState
 import app.vitune.android.utils.forcePlay
 import app.vitune.android.utils.intent
 import app.vitune.android.utils.invokeOnReady
 import app.vitune.android.utils.setDefaultPalette
+import app.vitune.android.utils.songBundle
 import app.vitune.android.utils.toast
 import app.vitune.compose.persist.LocalPersistMap
 import app.vitune.compose.persist.PersistMap
@@ -190,125 +189,109 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
 
     @Suppress("CyclomaticComplexMethod")
     @OptIn(ExperimentalLayoutApi::class)
-    fun setContent() {
-        val fromNotification = intent?.extras?.getBoolean("fromNotification") == true
+    fun setContent() = setContent {
+        AppWrapper {
+            val density = LocalDensity.current
+            val windowsInsets = WindowInsets.systemBars
+            val bottomDp = with(density) { windowsInsets.getBottom(density).toDp() }
 
-        setContent {
-            AppWrapper {
-                val density = LocalDensity.current
-                val windowsInsets = WindowInsets.systemBars
-                val bottomDp = with(density) { windowsInsets.getBottom(density).toDp() }
+            val imeVisible = WindowInsets.isImeVisible
+            val imeBottomDp = with(density) { WindowInsets.ime.getBottom(density).toDp() }
+            val animatedBottomDp by animateDpAsState(
+                targetValue = if (imeVisible) 0.dp else bottomDp,
+                label = ""
+            )
 
-                val imeVisible = WindowInsets.isImeVisible
-                val imeBottomDp = with(density) { WindowInsets.ime.getBottom(density).toDp() }
-                val animatedBottomDp by animateDpAsState(
-                    targetValue = if (imeVisible) 0.dp else bottomDp,
-                    label = ""
-                )
+            val playerBottomSheetState = rememberBottomSheetState(
+                dismissedBound = 0.dp,
+                collapsedBound = Dimensions.items.collapsedPlayerHeight + bottomDp,
+                expandedBound = maxHeight
+            )
 
-                val playerBottomSheetState = rememberBottomSheetState(
-                    dismissedBound = 0.dp,
-                    collapsedBound = Dimensions.items.collapsedPlayerHeight + bottomDp,
-                    expandedBound = maxHeight
-                )
+            val playerAwareWindowInsets = remember(
+                bottomDp,
+                animatedBottomDp,
+                playerBottomSheetState.value,
+                imeVisible,
+                imeBottomDp
+            ) {
+                val bottom =
+                    if (imeVisible) imeBottomDp.coerceAtLeast(playerBottomSheetState.value)
+                    else playerBottomSheetState.value.coerceIn(
+                        animatedBottomDp..playerBottomSheetState.collapsedBound
+                    )
 
-                val playerAwareWindowInsets = remember(
-                    bottomDp,
-                    animatedBottomDp,
-                    playerBottomSheetState.value,
-                    imeVisible,
-                    imeBottomDp
-                ) {
-                    val bottom =
-                        if (imeVisible) imeBottomDp.coerceAtLeast(playerBottomSheetState.value)
-                        else playerBottomSheetState.value.coerceIn(
-                            animatedBottomDp..playerBottomSheetState.collapsedBound
-                        )
+                windowsInsets
+                    .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+                    .add(WindowInsets(bottom = bottom))
+            }
 
-                    windowsInsets
-                        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
-                        .add(WindowInsets(bottom = bottom))
-                }
+            CompositionLocalProvider(
+                LocalIndication provides rememberRipple(),
+                LocalRippleTheme provides rippleTheme(),
+                LocalShimmerTheme provides shimmerTheme(),
+                LocalPlayerServiceBinder provides binder,
+                LocalPlayerAwareWindowInsets provides playerAwareWindowInsets,
+                LocalLayoutDirection provides LayoutDirection.Ltr,
+                LocalPersistMap provides Dependencies.application.persistMap,
+                LocalMonetCompat provides monet
+            ) {
+                val isDownloading by downloadState.collectAsState()
 
-                CompositionLocalProvider(
-                    LocalIndication provides rememberRipple(),
-                    LocalRippleTheme provides rippleTheme(),
-                    LocalShimmerTheme provides shimmerTheme(),
-                    LocalPlayerServiceBinder provides binder,
-                    LocalPlayerAwareWindowInsets provides playerAwareWindowInsets,
-                    LocalLayoutDirection provides LayoutDirection.Ltr,
-                    LocalPersistMap provides Dependencies.application.persistMap,
-                    LocalMonetCompat provides monet
-                ) {
-                    val isDownloading by downloadState.collectAsState()
-
-                    Box {
-                        HomeScreen(
-                            onPlaylistUrl = { url ->
-                                onNewIntent(Intent.parseUri(url, 0))
-                            }
-                        )
-                    }
-
-                    AnimatedVisibility(
-                        visible = isDownloading,
-                        modifier = Modifier.padding(playerAwareWindowInsets.asPaddingValues())
-                    ) {
-                        LinearProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.TopCenter)
-                        )
-                    }
-
-                    CompositionLocalProvider(
-                        LocalAppearance provides LocalAppearance.current.let {
-                            if (it.colorPalette.isDark && AppearancePreferences.darkness == Darkness.AMOLED) {
-                                it.copy(colorPalette = it.colorPalette.amoled())
-                            } else it
+                Box {
+                    HomeScreen(
+                        onPlaylistUrl = { url ->
+                            onNewIntent(Intent.parseUri(url, 0))
                         }
-                    ) {
-                        Player(
-                            layoutState = playerBottomSheetState,
-                            modifier = Modifier.align(Alignment.BottomCenter)
-                        )
-                    }
-
-                    BottomSheetMenu(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .imePadding()
                     )
                 }
 
-                LaunchedEffect(binder?.player) {
-                    val player = binder?.player ?: return@LaunchedEffect
-
-                    when {
-                        player.currentMediaItem == null ->
-                            if (!playerBottomSheetState.isDismissed) playerBottomSheetState.dismiss()
-
-                        playerBottomSheetState.isDismissed -> if (fromNotification) {
-                            intent.replaceExtras(null)
-                            playerBottomSheetState.expandSoft()
-                        } else playerBottomSheetState.collapseSoft()
-                    }
+                AnimatedVisibility(
+                    visible = isDownloading,
+                    modifier = Modifier.padding(playerAwareWindowInsets.asPaddingValues())
+                ) {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter)
+                    )
                 }
 
-                binder?.player?.DisposableListener {
-                    object : Player.Listener {
-                        override fun onMediaItemTransition(
-                            mediaItem: MediaItem?,
-                            reason: Int
-                        ) = when {
-                            reason != Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED || mediaItem == null -> Unit
+                CompositionLocalProvider(
+                    LocalAppearance provides LocalAppearance.current.let {
+                        if (it.colorPalette.isDark && AppearancePreferences.darkness == Darkness.AMOLED) {
+                            it.copy(colorPalette = it.colorPalette.amoled())
+                        } else it
+                    }
+                ) {
+                    Player(
+                        layoutState = playerBottomSheetState,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
+                }
 
-                            mediaItem.mediaMetadata.extras
-                                ?.let { SongBundleAccessor(it) }
-                                ?.isFromPersistentQueue == true -> playerBottomSheetState.collapseSoft()
+                BottomSheetMenu(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .imePadding()
+                )
+            }
 
-                            else -> playerBottomSheetState.expandSoft()
-                        }
+            binder?.player?.DisposableListener {
+                object : Player.Listener {
+                    override fun onMediaItemTransition(
+                        mediaItem: MediaItem?,
+                        reason: Int
+                    ) = when {
+                        mediaItem == null -> playerBottomSheetState.dismissSoft()
+
+                        reason == Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED &&
+                                mediaItem.mediaMetadata.extras?.songBundle?.isFromPersistentQueue != true
+                        -> playerBottomSheetState.expandSoft()
+
+                        playerBottomSheetState.dismissed -> playerBottomSheetState.collapseSoft()
+
+                        else -> Unit
                     }
                 }
             }

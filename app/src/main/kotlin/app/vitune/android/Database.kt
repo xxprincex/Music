@@ -52,7 +52,7 @@ import app.vitune.android.models.SongPlaylistMap
 import app.vitune.android.models.SongWithContentLength
 import app.vitune.android.models.SortedSongPlaylistMap
 import app.vitune.android.service.LOCAL_KEY_PREFIX
-import app.vitune.android.utils.SongBundleAccessor
+import app.vitune.android.utils.songBundle
 import app.vitune.core.data.enums.AlbumSortBy
 import app.vitune.core.data.enums.ArtistSortBy
 import app.vitune.core.data.enums.PlaylistSortBy
@@ -553,7 +553,7 @@ interface Database {
 
     @Transaction
     fun insert(mediaItem: MediaItem, block: (Song) -> Song = { it }) {
-        val extras = mediaItem.mediaMetadata.extras?.let { SongBundleAccessor(it) }
+        val extras = mediaItem.mediaMetadata.extras?.songBundle
         val song = Song(
             id = mediaItem.mediaId,
             title = mediaItem.mediaMetadata.title?.toString().orEmpty(),
