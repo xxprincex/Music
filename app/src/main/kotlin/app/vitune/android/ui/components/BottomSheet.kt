@@ -132,19 +132,16 @@ class BottomSheetState internal constructor(
     }
 
     private fun collapse(spec: AnimationSpec<Dp> = spring()) {
-        println("collapse")
         onAnchorChanged(Anchor.Collapsed)
         deferAnimateTo(collapsedBound, spec)
     }
 
     private fun expand(spec: AnimationSpec<Dp> = spring()) {
-        println("expand")
         onAnchorChanged(Anchor.Expanded)
         deferAnimateTo(expandedBound, spec)
     }
 
     private fun dismiss(spec: AnimationSpec<Dp> = spring()) {
-        println("dismiss")
         onAnchorChanged(Anchor.Dismissed)
         deferAnimateTo(dismissedBound, spec)
     }
