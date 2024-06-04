@@ -27,6 +27,7 @@ import app.vitune.android.service.isLocal
 import app.vitune.android.ui.modifiers.PinchDirection
 import app.vitune.android.ui.modifiers.onSwipe
 import app.vitune.android.ui.modifiers.pinchToToggle
+import app.vitune.android.utils.FullScreenState
 import app.vitune.android.utils.forceSeekToNext
 import app.vitune.android.utils.forceSeekToPrevious
 import app.vitune.android.utils.thumbnail
@@ -41,6 +42,8 @@ fun LyricsDialog(
     modifier: Modifier = Modifier
 ) = Dialog(onDismissRequest = onDismiss) {
     val currentOnDismiss by rememberUpdatedState(onDismiss)
+
+    FullScreenState(shown = false)
 
     val (colorPalette, _, _, thumbnailShape) = LocalAppearance.current
 
