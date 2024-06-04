@@ -1,7 +1,6 @@
 package app.vitune.android.utils
 
 import android.os.Bundle
-import app.vitune.android.models.Song
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty

@@ -60,6 +60,7 @@ import androidx.work.Configuration
 import app.vitune.android.preferences.AppearancePreferences
 import app.vitune.android.preferences.DataPreferences
 import app.vitune.android.service.PlayerService
+import app.vitune.android.service.ServiceNotifications
 import app.vitune.android.service.downloadState
 import app.vitune.android.ui.components.BottomSheetMenu
 import app.vitune.android.ui.components.rememberBottomSheetState
@@ -386,6 +387,7 @@ class MainApplication : Application(), ImageLoaderFactory, Configuration.Provide
 
         Dependencies.init(this)
         MonetCompat.enablePaletteCompat()
+        ServiceNotifications.createAll()
     }
 
     override fun newImageLoader() = ImageLoader.Builder(this)

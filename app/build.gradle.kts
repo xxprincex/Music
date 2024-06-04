@@ -135,6 +135,7 @@ dependencies {
     implementation(libs.exoplayer)
     implementation(libs.exoplayer.workmanager)
     implementation(libs.media3.session)
+    implementation(libs.media)
 
     implementation(libs.workmanager)
     implementation(libs.workmanager.ktx)

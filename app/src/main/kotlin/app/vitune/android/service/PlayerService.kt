@@ -1,9 +1,6 @@
 package app.vitune.android.service
 
 import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -24,6 +21,7 @@ import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.media.session.MediaSessionCompat
 import android.text.format.DateUtils
 import androidx.annotation.OptIn
 import androidx.compose.runtime.Stable
@@ -52,8 +50,8 @@ import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.RenderersFactory
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.analytics.PlaybackStats
 import androidx.media3.exoplayer.analytics.PlaybackStatsListener
@@ -61,9 +59,7 @@ import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioOffloadSupportProvider
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink.DefaultAudioProcessorChain
-import androidx.media3.exoplayer.audio.MediaCodecAudioRenderer
 import androidx.media3.exoplayer.audio.SilenceSkippingAudioProcessor
-import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.extractor.DefaultExtractorsFactory
 import app.vitune.android.Database
@@ -77,7 +73,6 @@ import app.vitune.android.models.SongWithContentLength
 import app.vitune.android.preferences.AppearancePreferences
 import app.vitune.android.preferences.DataPreferences
 import app.vitune.android.preferences.PlayerPreferences
-import app.vitune.android.query
 import app.vitune.android.transaction
 import app.vitune.android.utils.ActionReceiver
 import app.vitune.android.utils.ConditionalCacheDataSourceFactory
@@ -129,6 +124,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -183,7 +179,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private val playbackStateMutex = Mutex()
     private val metadataBuilder = MediaMetadata.Builder()
 
-    private var notificationManager: NotificationManager? = null
     private var timerJob: TimerJob? by mutableStateOf(null)
     private var radio: YouTubeRadio? = null
 
@@ -204,7 +199,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private val binder = Binder()
 
     private var isNotificationStarted = false
-    override val notificationId get() = NOTIFICATION_ID
+    override val notificationId get() = ServiceNotifications.default.notificationId!!
     private val notificationActionReceiver = NotificationActionReceiver()
 
     private val mediaItemState = MutableStateFlow<MediaItem?>(null)
@@ -218,6 +213,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             } ?: flowOf(null)
         }
         .map { it != null }
+        .onEach {
+            updateNotification()
+        }
         .stateIn(
             scope = coroutineScope,
             started = SharingStarted.Eagerly,
@@ -244,18 +242,16 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             }
         )
 
-        createNotificationChannel()
-
         cache = createCache(this)
         player = ExoPlayer.Builder(this, createRendersFactory(), createMediaSourceFactory())
             .setHandleAudioBecomingNoisy(true)
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .setAudioAttributes(
-                AudioAttributes.Builder()
+                /* audioAttributes = */ AudioAttributes.Builder()
                     .setUsage(C.USAGE_MEDIA)
                     .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
                     .build(),
-                true
+                /* handleAudioFocus = */ true
             )
             .setUsePlatformDiagnostics(false)
             .build()
@@ -288,16 +284,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     first = false
                     return@combine
                 }
+
                 if (mediaItem == null) return@combine
                 withContext(Dispatchers.Main) {
                     updatePlaybackState()
-                    // work around NPE in other processes
-                    handler.post {
-                        runCatching {
-                            applicationContext.getSystemService<NotificationManager>()
-                                ?.notify(NOTIFICATION_ID, notification())
-                        }
-                    }
+                    updateNotification()
                 }
             }.collect()
         }
@@ -410,7 +401,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             cache.release()
 
             loudnessEnhancer?.release()
-
             preferenceUpdaterJob?.cancel()
 
             coroutineScope.cancel()
@@ -423,11 +413,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         handler.post {
-            runCatching {
-                if (bitmapProvider.setDefaultBitmap() && player.currentMediaItem != null)
-                    notificationManager?.notify(NOTIFICATION_ID, notification())
-            }
+            if (!bitmapProvider.setDefaultBitmap() || player.currentMediaItem == null) return@post
+            updateNotification()
         }
+
         super.onConfigurationChanged(newConfig)
     }
 
@@ -435,16 +424,17 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         eventTime: AnalyticsListener.EventTime,
         playbackStats: PlaybackStats
     ) {
-        val mediaItem =
-            eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window()).mediaItem
+        val mediaItem = eventTime.timeline
+            .getWindow(eventTime.windowIndex, Timeline.Window())
+            .mediaItem
 
         val totalPlayTimeMs = playbackStats.totalPlayTimeMs
 
-        if (totalPlayTimeMs > 5000 && !DataPreferences.pausePlaytime) query {
+        if (totalPlayTimeMs > 5000 && !DataPreferences.pausePlaytime) transaction {
             Database.incrementTotalPlayTimeMs(mediaItem.mediaId, totalPlayTimeMs)
         }
 
-        if (totalPlayTimeMs > 30000 && !DataPreferences.pauseHistory) query {
+        if (totalPlayTimeMs > 30000 && !DataPreferences.pauseHistory) transaction {
             runCatching {
                 Database.insert(
                     Event(
@@ -489,31 +479,19 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         val prev = player.currentMediaItem ?: return
         player.seekToNextMediaItem()
 
-        if (isAtLeastAndroid8) notificationManager?.createNotificationChannel(
-            NotificationChannel(
-                /* id = */ AUTOSKIP_NOTIFICATION_CHANNEL_ID,
-                /* name = */ getString(R.string.skip_on_error),
-                /* importance = */ NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                enableVibration(true)
-                enableLights(true)
-            }
-        )
-
-        val notification = NotificationCompat.Builder(this, AUTOSKIP_NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.drawable.app_icon)
-            .setCategory(NotificationCompat.CATEGORY_ERROR)
-            .setOnlyAlertOnce(false)
-            .setContentIntent(activityPendingIntent<MainActivity>())
-            .setContentText(
-                prev.mediaMetadata.title?.let {
-                    getString(R.string.skip_on_error_notification, it)
-                } ?: getString(R.string.skip_on_error_notification_unknown_song)
-            )
-            .setContentTitle(getString(R.string.skip_on_error))
-            .build()
-
-        notificationManager?.notify(AUTOSKIP_NOTIFICATION_ID, notification)
+        ServiceNotifications.autoSkip.sendNotification(this) {
+            this
+                .setSmallIcon(R.drawable.app_icon)
+                .setCategory(NotificationCompat.CATEGORY_ERROR)
+                .setOnlyAlertOnce(false)
+                .setContentIntent(activityPendingIntent<MainActivity>())
+                .setContentText(
+                    prev.mediaMetadata.title?.let {
+                        getString(R.string.skip_on_error_notification, it)
+                    } ?: getString(R.string.skip_on_error_notification_unknown_song)
+                )
+                .setContentTitle(getString(R.string.skip_on_error))
+        }
     }
 
     private fun updateMediaSessionQueue(timeline: Timeline) {
@@ -568,16 +546,18 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         val mediaItemIndex = player.currentMediaItemIndex
         val mediaItemPosition = player.currentPosition
 
-        query {
-            Database.clearQueue()
-            Database.insert(
-                mediaItems.mapIndexed { index, mediaItem ->
-                    QueuedMediaItem(
-                        mediaItem = mediaItem,
-                        position = if (index == mediaItemIndex) mediaItemPosition else null
-                    )
-                }
-            )
+        transaction {
+            runCatching {
+                Database.clearQueue()
+                Database.insert(
+                    mediaItems.mapIndexed { index, mediaItem ->
+                        QueuedMediaItem(
+                            mediaItem = mediaItem,
+                            position = if (index == mediaItemIndex) mediaItemPosition else null
+                        )
+                    }
+                )
+            }
         }
     }
 
@@ -614,7 +594,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
                     isNotificationStarted = true
                     startForegroundService(this@PlayerService, intent<PlayerService>())
-                    startForeground(NOTIFICATION_ID, notification())
+                    startForeground()
                 }
             }
         }
@@ -803,138 +783,117 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         updatePlaybackState()
 
         if (
-            events.containsAny(
+            !events.containsAny(
                 Player.EVENT_PLAYBACK_STATE_CHANGED,
                 Player.EVENT_PLAY_WHEN_READY_CHANGED,
                 Player.EVENT_IS_PLAYING_CHANGED,
-                Player.EVENT_POSITION_DISCONTINUITY
+                Player.EVENT_POSITION_DISCONTINUITY,
+                Player.EVENT_IS_LOADING_CHANGED,
+                Player.EVENT_MEDIA_METADATA_CHANGED
             )
-        ) {
-            val notification = notification()
+        ) return
 
-            if (notification == null) {
+        val notification = notification()
+
+        if (notification == null) {
+            isNotificationStarted = false
+            makeInvincible(false)
+            stopForeground(false)
+            sendCloseEqualizerIntent()
+            ServiceNotifications.default.cancel(this)
+            return
+        }
+
+        if (player.shouldBePlaying && !isNotificationStarted) {
+            isNotificationStarted = true
+            startForegroundService(this@PlayerService, intent<PlayerService>())
+            startForeground()
+            makeInvincible(false)
+            sendOpenEqualizerIntent()
+        } else {
+            if (!player.shouldBePlaying) {
                 isNotificationStarted = false
-                makeInvincible(false)
                 stopForeground(false)
+                makeInvincible(true)
                 sendCloseEqualizerIntent()
-                notificationManager?.cancel(NOTIFICATION_ID)
-                return
             }
-
-            if (player.shouldBePlaying && !isNotificationStarted) {
-                isNotificationStarted = true
-                startForegroundService(this@PlayerService, intent<PlayerService>())
-                startForeground(NOTIFICATION_ID, notification)
-                makeInvincible(false)
-                sendOpenEqualizerIntent()
-            } else {
-                if (!player.shouldBePlaying) {
-                    isNotificationStarted = false
-                    stopForeground(false)
-                    makeInvincible(true)
-                    sendCloseEqualizerIntent()
-                }
-                runCatching {
-                    notificationManager?.notify(NOTIFICATION_ID, notification)
-                }
-            }
+            updateNotification()
         }
     }
 
-    override fun notification(): Notification? {
+    private fun notification(): (NotificationCompat.Builder.() -> NotificationCompat.Builder)? {
         if (player.currentMediaItem == null) return null
 
         val mediaMetadata = player.mediaMetadata
 
-        @Suppress("DEPRECATION") // support for SDK < 26
-        val builder = if (isAtLeastAndroid8) {
-            Notification.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
-        } else {
-            Notification.Builder(applicationContext)
-        }
-            .setContentTitle(mediaMetadata.title)
-            .setContentText(mediaMetadata.artist)
-            .setSubText(player.playerError?.message)
-            .setLargeIcon(bitmapProvider.bitmap)
-            .setAutoCancel(false)
-            .setOnlyAlertOnce(true)
-            .setShowWhen(false)
-            .setSmallIcon(
-                player.playerError?.let { R.drawable.alert_circle } ?: R.drawable.app_icon
-            )
-            .setOngoing(false)
-            .setContentIntent(
-                activityPendingIntent<MainActivity>(flags = PendingIntent.FLAG_UPDATE_CURRENT)
-            )
-            .setDeleteIntent(broadcastPendingIntent<NotificationDismissReceiver>())
-            .setVisibility(Notification.VISIBILITY_PUBLIC)
-            .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
-            .setStyle(
-                Notification.MediaStyle()
-                    .setShowActionsInCompactView(0, 1, 2)
-                    .setMediaSession(mediaSession.sessionToken)
-            )
-            .addAction(
-                R.drawable.play_skip_back,
-                getString(R.string.skip_back),
-                notificationActionReceiver.previous.pendingIntent
-            )
-            .let {
-                if (player.shouldBePlaying) it.addAction(
-                    R.drawable.pause,
-                    getString(R.string.pause),
-                    notificationActionReceiver.pause.pendingIntent
-                )
-                else it.addAction(
-                    R.drawable.play,
-                    getString(R.string.play),
-                    notificationActionReceiver.play.pendingIntent
-                )
-            }
-            .addAction(
-                R.drawable.play_skip_forward,
-                getString(R.string.skip_forward),
-                notificationActionReceiver.next.pendingIntent
-            )
-            .addAction(
-                if (isLikedState.value) R.drawable.heart else R.drawable.heart_outline,
-                getString(R.string.like),
-                notificationActionReceiver.like.pendingIntent
-            )
-
-        bitmapProvider.load(mediaMetadata.artworkUri) { bitmap ->
+        bitmapProvider.load(mediaMetadata.artworkUri) {
             maybeShowSongCoverInLockScreen()
-            handler.post {
-                runCatching {
-                    notificationManager?.notify(
-                        NOTIFICATION_ID,
-                        builder.setLargeIcon(bitmap).build()
+            updateNotification()
+        }
+
+        return {
+            this
+                .setContentTitle(mediaMetadata.title)
+                .setContentText(mediaMetadata.artist)
+                .setSubText(player.playerError?.message)
+                .setLargeIcon(bitmapProvider.bitmap)
+                .setAutoCancel(false)
+                .setOnlyAlertOnce(true)
+                .setShowWhen(false)
+                .setSmallIcon(
+                    player.playerError?.let { R.drawable.alert_circle } ?: R.drawable.app_icon
+                )
+                .setOngoing(false)
+                .setContentIntent(
+                    activityPendingIntent<MainActivity>(flags = PendingIntent.FLAG_UPDATE_CURRENT)
+                )
+                .setDeleteIntent(broadcastPendingIntent<NotificationDismissReceiver>())
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+                .setStyle(
+                    androidx.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(0, 1, 2)
+                        .setMediaSession(MediaSessionCompat.Token.fromToken(mediaSession.sessionToken))
+                )
+                .addAction(
+                    R.drawable.play_skip_back,
+                    getString(R.string.skip_back),
+                    notificationActionReceiver.previous.pendingIntent
+                )
+                .let {
+                    if (player.shouldBePlaying) it.addAction(
+                        R.drawable.pause,
+                        getString(R.string.pause),
+                        notificationActionReceiver.pause.pendingIntent
+                    )
+                    else it.addAction(
+                        R.drawable.play,
+                        getString(R.string.play),
+                        notificationActionReceiver.play.pendingIntent
                     )
                 }
-            }
+                .addAction(
+                    R.drawable.play_skip_forward,
+                    getString(R.string.skip_forward),
+                    notificationActionReceiver.next.pendingIntent
+                )
+                .addAction(
+                    if (isLikedState.value) R.drawable.heart else R.drawable.heart_outline,
+                    getString(R.string.like),
+                    notificationActionReceiver.like.pendingIntent
+                )
         }
-
-        return builder.build()
     }
 
-    private fun createNotificationChannel() {
-        notificationManager = getSystemService()
-        if (!isAtLeastAndroid8) return
+    private fun updateNotification() = runCatching {
+        handler.post {
+            notification()?.let { ServiceNotifications.default.sendNotification(this, it) }
+        }
+    }
 
-        notificationManager?.createNotificationChannel(
-            NotificationChannel(
-                /* id = */ NOTIFICATION_CHANNEL_ID,
-                /* name = */ getString(R.string.now_playing),
-                /* importance = */ NotificationManager.IMPORTANCE_LOW
-            )
-        )
-        notificationManager?.createNotificationChannel(
-            NotificationChannel(
-                /* id = */ SLEEP_TIMER_NOTIFICATION_CHANNEL_ID,
-                /* name = */ getString(R.string.sleep_timer),
-                /* importance = */ NotificationManager.IMPORTANCE_LOW
-            )
-        )
+    override fun startForeground() {
+        notification()
+            ?.let { ServiceNotifications.default.startForeground(this, it) }
     }
 
     private fun createMediaSourceFactory() = DefaultMediaSourceFactory(
@@ -950,40 +909,38 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         /* extractorsFactory = */ DefaultExtractorsFactory()
     )
 
-    private fun createRendersFactory(): RenderersFactory {
-        val minimumSilenceDuration = PlayerPreferences.minimumSilence.coerceIn(1000L..2_000_000L)
-        val audioSink = DefaultAudioSink.Builder(applicationContext)
-            .setEnableFloatOutput(false)
-            .setEnableAudioTrackPlaybackParams(false)
-            .setAudioOffloadSupportProvider(DefaultAudioOffloadSupportProvider(applicationContext))
-            .setAudioProcessorChain(
-                DefaultAudioProcessorChain(
-                    arrayOf(),
-                    SilenceSkippingAudioProcessor(
-                        /* minimumSilenceDurationUs = */ minimumSilenceDuration,
-                        /* silenceRetentionRatio = */ 0.01f,
-                        /* maxSilenceToKeepDurationUs = */ minimumSilenceDuration,
-                        /* minVolumeToKeepPercentageWhenMuting = */ 0,
-                        /* silenceThresholdLevel = */ 256
-                    ),
-                    SonicAudioProcessor()
-                )
-            )
-            .build()
-            .apply {
-                if (isAtLeastAndroid10) setOffloadMode(AudioSink.OFFLOAD_MODE_DISABLED)
-            }
+    private fun createRendersFactory() = object : DefaultRenderersFactory(this) {
+        override fun buildAudioSink(
+            context: Context,
+            enableFloatOutput: Boolean,
+            enableAudioTrackPlaybackParams: Boolean
+        ): AudioSink {
+            val minimumSilenceDuration =
+                PlayerPreferences.minimumSilence.coerceIn(1000L..2_000_000L)
 
-        return RenderersFactory { handler, _, audioListener, _, _ ->
-            arrayOf(
-                MediaCodecAudioRenderer(
-                    /* context = */ this,
-                    /* mediaCodecSelector = */ MediaCodecSelector.DEFAULT,
-                    /* eventHandler = */ handler,
-                    /* eventListener = */ audioListener,
-                    /* audioSink = */ audioSink
+            return DefaultAudioSink.Builder(applicationContext)
+                .setEnableFloatOutput(enableFloatOutput)
+                .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
+                .setAudioOffloadSupportProvider(
+                    DefaultAudioOffloadSupportProvider(applicationContext)
                 )
-            )
+                .setAudioProcessorChain(
+                    DefaultAudioProcessorChain(
+                        arrayOf(),
+                        SilenceSkippingAudioProcessor(
+                            /* minimumSilenceDurationUs = */ minimumSilenceDuration,
+                            /* silenceRetentionRatio = */ 0.01f,
+                            /* maxSilenceToKeepDurationUs = */ minimumSilenceDuration,
+                            /* minVolumeToKeepPercentageWhenMuting = */ 0,
+                            /* silenceThresholdLevel = */ 256
+                        ),
+                        SonicAudioProcessor()
+                    )
+                )
+                .build()
+                .apply {
+                    if (isAtLeastAndroid10) setOffloadMode(AudioSink.OFFLOAD_MODE_DISABLED)
+                }
         }
     }
 
@@ -1018,17 +975,15 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             timerJob?.cancel()
 
             timerJob = coroutineScope.timer(delayMillis) {
-                val notification = NotificationCompat
-                    .Builder(this@PlayerService, SLEEP_TIMER_NOTIFICATION_CHANNEL_ID)
-                    .setContentTitle(getString(R.string.sleep_timer_ended))
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setAutoCancel(true)
-                    .setOnlyAlertOnce(true)
-                    .setShowWhen(true)
-                    .setSmallIcon(R.drawable.app_icon)
-                    .build()
-
-                notificationManager?.notify(SLEEP_TIMER_NOTIFICATION_ID, notification)
+                ServiceNotifications.sleepTimer.sendNotification(this@PlayerService) {
+                    this
+                        .setContentTitle(getString(R.string.sleep_timer_ended))
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setAutoCancel(true)
+                        .setOnlyAlertOnce(true)
+                        .setShowWhen(true)
+                        .setSmallIcon(R.drawable.app_icon)
+                }
 
                 stopSelf()
                 exitProcess(0)
