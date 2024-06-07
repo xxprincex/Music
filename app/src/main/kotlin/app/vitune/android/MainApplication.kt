@@ -278,7 +278,7 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
                 )
             }
 
-            binder?.player?.DisposableListener {
+            binder?.player.DisposableListener {
                 object : Player.Listener {
                     override fun onMediaItemTransition(
                         mediaItem: MediaItem?,
