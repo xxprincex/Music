@@ -33,6 +33,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -58,6 +60,7 @@ import app.vitune.android.Database
 import app.vitune.android.LocalPlayerServiceBinder
 import app.vitune.android.R
 import app.vitune.android.models.Lyrics
+import app.vitune.android.preferences.AppearancePreferences
 import app.vitune.android.preferences.PlayerPreferences
 import app.vitune.android.query
 import app.vitune.android.transaction
@@ -114,7 +117,8 @@ fun Lyrics(
     shouldShowSynchronizedLyrics: Boolean = PlayerPreferences.isShowingSynchronizedLyrics,
     setShouldShowSynchronizedLyrics: (Boolean) -> Unit = {
         PlayerPreferences.isShowingSynchronizedLyrics = it
-    }
+    },
+    shouldKeepScreenAwake: Boolean = AppearancePreferences.lyricsKeepScreenAwake
 ) = AnimatedVisibility(
     visible = isDisplayed,
     enter = fadeIn(),
@@ -129,6 +133,7 @@ fun Lyrics(
     val menuState = LocalMenuState.current
     val binder = LocalPlayerServiceBinder.current
     val density = LocalDensity.current
+    val view = LocalView.current
 
     var lyrics by remember { mutableStateOf<Lyrics?>(null) }
 
@@ -143,6 +148,13 @@ fun Lyrics(
 
     val text = remember(lyrics, showSynchronizedLyrics) {
         if (showSynchronizedLyrics) lyrics?.synced else lyrics?.fixed
+    }
+
+    if (shouldKeepScreenAwake) DisposableEffect(Unit) {
+        view.keepScreenOn = true
+        onDispose {
+            view.keepScreenOn = false
+        }
     }
 
     LaunchedEffect(mediaId, shouldShowSynchronizedLyrics) {

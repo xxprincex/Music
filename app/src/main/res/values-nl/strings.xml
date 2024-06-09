@@ -230,6 +230,8 @@
     <string name="show_like_button_description">Laat de like knop direct in de speler zien</string>
     <string name="swipe_to_remove_item">Swipe om item te verwijderen</string>
     <string name="swipe_to_remove_item_description">Swipe naar links om een nummer uit de wachtrij te halen</string>
+    <string name="lyrics_keep_screen_awake">Houd scherm wakker (songtekst)</string>
+    <string name="lyrics_keep_screen_awake_description">Houdt het scherm aan terwijl je de songteksten leest</string>
 
     <string name="cache">Cache</string>
     <string name="cache_description">Wanneer de cache vol raakt worden de bestanden die het langst niet zijn gebruikt verwijderd</string>
