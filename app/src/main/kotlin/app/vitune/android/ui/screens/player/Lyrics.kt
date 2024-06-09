@@ -227,10 +227,8 @@ fun Lyrics(
                             }
                         } else lyrics = currentLyrics
 
-                        if (
-                            (shouldShowSynchronizedLyrics && lyrics?.synced?.isBlank() == true) ||
-                            (!shouldShowSynchronizedLyrics && lyrics?.fixed?.isBlank() == true)
-                        ) isError = true
+                        isError = (shouldShowSynchronizedLyrics && lyrics?.synced?.isBlank() == true) ||
+                                (!shouldShowSynchronizedLyrics && lyrics?.fixed?.isBlank() == true)
                     }
             }
         }.exceptionOrNull()
@@ -239,7 +237,7 @@ fun Lyrics(
 
     if (isEditing) TextFieldDialog(
         hintText = stringResource(R.string.enter_lyrics),
-        initialTextInput = text.orEmpty(),
+        initialTextInput = (if (shouldShowSynchronizedLyrics) lyrics?.synced else lyrics?.fixed).orEmpty(),
         singleLine = false,
         maxLines = 10,
         isTextInputValid = { true },
