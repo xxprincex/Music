@@ -13,6 +13,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.SaverScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.media3.common.MediaItem
@@ -55,7 +58,13 @@ fun Player?.DisposableListener(
 fun Player?.positionAndDurationState(
     delay: Duration = 500.milliseconds
 ): Pair<Long, Long> {
-    var state by remember {
+    var state by rememberSaveable(
+        this,
+        object : Saver<Pair<Long, Long>, List<Any>> {
+            override fun restore(value: List<Any>) = value[0] as Long to value[1] as Long
+            override fun SaverScope.save(value: Pair<Long, Long>) = listOf(value.first, value.second)
+        }
+    ) {
         mutableStateOf(this?.let { currentPosition to duration } ?: (0L to 1L))
     }
 

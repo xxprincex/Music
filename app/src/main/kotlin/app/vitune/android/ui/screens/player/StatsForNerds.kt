@@ -121,9 +121,7 @@ fun StatsForNerds(
                 cachedBytes -= span.length
             }
 
-            override fun onSpanTouched(cache: Cache, oldSpan: CacheSpan, newSpan: CacheSpan) {
-                cachedBytes = newSpan.length
-            }
+            override fun onSpanTouched(cache: Cache, oldSpan: CacheSpan, newSpan: CacheSpan) = Unit
         }
 
         currentBinder.cache.addListener(mediaId, listener)
