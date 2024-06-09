@@ -167,7 +167,8 @@ fun Thumbnail(
             StatsForNerds(
                 mediaId = currentWindow.mediaItem.mediaId,
                 isDisplayed = isShowingStatsForNerds && error == null,
-                onDismiss = { onShowStatsForNerds(false) }
+                onDismiss = { onShowStatsForNerds(false) },
+                modifier = Modifier.height(height.px.dp)
             )
 
             PlaybackError(
