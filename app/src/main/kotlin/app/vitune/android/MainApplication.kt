@@ -163,7 +163,7 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
         modifier: Modifier = Modifier,
         content: @Composable BoxWithConstraintsScope.() -> Unit
     ) = with(AppearancePreferences) {
-        val sampleBitmap by binder.collectProvidedBitmapAsState()
+        val sampleBitmap = binder.collectProvidedBitmapAsState()
         val appearance = appearance(
             source = colorSource,
             mode = colorMode,

@@ -40,6 +40,7 @@ val Innertube.SongItem.asMediaItem: MediaItem
                         artistNames = authors
                             ?.filter { it.endpoint != null }
                             ?.mapNotNull { it.name }
+                        artistIds = authors?.mapNotNull { it.endpoint?.browseId }
                         explicit = this@asMediaItem.explicit
                     }
                 )
