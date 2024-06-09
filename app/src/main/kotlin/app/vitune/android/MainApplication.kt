@@ -1,7 +1,6 @@
 package app.vitune.android
 
 import android.app.Application
-import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent

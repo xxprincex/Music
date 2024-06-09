@@ -838,8 +838,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         return {
             this
-                .setContentTitle(mediaMetadata.title)
-                .setContentText(mediaMetadata.artist)
+                .setContentTitle(mediaMetadata.title?.toString().orEmpty())
+                .setContentText(mediaMetadata.artist?.toString().orEmpty())
                 .setSubText(player.playerError?.message)
                 .setLargeIcon(bitmapProvider.bitmap)
                 .setAutoCancel(false)
