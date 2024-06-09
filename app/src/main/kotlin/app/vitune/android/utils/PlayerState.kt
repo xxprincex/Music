@@ -8,7 +8,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SnapshotMutationPolicy
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +37,7 @@ value class PlayerScope internal constructor(val player: Player)
 
 @Composable
 fun Player?.DisposableListener(
-    key: Any = Unit,
+    key: Any? = Unit,
     listenerProvider: PlayerScope.() -> Player.Listener
 ) {
     val currentListenerProvider by rememberUpdatedState(listenerProvider)
@@ -58,13 +60,7 @@ fun Player?.DisposableListener(
 fun Player?.positionAndDurationState(
     delay: Duration = 500.milliseconds
 ): Pair<Long, Long> {
-    var state by rememberSaveable(
-        this,
-        object : Saver<Pair<Long, Long>, List<Any>> {
-            override fun restore(value: List<Any>) = value[0] as Long to value[1] as Long
-            override fun SaverScope.save(value: Pair<Long, Long>) = listOf(value.first, value.second)
-        }
-    ) {
+    var state by remember {
         mutableStateOf(this?.let { currentPosition to duration } ?: (0L to 1L))
     }
 
@@ -103,11 +99,20 @@ typealias WindowState = Pair<Timeline.Window?, PlaybackException?>
 fun windowState(
     binder: PlayerService.Binder? = LocalPlayerServiceBinder.current
 ): WindowState {
-    val player = binder?.player ?: return null to null
-    var window by remember { mutableStateOf(player.currentWindow) }
-    var error by remember { mutableStateOf<PlaybackException?>(player.playerError) }
+    var window by remember { mutableStateOf(binder?.player?.currentWindow) }
+    var error by remember { mutableStateOf<PlaybackException?>(binder?.player?.playerError) }
+    val state by remember {
+        derivedStateOf(
+            policy = object : SnapshotMutationPolicy<WindowState> {
+                override fun equivalent(a: WindowState, b: WindowState) =
+                    a.first === b.first && a.second == b.second
+            }
+        ) {
+            window to error
+        }
+    }
 
-    player.DisposableListener {
+    binder?.player.DisposableListener {
         object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 window = player.currentWindow
@@ -123,7 +128,7 @@ fun windowState(
         }
     }
 
-    return window to error
+    return state
 }
 
 @Composable

@@ -155,7 +155,10 @@ fun Player(
     BottomSheet(
         state = layoutState,
         modifier = modifier,
-        onDismiss = { binder?.let { onDismiss(it) } },
+        onDismiss = {
+            binder?.let { onDismiss(it) }
+            layoutState.dismissSoft()
+        },
         collapsedContent = { innerModifier ->
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -165,15 +168,15 @@ fun Player(
                         if (horizontalSwipeToClose) modifier.onSwipe(
                             animateOffset = true,
                             onSwipeOut = { animationJob ->
+                                binder?.let { onDismiss(it) }
                                 animationJob.join()
                                 layoutState.dismissSoft()
-                                binder?.let { onDismiss(it) }
                             }
                         ) else modifier
                     }
+                    .fillMaxSize()
                     .clip(shape)
                     .background(colorPalette.background1)
-                    .fillMaxSize()
                     .drawBehind {
                         drawRect(
                             color = colorPalette.collapsedPlayerProgressBar,

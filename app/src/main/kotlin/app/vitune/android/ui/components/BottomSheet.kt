@@ -245,6 +245,7 @@ class BottomSheetState internal constructor(
 
 @Composable
 fun rememberBottomSheetState(
+    key: Any? = Unit,
     dismissedBound: Dp,
     expandedBound: Dp,
     collapsedBound: Dp = dismissedBound,
@@ -257,7 +258,7 @@ fun rememberBottomSheetState(
         mutableStateOf(initialAnchor)
     }
 
-    return remember(dismissedBound, expandedBound, collapsedBound, coroutineScope) {
+    return remember(key, dismissedBound, expandedBound, collapsedBound, coroutineScope) {
         val initialValue = when (previousAnchor) {
             BottomSheetState.Anchor.Dismissed -> dismissedBound
             BottomSheetState.Anchor.Collapsed -> collapsedBound

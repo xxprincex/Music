@@ -10,6 +10,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.LocalIndication
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import androidx.credentials.CredentialManager
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -112,14 +114,21 @@ import kotlinx.coroutines.withContext
 
 private const val TAG = "MainActivity"
 
+// Viewmodel in order to avoid recreating the entire Player state (WORKAROUND)
+private class MainViewModel : ViewModel() {
+    var binder: PlayerService.Binder? by mutableStateOf(null)
+}
+
 class MainActivity : ComponentActivity(), MonetColorsChangedListener {
+    private val vm: MainViewModel by viewModels()
+
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            if (service is PlayerService.Binder) this@MainActivity.binder = service
+            if (service is PlayerService.Binder) vm.binder = service
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            binder = null
+            vm.binder = null
             // Try to rebind, otherwise fail
             unbindService(this)
             bindService(intent<PlayerService>(), this, Context.BIND_AUTO_CREATE)
@@ -128,8 +137,6 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
 
     private var _monet: MonetCompat? by mutableStateOf(null)
     private val monet get() = _monet ?: throw MonetActivityAccessException()
-
-    private var binder by mutableStateOf<PlayerService.Binder?>(null)
 
     override fun onStart() {
         super.onStart()
@@ -163,7 +170,7 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
         modifier: Modifier = Modifier,
         content: @Composable BoxWithConstraintsScope.() -> Unit
     ) = with(AppearancePreferences) {
-        val sampleBitmap = binder.collectProvidedBitmapAsState()
+        val sampleBitmap = vm.binder.collectProvidedBitmapAsState()
         val appearance = appearance(
             source = colorSource,
             mode = colorMode,
@@ -182,7 +189,11 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
                 .fillMaxSize()
                 .background(appearance.colorPalette.background0)
         ) {
-            CompositionLocalProvider(LocalAppearance provides appearance) {
+            CompositionLocalProvider(
+                LocalAppearance provides appearance,
+                LocalPlayerServiceBinder provides vm.binder,
+                LocalCredentialManager provides Dependencies.credentialManager
+            ) {
                 content()
             }
         }
@@ -204,6 +215,7 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
             )
 
             val playerBottomSheetState = rememberBottomSheetState(
+                key = vm.binder,
                 dismissedBound = 0.dp,
                 collapsedBound = Dimensions.items.collapsedPlayerHeight + bottomDp,
                 expandedBound = maxHeight
@@ -231,7 +243,6 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
                 LocalIndication provides rememberRipple(),
                 LocalRippleTheme provides rippleTheme(),
                 LocalShimmerTheme provides shimmerTheme(),
-                LocalPlayerServiceBinder provides binder,
                 LocalPlayerAwareWindowInsets provides playerAwareWindowInsets,
                 LocalLayoutDirection provides LayoutDirection.Ltr,
                 LocalPersistMap provides Dependencies.application.persistMap,
@@ -278,7 +289,7 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
                 )
             }
 
-            binder?.player.DisposableListener {
+            vm.binder?.player.DisposableListener {
                 object : Player.Listener {
                     override fun onMediaItemTransition(
                         mediaItem: MediaItem?,
@@ -343,7 +354,7 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
                     }
                 }?.let { videoId ->
                     Innertube.song(videoId)?.getOrNull()?.let { song ->
-                        val binder = snapshotFlow { binder }.filterNotNull().first()
+                        val binder = snapshotFlow { vm.binder }.filterNotNull().first()
 
                         withContext(Dispatchers.Main) {
                             binder.player.forcePlay(song.asMediaItem)
@@ -379,6 +390,7 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
 val LocalPlayerServiceBinder = staticCompositionLocalOf<PlayerService.Binder?> { null }
 val LocalPlayerAwareWindowInsets =
     compositionLocalOf<WindowInsets> { error("No player insets provided") }
+val LocalCredentialManager = staticCompositionLocalOf { Dependencies.credentialManager }
 
 class MainApplication : Application(), ImageLoaderFactory, Configuration.Provider {
     override fun onCreate() {

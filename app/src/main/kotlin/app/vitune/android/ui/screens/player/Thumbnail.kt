@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -33,6 +34,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.C
 import app.vitune.android.Database
 import app.vitune.android.LocalPlayerServiceBinder
 import app.vitune.android.R
@@ -63,24 +65,28 @@ fun Thumbnail(
     modifier: Modifier = Modifier
 ) {
     val binder = LocalPlayerServiceBinder.current
-    val player = binder?.player ?: return
-
     val (colorPalette, _, _, thumbnailShape) = LocalAppearance.current
-    val thumbnailSize = Dimensions.thumbnails.player.song
 
-    val (nullableWindow, error) = windowState()
-    val window = nullableWindow ?: return
+    val (window, error) = windowState()
 
     AnimatedContent(
         targetState = window,
         transitionSpec = {
             val duration = 500
+            val initial = initialState
+            val target = targetState
+
+            if (initial == null || target == null) return@AnimatedContent ContentTransform(
+                targetContentEnter = fadeIn(tween(duration)),
+                initialContentExit = fadeOut(tween(duration)),
+                sizeTransform = null
+            )
+
             val sizeTransform = SizeTransform(clip = false) { _, _ ->
                 tween(durationMillis = duration, delayMillis = duration)
             }
 
-            val direction =
-                if (targetState.firstPeriodIndex > initialState.firstPeriodIndex) Left else Right
+            val direction = if (target.firstPeriodIndex < initial.firstPeriodIndex) Right else Left
 
             ContentTransform(
                 targetContentEnter = slideIntoContainer(direction, tween(duration)) +
@@ -94,11 +100,11 @@ fun Thumbnail(
         },
         modifier = modifier.onSwipe(
             onSwipeLeft = {
-                binder.player.forceSeekToNext()
+                binder?.player?.forceSeekToNext()
             },
             onSwipeRight = {
-                binder.player.seekToDefaultPosition()
-                binder.player.forceSeekToPrevious()
+                binder?.player?.seekToDefaultPosition()
+                binder?.player?.forceSeekToPrevious()
             }
         ),
         contentAlignment = Alignment.Center,
@@ -106,19 +112,23 @@ fun Thumbnail(
     ) { currentWindow ->
         val shadowElevation by animateDpAsState(
             targetValue = if (window == currentWindow) 8.dp else 0.dp,
-            animationSpec = tween(500),
+            animationSpec = tween(
+                durationMillis = 500,
+                delayMillis = 500,
+                easing = LinearEasing
+            ),
             label = ""
         )
         val blurRadius by animateDpAsState(
             targetValue = if (
-                (isShowingLyrics && !currentWindow.mediaItem.isLocal) ||
+                (isShowingLyrics && currentWindow?.mediaItem?.isLocal == false) ||
                 error != null || isShowingStatsForNerds
             ) 8.dp else 0.dp,
             animationSpec = tween(500),
             label = ""
         )
 
-        Box(
+        if (currentWindow != null) Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
@@ -131,7 +141,8 @@ fun Thumbnail(
             var height by remember { mutableIntStateOf(0) }
 
             AsyncImage(
-                model = currentWindow.mediaItem.mediaMetadata.artworkUri.thumbnail((thumbnailSize - 64.dp).px),
+                model = currentWindow.mediaItem.mediaMetadata.artworkUri
+                    ?.thumbnail((Dimensions.thumbnails.player.song - 64.dp).px),
                 error = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = null,
                 contentScale = ContentScale.FillWidth,
@@ -159,7 +170,7 @@ fun Thumbnail(
                 onDismiss = { onShowLyrics(false) },
                 ensureSongInserted = { Database.insert(currentWindow.mediaItem) },
                 mediaMetadataProvider = currentWindow.mediaItem::mediaMetadata,
-                durationProvider = player::getDuration,
+                durationProvider = { binder?.player?.duration ?: C.TIME_UNSET },
                 onOpenDialog = onOpenDialog,
                 modifier = Modifier.height(height.px.dp)
             )
@@ -186,7 +197,7 @@ fun Thumbnail(
                         else -> stringResource(R.string.error_unknown_playback)
                     }
                 },
-                onDismiss = player::prepare
+                onDismiss = { binder?.player?.prepare() }
             )
         }
     }
