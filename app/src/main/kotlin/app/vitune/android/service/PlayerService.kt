@@ -76,6 +76,7 @@ import app.vitune.android.preferences.PlayerPreferences
 import app.vitune.android.transaction
 import app.vitune.android.utils.ActionReceiver
 import app.vitune.android.utils.ConditionalCacheDataSourceFactory
+import app.vitune.android.utils.EqualizerIntentBundleAccessor
 import app.vitune.android.utils.InvincibleService
 import app.vitune.android.utils.TimerJob
 import app.vitune.android.utils.YouTubeRadio
@@ -725,15 +726,19 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     private fun sendOpenEqualizerIntent() = sendBroadcast(
         Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION).apply {
-            putExtra(AudioEffect.EXTRA_AUDIO_SESSION, player.audioSessionId)
-            putExtra(AudioEffect.EXTRA_PACKAGE_NAME, packageName)
-            putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
+            replaceExtras(EqualizerIntentBundleAccessor.bundle {
+                audioSession = player.audioSessionId
+                packageName = packageName
+                contentType = AudioEffect.CONTENT_TYPE_MUSIC
+            })
         }
     )
 
     private fun sendCloseEqualizerIntent() = sendBroadcast(
         Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION).apply {
-            putExtra(AudioEffect.EXTRA_AUDIO_SESSION, player.audioSessionId)
+            replaceExtras(EqualizerIntentBundleAccessor.bundle {
+                audioSession = player.audioSessionId
+            })
         }
     )
 

@@ -1,6 +1,7 @@
 package app.vitune.android
 
 import android.app.Application
+import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -72,8 +73,11 @@ import app.vitune.android.ui.screens.artistRoute
 import app.vitune.android.ui.screens.home.HomeScreen
 import app.vitune.android.ui.screens.player.Player
 import app.vitune.android.ui.screens.playlistRoute
+import app.vitune.android.ui.screens.searchResultRoute
+import app.vitune.android.ui.screens.settingsRoute
 import app.vitune.android.utils.DisposableListener
 import app.vitune.android.utils.LocalMonetCompat
+import app.vitune.android.utils.activityIntentBundle
 import app.vitune.android.utils.asMediaItem
 import app.vitune.android.utils.collectProvidedBitmapAsState
 import app.vitune.android.utils.forcePlay
@@ -115,7 +119,7 @@ import kotlinx.coroutines.withContext
 private const val TAG = "MainActivity"
 
 // Viewmodel in order to avoid recreating the entire Player state (WORKAROUND)
-private class MainViewModel : ViewModel() {
+class MainViewModel : ViewModel() {
     var binder: PlayerService.Binder? by mutableStateOf(null)
 }
 
@@ -312,52 +316,75 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
 
     @Suppress("CyclomaticComplexMethod")
     private fun handleIntent(intent: Intent) {
-        val uri = intent.data ?: intent.getStringExtra(Intent.EXTRA_TEXT)?.toUri() ?: return
-        intent.data = null
-        intent.putExtra(Intent.EXTRA_TEXT, null as String?)
+        val extras = intent.extras?.activityIntentBundle
 
-        val path = uri.pathSegments.firstOrNull()
+        when (intent.action) {
+            Intent.ACTION_SEARCH -> {
+                val query = extras?.query ?: return
+                extras.query = null
 
-        Log.d(TAG, "Opening url: $uri ($path)")
+                lifecycleScope.launch(Dispatchers.IO) {
+                    searchResultRoute.ensureGlobal(query)
+                }
+            }
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            when (path) {
-                "playlist" -> uri.getQueryParameter("list")?.let { playlistId ->
-                    val browseId = "VL$playlistId"
+            Intent.ACTION_APPLICATION_PREFERENCES -> lifecycleScope.launch {
+                settingsRoute.ensureGlobal()
+            }
 
-                    if (playlistId.startsWith("OLAK5uy_")) Innertube.playlistPage(
-                        body = BrowseBody(browseId = browseId)
-                    )
-                        ?.getOrNull()
-                        ?.let { page ->
-                            page.songsPage?.items?.firstOrNull()?.album?.endpoint?.browseId
-                                ?.let { albumRoute.ensureGlobal(it) }
+            Intent.ACTION_VIEW, Intent.ACTION_SEND -> {
+                val uri = intent.data ?: runCatching { extras?.text?.toUri() }.getOrNull() ?: return
+                intent.data = null
+                extras?.text = null
+
+                val path = uri.pathSegments.firstOrNull()
+
+                Log.d(TAG, "Opening url: $uri ($path)")
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    when (path) {
+                        "search" -> uri.getQueryParameter("q")?.let { query ->
+                            searchResultRoute.ensureGlobal(query)
                         }
-                    else playlistRoute.ensureGlobal(
-                        p0 = browseId,
-                        p1 = uri.getQueryParameter("params"),
-                        p2 = null,
-                        p3 = playlistId.startsWith("RDCLAK5uy_")
-                    )
-                }
 
-                "channel", "c" -> uri.lastPathSegment?.let { channelId ->
-                    artistRoute.ensureGlobal(channelId)
-                }
+                        "playlist" -> uri.getQueryParameter("list")?.let { playlistId ->
+                            val browseId = "VL$playlistId"
 
-                else -> when {
-                    path == "watch" -> uri.getQueryParameter("v")
-                    uri.host == "youtu.be" -> path
-                    else -> {
-                        toast(getString(R.string.error_url, uri))
-                        null
-                    }
-                }?.let { videoId ->
-                    Innertube.song(videoId)?.getOrNull()?.let { song ->
-                        val binder = snapshotFlow { vm.binder }.filterNotNull().first()
+                            if (playlistId.startsWith("OLAK5uy_")) Innertube.playlistPage(
+                                body = BrowseBody(browseId = browseId)
+                            )
+                                ?.getOrNull()
+                                ?.let { page ->
+                                    page.songsPage?.items?.firstOrNull()?.album?.endpoint?.browseId
+                                        ?.let { albumRoute.ensureGlobal(it) }
+                                }
+                            else playlistRoute.ensureGlobal(
+                                p0 = browseId,
+                                p1 = uri.getQueryParameter("params"),
+                                p2 = null,
+                                p3 = playlistId.startsWith("RDCLAK5uy_")
+                            )
+                        }
 
-                        withContext(Dispatchers.Main) {
-                            binder.player.forcePlay(song.asMediaItem)
+                        "channel", "c" -> uri.lastPathSegment?.let { channelId ->
+                            artistRoute.ensureGlobal(channelId)
+                        }
+
+                        else -> when {
+                            path == "watch" -> uri.getQueryParameter("v")
+                            uri.host == "youtu.be" -> path
+                            else -> {
+                                toast(getString(R.string.error_url, uri))
+                                null
+                            }
+                        }?.let { videoId ->
+                            Innertube.song(videoId)?.getOrNull()?.let { song ->
+                                val binder = snapshotFlow { vm.binder }.filterNotNull().first()
+
+                                withContext(Dispatchers.Main) {
+                                    binder.player.forcePlay(song.asMediaItem)
+                                }
+                            }
                         }
                     }
                 }
