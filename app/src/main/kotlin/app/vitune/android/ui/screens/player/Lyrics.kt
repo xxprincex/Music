@@ -118,7 +118,8 @@ fun Lyrics(
     setShouldShowSynchronizedLyrics: (Boolean) -> Unit = {
         PlayerPreferences.isShowingSynchronizedLyrics = it
     },
-    shouldKeepScreenAwake: Boolean = AppearancePreferences.lyricsKeepScreenAwake
+    shouldKeepScreenAwake: Boolean = AppearancePreferences.lyricsKeepScreenAwake,
+    shouldUpdateLyrics: Boolean = true
 ) = AnimatedVisibility(
     visible = isDisplayed,
     enter = fadeIn(),
@@ -165,19 +166,25 @@ fun Lyrics(
                     .distinctUntilChanged()
                     .cancellable()
                     .collect { currentLyrics ->
-                        val mediaMetadata = currentMediaMetadataProvider()
-                        var duration = withContext(Dispatchers.Main) { currentDurationProvider() }
+                        if (
+                            !shouldUpdateLyrics ||
+                            (currentLyrics?.fixed != null && currentLyrics.synced != null)
+                        ) lyrics = currentLyrics
+                        else {
+                            val mediaMetadata = currentMediaMetadataProvider()
+                            var duration =
+                                withContext(Dispatchers.Main) { currentDurationProvider() }
 
-                        while (duration == C.TIME_UNSET) {
-                            delay(100)
-                            duration = withContext(Dispatchers.Main) { currentDurationProvider() }
-                        }
+                            while (duration == C.TIME_UNSET) {
+                                delay(100)
+                                duration =
+                                    withContext(Dispatchers.Main) { currentDurationProvider() }
+                            }
 
-                        val album = mediaMetadata.albumTitle?.toString()
-                        val artist = mediaMetadata.artist?.toString().orEmpty()
-                        val title = mediaMetadata.title?.toString().orEmpty()
+                            val album = mediaMetadata.albumTitle?.toString()
+                            val artist = mediaMetadata.artist?.toString().orEmpty()
+                            val title = mediaMetadata.title?.toString().orEmpty()
 
-                        if (currentLyrics?.fixed == null || currentLyrics.synced == null) {
                             lyrics = null
                             isError = false
 
@@ -225,10 +232,11 @@ fun Lyrics(
                                     }
                                 }
                             }
-                        } else lyrics = currentLyrics
+                        }
 
-                        isError = (shouldShowSynchronizedLyrics && lyrics?.synced?.isBlank() == true) ||
-                                (!shouldShowSynchronizedLyrics && lyrics?.fixed?.isBlank() == true)
+                        isError =
+                            (shouldShowSynchronizedLyrics && lyrics?.synced?.isBlank() == true) ||
+                                    (!shouldShowSynchronizedLyrics && lyrics?.fixed?.isBlank() == true)
                     }
             }
         }.exceptionOrNull()
