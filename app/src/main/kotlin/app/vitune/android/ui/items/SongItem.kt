@@ -221,7 +221,11 @@ fun SongItem(
                         text = authors,
                         style = typography.xs.semiBold.secondary,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(
+                            weight = 1f,
+                            fill = false
+                        )
                     )
                 }
 
