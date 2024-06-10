@@ -150,7 +150,7 @@ fun Player(
         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
         .asPaddingValues()
 
-    OnGlobalRoute { layoutState.collapseSoft() }
+    OnGlobalRoute { if (layoutState.expanded) layoutState.collapseSoft() }
 
     BottomSheet(
         state = layoutState,

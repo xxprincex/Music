@@ -108,6 +108,7 @@
 
     <string name="moods_and_genres">Moods and genres</string>
     <string name="new_released_albums">New released albums</string>
+    <string name="more">More</string>
 
     <string name="artist_has_no_albums">This artist hasn\'t released an album yet</string>
     <string name="artist_has_no_singles">This artist hasn\'t released a single yet</string>

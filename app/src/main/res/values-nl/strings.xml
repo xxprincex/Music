@@ -108,6 +108,7 @@
 
     <string name="moods_and_genres">Stemmingen en genres</string>
     <string name="new_released_albums">Nieuwe uitgebrachte albums</string>
+    <string name="more">Meer</string>
 
     <string name="artist_has_no_albums">Deze artiest heeft geen albums uitbebracht</string>
     <string name="artist_has_no_singles">Deze artiest heeft geen singles uitbebracht</string>

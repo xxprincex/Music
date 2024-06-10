@@ -277,6 +277,7 @@ class EqualizerIntentBundleAccessor(val extras: Bundle = Bundle()) : BundleAcces
     var contentType by extras.int(AudioEffect.EXTRA_CONTENT_TYPE)
         @ContentType
         get
+
         @SuppressLint("SupportAnnotationUsage")
         @ContentType
         set
