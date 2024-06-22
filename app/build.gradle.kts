@@ -17,7 +17,7 @@ android {
         minSdk = 21
         targetSdk = 34
 
-        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 6
+        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 7
         versionName = project.version.toString()
 
         multiDexEnabled = true
