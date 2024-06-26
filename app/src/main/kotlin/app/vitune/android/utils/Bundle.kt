@@ -5,6 +5,7 @@ import android.app.SearchManager
 import android.content.Intent
 import android.media.audiofx.AudioEffect
 import android.os.Bundle
+import android.provider.MediaStore
 import androidx.annotation.IntDef
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadWriteProperty
@@ -243,6 +244,13 @@ class ActivityIntentBundleAccessor(val extras: Bundle = Bundle()) : BundleAccess
 
     var query by extras.string(SearchManager.QUERY)
     var text by extras.string(Intent.EXTRA_TEXT)
+    var mediaFocus by extras.string(MediaStore.EXTRA_MEDIA_FOCUS)
+
+    var album by extras.string(MediaStore.EXTRA_MEDIA_ALBUM)
+    var artist by extras.string(MediaStore.EXTRA_MEDIA_ARTIST)
+    var genre by extras.string("android.intent.extra.genre")
+    var playlist by extras.string("android.intent.extra.playlist")
+    var title by extras.string(MediaStore.EXTRA_MEDIA_TITLE)
 }
 
 inline val Bundle.activityIntentBundle get() = ActivityIntentBundleAccessor(this)

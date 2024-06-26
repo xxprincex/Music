@@ -21,6 +21,8 @@ kotlin {
 }
 
 dependencies {
+    implementation(libs.core.ktx)
+
     detektPlugins(libs.detekt.compose)
     detektPlugins(libs.detekt.formatting)
 }

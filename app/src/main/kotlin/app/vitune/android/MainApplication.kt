@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -387,6 +388,24 @@ class MainActivity : ComponentActivity(), MonetColorsChangedListener {
                         }
                     }
                 }
+            }
+
+            MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH -> {
+                val query = when (extras?.mediaFocus) {
+                    null, "vnd.android.cursor.item/*" -> extras?.query ?: extras?.text
+                    MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE -> extras.genre
+                    MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE -> extras.artist
+                    MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE -> extras.album
+                    "vnd.android.cursor.item/audio" -> listOfNotNull(
+                        extras.album, extras.artist, extras.genre, extras.title
+                    ).joinToString(separator = " ")
+                    @Suppress("deprecation")
+                    MediaStore.Audio.Playlists.ENTRY_CONTENT_TYPE -> extras.playlist
+
+                    else -> null
+                }
+
+                if (!query.isNullOrBlank()) vm.binder?.playFromSearch(query)
             }
         }
     }
