@@ -50,7 +50,7 @@
     <string name="shuffle">随机播放</string>
     <string name="sync">同步</string>
     <string name="start_radio">播放电台</string>
-    <string name="play_next">播放下一首</string>
+    <string name="play_next">下一首播放</string>
     <string name="enqueue">加入队列</string>
 
     <string name="sleep_timer">睡眠定时器</string>
@@ -226,7 +226,7 @@
     <string name="previous_button_while_collapsed">折叠时显示上一曲按钮</string>
     <string name="previous_button_while_collapsed_description">播放器折叠时显示上一曲按钮</string>
     <string name="swipe_horizontally_to_close">横向滑动关闭</string>
-    <string name="swipe_horizontally_to_close_description">在折叠播放器上左右滑动可关闭播放器。对启用安卓单手模式的用户很有用。</string>
+    <string name="swipe_horizontally_to_close_description">在折叠播放器上左右滑动可关闭播放器。对启用安卓单手模式的用户很有用</string>
     <string name="show_like_button">显示喜欢按钮</string>
     <string name="show_like_button_description">在播放器中直接显示喜欢按钮</string>
     <string name="swipe_to_remove_item">滑动移除项目</string>
@@ -250,19 +250,19 @@
     <string name="reset_quick_picks">重置快速选择</string>
     <string name="quick_picks_empty">快速选择已清空</string>
     <string name="pause_playback_time">暂停播放时间</string>
-    <string name="format_pause_playback_time_description">停止保存播放时间。这将暂停“我的热门 %1$s”播放列表中的统计数据！</string>
+    <string name="format_pause_playback_time_description">停止保存播放时间。这将暂停 “我的热门 %1$s” 播放列表中的统计数据！</string>
 
     <string name="backup">备份</string>
-    <string name="backup_description">个人偏好（如主题模式）和缓存将被排除。</string>
+    <string name="backup_description">个人偏好（如主题模式）和缓存将被排除</string>
     <string name="backup_action_description">将数据库导出到外部存储</string>
     <string name="restore">恢复</string>
-    <string name="restore_warning">现有数据将被覆盖。\n恢复数据库后，ViTune 将自动关闭。</string>
+    <string name="restore_warning">现有数据将被覆盖。\n恢复数据库后，ViTune 将自动关闭</string>
     <string name="restore_description">从外部存储导入数据库</string>
 
     <string name="other">其他</string>
     <string name="android_auto">Android Auto</string>
     <string name="android_auto_description">启用 Android Auto 支持</string>
-    <string name="android_auto_warning">请记得在 Android Auto 的开发者设置中启用“未知来源”。</string>
+    <string name="android_auto_warning">请记得在 Android Auto 的开发者设置中启用 “未知来源”。</string>
     <string name="search_history">搜索历史</string>
     <string name="pause_search_history">暂停搜索历史</string>
     <string name="pause_search_history_description">不保存新的搜索查询，也不显示历史记录</string>
@@ -271,7 +271,7 @@
     <string name="empty_history">历史记录为空</string>
     <string name="built_in_playlists">内置播放列表</string>
     <string name="top_list_length">热门列表长度</string>
-    <string name="top_list_length_description">限制“我的热门 x”播放列表的长度</string>
+    <string name="top_list_length_description">限制 “我的热门 x” 播放列表的长度</string>
 
     <string name="service_lifetime">服务时长</string>
     <string name="service_lifetime_warning">如果应用了电池优化，暂停时播放通知可能会突然消失。</string>
@@ -284,7 +284,7 @@
 
     <string name="need_help">需要帮助？</string>
     <string name="need_help_description">大多数情况下，即使启用了不可杀服务，应用在后台停止工作也不是开发者的错。\n检查你的设备制造商是否杀死了你的应用（点击跳转）</string>
-    <string name="service_lifetime_report_issue">如果你真的认为应用本身有问题，请前往“关于”标签</string>
+    <string name="service_lifetime_report_issue">如果你真的认为应用本身有问题，请前往 “关于” 标签</string>
     <string name="troubleshooting">故障排除</string>
     <string name="troubleshooting_warning">警告：当音频播放失败时，请最后尝试使用这些按钮</string>
     <string name="reload_app_internals">重新加载应用内部</string>
@@ -385,7 +385,7 @@
     <string name="version_check">自动检查更新</string>
 
     <string name="skip_on_error">自动跳过</string>
-    <string name="skip_on_error_description">当发生错误时跳过当前歌曲。</string>
+    <string name="skip_on_error_description">当发生错误时跳过当前歌曲</string>
     <string name="skip_on_error_notification">由于错误，已跳过 %s</string>
     <string name="skip_on_error_notification_unknown_song">由于错误，已跳过当前歌曲</string>
 
