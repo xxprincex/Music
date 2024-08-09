@@ -76,7 +76,7 @@ import app.vitune.android.preferences.PlayerPreferences
 import app.vitune.android.transaction
 import app.vitune.android.utils.ActionReceiver
 import app.vitune.android.utils.ConditionalCacheDataSourceFactory
-import app.vitune.android.utils.EqualizerIntentBundleAccessor
+import app.vitune.core.ui.utils.EqualizerIntentBundleAccessor
 import app.vitune.android.utils.InvincibleService
 import app.vitune.android.utils.TimerJob
 import app.vitune.android.utils.YouTubeRadio
@@ -90,7 +90,7 @@ import app.vitune.android.utils.intent
 import app.vitune.android.utils.mediaItems
 import app.vitune.android.utils.setPlaybackPitch
 import app.vitune.android.utils.shouldBePlaying
-import app.vitune.android.utils.songBundle
+import app.vitune.core.ui.utils.songBundle
 import app.vitune.android.utils.thumbnail
 import app.vitune.android.utils.timer
 import app.vitune.android.utils.toast

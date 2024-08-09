@@ -79,14 +79,14 @@ import app.vitune.android.ui.screens.searchResultRoute
 import app.vitune.android.ui.screens.settingsRoute
 import app.vitune.android.utils.DisposableListener
 import app.vitune.android.utils.LocalMonetCompat
-import app.vitune.android.utils.activityIntentBundle
+import app.vitune.core.ui.utils.activityIntentBundle
 import app.vitune.android.utils.asMediaItem
 import app.vitune.android.utils.collectProvidedBitmapAsState
 import app.vitune.android.utils.forcePlay
 import app.vitune.android.utils.intent
 import app.vitune.android.utils.invokeOnReady
 import app.vitune.android.utils.setDefaultPalette
-import app.vitune.android.utils.songBundle
+import app.vitune.core.ui.utils.songBundle
 import app.vitune.android.utils.toast
 import app.vitune.compose.persist.LocalPersistMap
 import app.vitune.compose.persist.PersistMap
