@@ -46,6 +46,7 @@ object PlayerPreferences : GlobalPreferencesHolder() {
     var showRemaining by boolean(false)
 
     var skipOnError by boolean(false)
+    var handleAudioFocus by boolean(true)
 
     enum class PlayerLayout(val displayName: @Composable () -> String) {
         Classic(displayName = { stringResource(R.string.classic_player_layout_name) }),
