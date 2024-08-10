@@ -151,8 +151,9 @@ fun Lyrics(
         if (showSynchronizedLyrics) lyrics?.synced else lyrics?.fixed
     }
 
-    if (shouldKeepScreenAwake) DisposableEffect(Unit) {
-        view.keepScreenOn = true
+    DisposableEffect(shouldKeepScreenAwake) {
+        view.keepScreenOn = shouldKeepScreenAwake
+
         onDispose {
             view.keepScreenOn = false
         }
