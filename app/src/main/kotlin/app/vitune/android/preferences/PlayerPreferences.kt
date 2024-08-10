@@ -44,6 +44,8 @@ object PlayerPreferences : GlobalPreferencesHolder() {
     var wavySeekBarQuality by enum(WavySeekBarQuality.Great)
     var showLike by boolean(false)
     var showRemaining by boolean(false)
+    var lyricsKeepScreenAwake by boolean(false)
+    var lyricsShowSystemBars by boolean(true)
 
     var skipOnError by boolean(false)
     var handleAudioFocus by boolean(true)
