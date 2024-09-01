@@ -172,9 +172,7 @@ fun HomePlaylists(
                     songCount = null,
                     thumbnailSize = Dimensions.thumbnails.playlist,
                     alternative = true,
-                    modifier = Modifier
-                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.Favorites) })
-                        .animateItemPlacement()
+                    modifier = Modifier.clickable { onBuiltInPlaylist(BuiltInPlaylist.Favorites) }
                 )
             }
 
@@ -186,9 +184,7 @@ fun HomePlaylists(
                     songCount = null,
                     thumbnailSize = Dimensions.thumbnails.playlist,
                     alternative = true,
-                    modifier = Modifier
-                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.Offline) })
-                        .animateItemPlacement()
+                    modifier = Modifier.clickable { onBuiltInPlaylist(BuiltInPlaylist.Offline) }
                 )
             }
 
@@ -203,9 +199,19 @@ fun HomePlaylists(
                     songCount = null,
                     thumbnailSize = Dimensions.thumbnails.playlist,
                     alternative = true,
-                    modifier = Modifier
-                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.Top) })
-                        .animateItemPlacement()
+                    modifier = Modifier.clickable { onBuiltInPlaylist(BuiltInPlaylist.Top) }
+                )
+            }
+
+            item(key = "history") {
+                PlaylistItem(
+                    icon = R.drawable.history,
+                    colorTint = colorPalette.textDisabled,
+                    name = stringResource(R.string.history),
+                    songCount = null,
+                    thumbnailSize = Dimensions.thumbnails.playlist,
+                    alternative = true,
+                    modifier = Modifier.clickable { onBuiltInPlaylist(BuiltInPlaylist.History) }
                 )
             }
 
