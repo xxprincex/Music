@@ -1262,10 +1262,17 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                             .let { spec ->
                                 (chunkLength ?: format.contentLength)?.let { length ->
                                     val start = dataSpec.uriPositionOffset
+                                    val range = "$start-${start + length}"
 
                                     spec
                                         .subrange(start, length)
-                                        .withAdditionalHeaders(mapOf("Range" to "$start-${start + length}"))
+                                        .withAdditionalHeaders(mapOf("Range" to range))
+                                        .withUri(
+                                            spec.uri
+                                                .buildUpon()
+                                                .appendQueryParameter("range", range)
+                                                .build()
+                                        )
                                 } ?: spec
                             }
                     }
