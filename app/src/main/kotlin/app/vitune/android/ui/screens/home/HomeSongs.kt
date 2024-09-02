@@ -292,7 +292,10 @@ fun HomeSongs(
                         )
                         .animateItemPlacement()
                         .let {
-                            if (AppearancePreferences.swipeToHideSong) it.swipeToClose(filteredItems) { animationJob ->
+                            if (AppearancePreferences.swipeToHideSong) it.swipeToClose(
+                                key = filteredItems,
+                                requireUnconsumed = true
+                            ) { animationJob ->
                                 if (AppearancePreferences.swipeToHideSongConfirm)
                                     hidingSong = song.id
                                 else {

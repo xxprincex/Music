@@ -43,7 +43,8 @@ fun SongItem(
     song: Innertube.SongItem,
     thumbnailSize: Dp,
     modifier: Modifier = Modifier,
-    showDuration: Boolean = true
+    showDuration: Boolean = true,
+    clip: Boolean = true
 ) = SongItem(
     modifier = modifier,
     thumbnailUrl = song.thumbnail?.size(thumbnailSize.px),
@@ -52,7 +53,8 @@ fun SongItem(
     duration = song.durationText,
     explicit = song.explicit,
     thumbnailSize = thumbnailSize,
-    showDuration = showDuration
+    showDuration = showDuration,
+    clip = clip
 )
 
 @Composable
@@ -62,7 +64,8 @@ fun SongItem(
     modifier: Modifier = Modifier,
     onThumbnailContent: (@Composable BoxScope.() -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null,
-    showDuration: Boolean = true
+    showDuration: Boolean = true,
+    clip: Boolean = true
 ) {
     val extras = remember(song) { song.mediaMetadata.extras?.songBundle }
 
@@ -76,7 +79,8 @@ fun SongItem(
         thumbnailSize = thumbnailSize,
         onThumbnailContent = onThumbnailContent,
         trailingContent = trailingContent,
-        showDuration = showDuration
+        showDuration = showDuration,
+        clip = clip
     )
 }
 
@@ -88,7 +92,8 @@ fun SongItem(
     index: Int? = null,
     onThumbnailContent: @Composable (BoxScope.() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
-    showDuration: Boolean = true
+    showDuration: Boolean = true,
+    clip: Boolean = true
 ) = SongItem(
     modifier = modifier,
     index = index,
@@ -100,7 +105,8 @@ fun SongItem(
     thumbnailSize = thumbnailSize,
     onThumbnailContent = onThumbnailContent,
     trailingContent = trailingContent,
-    showDuration = showDuration
+    showDuration = showDuration,
+    clip = clip
 )
 
 @Composable
@@ -115,7 +121,8 @@ fun SongItem(
     index: Int? = null,
     onThumbnailContent: @Composable (BoxScope.() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
-    showDuration: Boolean = true
+    showDuration: Boolean = true,
+    clip: Boolean = true
 ) {
     val (colorPalette, typography, _, thumbnailShape) = LocalAppearance.current
 
@@ -158,7 +165,8 @@ fun SongItem(
         },
         modifier = modifier,
         trailingContent = trailingContent,
-        showDuration = showDuration
+        showDuration = showDuration,
+        clip = clip
     )
 }
 
@@ -172,11 +180,13 @@ fun SongItem(
     thumbnailContent: @Composable BoxScope.() -> Unit,
     modifier: Modifier = Modifier,
     trailingContent: @Composable (() -> Unit)? = null,
-    showDuration: Boolean = true
+    showDuration: Boolean = true,
+    clip: Boolean = true
 ) = ItemContainer(
     alternative = false,
     thumbnailSize = thumbnailSize,
-    modifier = modifier
+    modifier = if (clip) Modifier.clip(LocalAppearance.current.thumbnailShape) then modifier
+    else modifier
 ) {
     val (colorPalette, typography) = LocalAppearance.current
 
