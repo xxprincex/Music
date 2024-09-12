@@ -205,3 +205,15 @@ fun <T> Flow<T>.onFirst(block: suspend (T) -> Unit): Flow<T> {
         isFirst = false
     }
 }
+
+inline fun <reified T : Throwable> Throwable.findCause(): T? {
+    if (this is T) return this
+
+    var th = cause
+    while (th != null) {
+        if (th is T) return th
+        th = th.cause
+    }
+
+    return null
+}

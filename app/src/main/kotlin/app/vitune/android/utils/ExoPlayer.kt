@@ -12,7 +12,7 @@ class RangeHandlerDataSourceFactory(private val parent: DataSource.Factory) : Da
         override fun open(dataSpec: DataSpec) = runCatching {
             parent.open(dataSpec)
         }.getOrElse { e ->
-            if (e is InvalidResponseCodeException && e.responseCode == 416) parent.open(
+            if (e.findCause<InvalidResponseCodeException>()?.responseCode == 416) parent.open(
                 dataSpec
                     .withRequestHeaders(
                         dataSpec.httpRequestHeaders.filter {

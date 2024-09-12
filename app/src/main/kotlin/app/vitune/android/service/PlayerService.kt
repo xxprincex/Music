@@ -45,6 +45,7 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException
 import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
@@ -85,6 +86,7 @@ import app.vitune.android.utils.TimerJob
 import app.vitune.android.utils.YouTubeRadio
 import app.vitune.android.utils.activityPendingIntent
 import app.vitune.android.utils.broadcastPendingIntent
+import app.vitune.android.utils.findCause
 import app.vitune.android.utils.findNextMediaItemById
 import app.vitune.android.utils.forcePlayFromBeginning
 import app.vitune.android.utils.forceSeekToNext
@@ -466,6 +468,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     override fun onPlayerError(error: PlaybackException) {
         super.onPlayerError(error)
+
+        if (error.findCause<InvalidResponseCodeException>()?.responseCode == 416) {
+            player.pause()
+            player.prepare()
+            player.play()
+            return
+        }
 
         if (!PlayerPreferences.skipOnError || !player.hasNextMediaItem()) return
 
