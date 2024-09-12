@@ -41,6 +41,7 @@ import androidx.media3.common.Timeline
 import androidx.media3.common.audio.SonicAudioProcessor
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -61,6 +62,7 @@ import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink.DefaultAudioProcessorChain
 import androidx.media3.exoplayer.audio.SilenceSkippingAudioProcessor
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import androidx.media3.extractor.DefaultExtractorsFactory
 import app.vitune.android.Database
 import app.vitune.android.MainActivity
@@ -88,6 +90,7 @@ import app.vitune.android.utils.forcePlayFromBeginning
 import app.vitune.android.utils.forceSeekToNext
 import app.vitune.android.utils.forceSeekToPrevious
 import app.vitune.android.utils.get
+import app.vitune.android.utils.handleRangeErrors
 import app.vitune.android.utils.intent
 import app.vitune.android.utils.mediaItems
 import app.vitune.android.utils.progress
@@ -141,6 +144,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import android.os.Binder as AndroidBinder
@@ -904,6 +908,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             cache = cache
         ),
         /* extractorsFactory = */ DefaultExtractorsFactory()
+    ).setLoadErrorHandlingPolicy(
+        object : DefaultLoadErrorHandlingPolicy() {
+            override fun isEligibleForFallback(exception: IOException) = true
+        }
     )
 
     private fun createRendersFactory() = object : DefaultRenderersFactory(this) {
@@ -1171,7 +1179,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             cache: Cache,
             chunkLength: Long? = DEFAULT_CHUNK_LENGTH,
             ringBuffer: RingBuffer<Pair<String, Uri>?> = RingBuffer(2) { null }
-        ): ResolvingDataSource.Factory = ResolvingDataSource.Factory(
+        ): DataSource.Factory = ResolvingDataSource.Factory(
             ConditionalCacheDataSourceFactory(
                 cacheDataSourceFactory = CacheDataSource.Factory().setCache(cache),
                 upstreamDataSourceFactory = DefaultDataSource.Factory(
@@ -1260,8 +1268,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                             .setUri(url.toUri())
                             .build()
                             .let { spec ->
-                                (chunkLength ?: format.contentLength)?.let { length ->
+                                format.contentLength?.let { contentLength ->
                                     val start = dataSpec.uriPositionOffset
+                                    val length = (contentLength - start).coerceAtMost(
+                                        chunkLength ?: (contentLength - start)
+                                    )
                                     val range = "$start-${start + length}"
 
                                     spec
@@ -1286,6 +1297,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     /* errorCode = */ PlaybackException.ERROR_CODE_UNSPECIFIED
                 )
             }
-        }
+        }.handleRangeErrors()
     }
 }
