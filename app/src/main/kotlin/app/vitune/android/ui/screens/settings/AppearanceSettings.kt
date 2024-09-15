@@ -213,6 +213,12 @@ fun AppearanceSettings() = with(AppearancePreferences) {
                     onCheckedChange = { swipeToHideSongConfirm = it }
                 )
             }
+            SwitchSettingsEntry(
+                title = stringResource(R.string.hide_explicit),
+                text = stringResource(R.string.hide_explicit_description),
+                isChecked = hideExplicit,
+                onCheckedChange = { hideExplicit = it }
+            )
         }
     }
 }

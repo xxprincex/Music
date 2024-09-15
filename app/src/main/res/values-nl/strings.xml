@@ -373,6 +373,8 @@
     <string name="swipe_to_hide_song_description">Wanneer je een song naar links swipet wordt deze verwijderd uit de database en cache</string>
     <string name="swipe_to_hide_song_confirm">Bevestig swipen</string>
     <string name="swipe_to_hide_song_confirm_description">Als je een song swipet word je eerst om bevestiging gevraagd</string>
+    <string name="hide_explicit">Verberg expliciete nummers</string>
+    <string name="hide_explicit_description">Verbergt alle expliciete nummers in de hele app. De speler zal deze nummers ook overslaan terwijl deze instelling aanstaat.</string>
 
     <string name="version">Versie</string>
     <string name="check_new_version">Zoek naar updates</string>
