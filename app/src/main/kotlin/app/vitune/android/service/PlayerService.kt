@@ -97,6 +97,7 @@ import app.vitune.android.utils.handleUnknownErrors
 import app.vitune.android.utils.intent
 import app.vitune.android.utils.mediaItems
 import app.vitune.android.utils.progress
+import app.vitune.android.utils.readOnlyWhen
 import app.vitune.android.utils.setPlaybackPitch
 import app.vitune.android.utils.shouldBePlaying
 import app.vitune.android.utils.thumbnail
@@ -105,7 +106,6 @@ import app.vitune.android.utils.toast
 import app.vitune.compose.preferences.SharedPreferencesProperty
 import app.vitune.core.data.enums.ExoPlayerDiskCacheSize
 import app.vitune.core.data.utils.UriCache
-import app.vitune.core.data.utils.mb
 import app.vitune.core.ui.utils.EqualizerIntentBundleAccessor
 import app.vitune.core.ui.utils.isAtLeastAndroid10
 import app.vitune.core.ui.utils.isAtLeastAndroid12
@@ -1217,9 +1217,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             uriCache: UriCache<String, Long?> = UriCache()
         ): DataSource.Factory = ResolvingDataSource.Factory(
             ConditionalCacheDataSourceFactory(
-                cacheDataSourceFactory = cache.asDataSource,
-                upstreamDataSourceFactory = context.defaultDataSource
-            ) { !it.isLocal }
+                cacheDataSourceFactory = cache.readOnlyWhen { PlayerPreferences.pauseCache }.asDataSource,
+                upstreamDataSourceFactory = context.defaultDataSource,
+                shouldCache = { !it.isLocal }
+            )
         ) { dataSpec ->
             val mediaId = dataSpec.key?.removePrefix("https://youtube.com/watch?v=")
                 ?: error("A key must be set")
