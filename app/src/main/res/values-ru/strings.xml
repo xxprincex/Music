@@ -410,17 +410,19 @@
 
     <plurals name="format_reset_blacklist_description">
         <item quantity="one">Удалить %1$s песню из черного списка</item>
-        <item quantity="other">Удалить все %1$s песен из черного списка</item>
+        <item quantity="few">Удалить все %1$s песен из черного списка</item>
+        <item quantity="many">Удалить все %1$s песен из черного списка</item>
     </plurals>
 
     <plurals name="format_reset_quick_picks_amount">
         <item quantity="one">Удалить %1$s событие воспроизведения</item>
-        <item quantity="other">Удалить %1$s событий воспроизведения</item>
+        <item quantity="few">Удалить %1$s событий воспроизведения</item>
+        <item quantity="many">Удалить %1$s событий воспроизведения</item>
     </plurals>
 
     <plurals name="song_count_plural">
         <item quantity="one">%1$d песня</item>
-		    <item quantity="other">%1$d песен</item>
+        <item quantity="few">%1$d песни</item>
+        <item quantity="many">%1$d песен</item>
     </plurals>
 </resources>
-
