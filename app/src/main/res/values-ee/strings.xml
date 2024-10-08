@@ -21,7 +21,7 @@
     <string name="all_time">Kõik aeg</string>
 
     <string name="songs">Lood</string>
-    <string name="playlists">Esitusloendid</string>
+    <string name="playlists">Playlist`id</string>
     <string name="albums">Albumid</string>
     <string name="artists">Artistid</string>
     <string name="singles">Singlid</string>
@@ -91,7 +91,7 @@
     <string name="youtube_music_not_installed">YouTube Music ei ole sinu seadmesse installitud!</string>
 
     <string name="remove_from_queue">Eemalda järjekorrast</string>
-    <string name="remove_from_playlist">Eemalda Playlist`i</string>
+    <string name="remove_from_playlist">Eemalda Playlist`ist</string>
 
     <string name="hide_from_quick_picks">Peida "Kiirvalikutest"</string>
     <string name="confirm_hide_song">Kas sa tõesti tahad selle loo peita? Selle esitusaeg ja vahemälu kustutatakse.\nSee tegevus on pöördumatu.</string>
