@@ -85,9 +85,9 @@
 
     <string name="go_to_album">Mine albumisse</string>
 
-    <string name="watch_on_youtube">Vaata YouTube'is</string>
-    <string name="open_in_youtube_music">Ava YouTube Music'is</string>
-    <string name="watch_playlist_on_youtube">Vaata Playlist`i YouTube'is</string>
+    <string name="watch_on_youtube">Vaata YouTube\'is</string>
+    <string name="open_in_youtube_music">Ava YouTube Music\'is</string>
+    <string name="watch_playlist_on_youtube">Vaata Playlist`i YouTube\'is</string>
     <string name="youtube_music_not_installed">YouTube Music ei ole sinu seadmesse installitud!</string>
 
     <string name="remove_from_queue">Eemalda järjekorrast</string>
@@ -96,7 +96,7 @@
     <string name="hide_from_quick_picks">Peida "Kiirvalikutest"</string>
     <string name="confirm_hide_song">Kas sa tõesti tahad selle loo peita? Selle esitusaeg ja vahemälu kustutatakse.\nSee tegevus on pöördumatu.</string>
     <string name="confirm_delete_playlist">Kas sa tõesti tahad selle esitusloendi kustutada?</string>
-    <string name="confirm_delete_piped_session">Kas sa tõesti tahad selle Piped'i sessiooni kustutada?</string>
+    <string name="confirm_delete_piped_session">Kas sa tõesti tahad selle Piped\'i sessiooni kustutada?</string>
 
     <string name="other_versions">Teised versioonid</string>
     <string name="no_alternative_version">Sellel albumil ei ole alternatiivset versiooni</string>
@@ -121,11 +121,11 @@
     <string name="error_server_restrictions">Seda lugu ei saa mängida serveri piirangute tõttu</string>
     <string name="error_id_mismatch">Tagastatud video ID ei kattu nõutud omaga</string>
     <string name="error_unknown_playback">Tekkis tundmatu esitamise viga</string>
-    <string name="error_piped_link">Tekkis tundmatu viga sinu Piped'i konto sidumisel. Proovi uuesti.</string>
-    <string name="error_piped_instances_unavailable">Piped'i instantside loend ei ole hetkel saadaval</string>
-    <string name="error_bassboost_init">Tekkis viga Bass Boost'i initsialiseerimisel. Tõenäoliselt ei toeta sinu seade seda. Proovi bassi tuge muuta või proovi uuesti.</string>
+    <string name="error_piped_link">Tekkis tundmatu viga sinu Piped\'i konto sidumisel. Proovi uuesti.</string>
+    <string name="error_piped_instances_unavailable">Piped\'i instantside loend ei ole hetkel saadaval</string>
+    <string name="error_bassboost_init">Tekkis viga Bass Boost\'i initsialiseerimisel. Tõenäoliselt ei toeta sinu seade seda. Proovi bassi tuge muuta või proovi uuesti.</string>
     <string name="error_pre_cache">Tekkis viga eelvahemälu loomisel. Proovi uuesti.</string>
-    <string name="error_url">Ei saa avada URL'i %1$s</string>
+    <string name="error_url">Ei saa avada URL\'i %1$s</string>
 
     <string name="media_permission_declined">Luba keeldus, palun anna meediaõigused seadme seadetes.</string>
     <string name="open_settings">Ava seaded</string>
@@ -133,7 +133,7 @@
     <string name="no_search_results">Tulemusi ei leitud. Proovi teist päringut või kategooriat</string>
 
     <string name="no_browser_installed">Interneti sirvimiseks ei leitud rakendust</string>
-<string name="no_equalizer_installed">Heli ekvalaiserit ei leitud</string>
+    <string name="no_equalizer_installed">Heli ekvalaiserit ei leitud</string>
     <string name="no_file_chooser_installed">Dokumentide loomise rakendust ei leitud</string>
     <string name="no_battery_optimization_settings_found">Aku optimeerimise seadeid ei leitud, palun lisa ViTune käsitsi valgesse nimekirja</string>
 
@@ -154,7 +154,7 @@
     <string name="edit_lyrics">Muuda laulusõnu</string>
     <string name="search_lyrics_online">Otsi laulusõnu internetis</string>
     <string name="refetch_lyrics">Uuenda laulusõnu</string>
-    <string name="pick_from_lrclib">Vali laulusõnad lrclib.net'ist</string>
+    <string name="pick_from_lrclib">Vali laulusõnad lrclib.net\'ist</string>
     <string name="set_lyrics_start_offset">Määra laulusõnade alguse nihke</string>
     <string name="set_lyrics_start_offset_description">Nihutab sünkroniseeritud laulusõnu praeguse esitusaaja järgi</string>
 
@@ -183,9 +183,9 @@
     <string name="github">GitHub</string>
     <string name="view_source">Vaata allikat</string>
     <string name="report_bug">Teata veast</string>
-    <string name="report_bug_description">Kui sul on probleem, võid sa teate esitada GitHub'is (kliki, et suunata)</string>
+    <string name="report_bug_description">Kui sul on probleem, võid sa teate esitada GitHub\'is (kliki, et suunata)</string>
     <string name="request_feature">Küsi funktsiooni või soovita ideed</string>
-    <string name="redirect_github">Sind suunatakse GitHub'i</string>
+    <string name="redirect_github">Sind suunatakse GitHub\'i</string>
 
     <string name="color_source">Aktsentvärvi allikas</string>
     <string name="color_source_default">Vaikimisi</string>
@@ -226,7 +226,7 @@
     <string name="previous_button_while_collapsed">Eelmise loo nupp kokkuvolditud ajal</string>
     <string name="previous_button_while_collapsed_description">Kuvab eelmise loo nupu, kui mängija on kokkuvolditud</string>
     <string name="swipe_horizontally_to_close">Pühkige horisontaalselt, et sulgeda</string>
-    <string name="swipe_horizontally_to_close_description">Sulgeb mängija, kui pühid vasakule/paremale kokkuvolditud mängijast. Kasulik, kui Android'i üheaegne töörežiim on sisse lülitatud.</string>
+    <string name="swipe_horizontally_to_close_description">Sulgeb mängija, kui pühid vasakule/paremale kokkuvolditud mängijast. Kasulik, kui Android\'i üheaegne töörežiim on sisse lülitatud.</string>
     <string name="show_like_button">Kuva "Meeldib" nupp</string>
     <string name="show_like_button_description">Kuvab "Meeldib" nupu otse mängijas</string>
     <string name="swipe_to_remove_item">Pühkige, et eemaldada element</string>
@@ -277,7 +277,7 @@
     <string name="empty_history">Ajalugu on tühi</string>
     <string name="built_in_playlists">Sisseehitatud esitusloendid</string>
     <string name="auto_sync_playlists">Automaatne esitusloendite sünkroniseerimine</string>
-    <string name="auto_sync_playlists_description">Automaatne salvestatud esitusloendite sünkroniseerimine YouTube'ist, kui neid avatakse</string>
+    <string name="auto_sync_playlists_description">Automaatne salvestatud esitusloendite sünkroniseerimine YouTube\'ist, kui neid avatakse</string>
     <string name="top_list_length">Top-nimekirja pikkus</string>
     <string name="top_list_length_description">Piirab "Minu top x" esitusloendi pikkust</string>
 
@@ -342,18 +342,18 @@
     <string name="piped">Piped</string>
     <string name="instance">Instants</string>
     <string name="click_to_select">Vajuta, et valida</string>
-	<string name="username">Kasutajanimi</string>
+    <string name="username">Kasutajanimi</string>
     <string name="password">Parool</string>
     <string name="login">Logi sisse</string>
-    <string name="sync_description">Sa saad esitusloendeid mujal majutada ja sünkroonida neid ViTune'iga. Praegu toetab ainult Piped.</string>
+    <string name="sync_description">Sa saad esitusloendeid mujal majutada ja sünkroonida neid ViTune\'iga. Praegu toetab ainult Piped.</string>
     <string name="add_account">Lisa konto</string>
-    <string name="add_account_description">Siduge Piped'i konto oma instantsiga, kasutajanime ja parooliga.</string>
+    <string name="add_account_description">Siduge Piped\'i konto oma instantsiga, kasutajanime ja parooliga.</string>
     <string name="learn_more">Uuri rohkem</string>
     <string name="learn_more_description">Ei tea, mis on Piped või sul pole kontot? Kliki siia, et suunata nende dokumentatsioonile</string>
-    <string name="piped_sessions">Piped'i seansid</string>
+    <string name="piped_sessions">Piped\'i seansid</string>
     <string name="custom_instance">Kohanda instants</string>
     <string name="base_api_url">Instantsi API URL</string>
-    <string name="piped_session_created_successfully">Piped'i seanss loodi edukalt</string>
+    <string name="piped_session_created_successfully">Piped\'i seanss loodi edukalt</string>
 
     <string name="seek_bar_style">Otsinguriba stiil</string>
     <string name="static_seek_bar_name">Statiline</string>
@@ -383,7 +383,7 @@
     <string name="version">Versioon</string>
     <string name="check_new_version">Kontrolli uuendusi</string>
     <string name="current_version">Sa kasutad versiooni v%1$s</string>
-    <string name="error_github">Tekkis tundmatu viga, kui andmeid GitHub'ist saadakse</string>
+    <string name="error_github">Tekkis tundmatu viga, kui andmeid GitHub\'ist saadakse</string>
     <string name="new_version_available">Uus versioon on saadaval</string>
     <string name="more_information">Rohkem teavet</string>
     <string name="up_to_date">Sa oled hetkel värskendatud: uuendusi pole saadaval</string>
