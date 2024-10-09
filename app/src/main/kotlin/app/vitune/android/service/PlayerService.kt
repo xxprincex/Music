@@ -121,12 +121,16 @@ import app.vitune.providers.innertube.models.bodies.SearchBody
 import app.vitune.providers.innertube.requests.player
 import app.vitune.providers.innertube.requests.searchPage
 import app.vitune.providers.innertube.utils.from
+import app.vitune.providers.sponsorblock.SponsorBlock
+import app.vitune.providers.sponsorblock.requests.segments
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -140,14 +144,17 @@ import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import kotlinx.datetime.Clock
 import java.io.IOException
 import kotlin.math.roundToInt
@@ -208,6 +215,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
     private var preferenceUpdaterJob: Job? = null
     private var volumeNormalizationJob: Job? = null
+    private var sponsorBlockJob: Job? = null
 
     override var isInvincibilityEnabled by mutableStateOf(false)
 
@@ -348,6 +356,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             subscribe(PlayerPreferences.trackLoopEnabledProperty) { updateRepeatMode() }
             subscribe(PlayerPreferences.volumeNormalizationBaseGainProperty) { maybeNormalizeVolume() }
             subscribe(PlayerPreferences.volumeNormalizationProperty) { maybeNormalizeVolume() }
+            subscribe(PlayerPreferences.sponsorBlockEnabledProperty) { maybeSponsorBlock() }
 
             launch {
                 val audioManager = getSystemService<AudioManager>()
@@ -665,6 +674,61 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun maybeSponsorBlock() {
+        if (!PlayerPreferences.sponsorBlockEnabled) {
+            sponsorBlockJob?.cancel()
+            sponsorBlockJob?.invokeOnCompletion { sponsorBlockJob = null }
+            return
+        }
+        sponsorBlockJob?.cancel()
+        sponsorBlockJob = coroutineScope.launch {
+            mediaItemState.onStart { emit(mediaItemState.value) }.collectLatest { mediaItem ->
+                val videoId = mediaItem?.mediaId
+                    ?.removePrefix("https://youtube.com/watch?v=")
+                    ?.takeIf { it.isNotBlank() } ?: return@collectLatest
+
+                SponsorBlock
+                    .segments(videoId)
+                    ?.map { segments -> segments.sortedBy { it.start.inWholeMilliseconds } }
+                    ?.mapCatching { segments ->
+                        suspend fun posMillis() = withContext(Dispatchers.Main) { player.currentPosition }
+                        suspend fun speed() = withContext(Dispatchers.Main) { player.playbackParameters.speed }
+                        suspend fun seek(millis: Long) = withContext(Dispatchers.Main) { player.seekTo(millis) }
+
+                        val ctx = currentCoroutineContext()
+                        val lastSegmentEnd =
+                            segments.lastOrNull()?.end?.inWholeMilliseconds ?: return@mapCatching
+
+                        do {
+                            if (lastSegmentEnd < posMillis()) {
+                                yield()
+                                continue
+                            }
+
+                            val nextSegment =
+                                segments.firstOrNull { posMillis() < it.end.inWholeMilliseconds }
+                                    ?: continue
+
+                            // Wait for next segment
+                            if (nextSegment.start.inWholeMilliseconds > posMillis()) delay(
+                                ((nextSegment.start.inWholeMilliseconds - posMillis()) / speed().toDouble()).milliseconds
+                            )
+
+                            if (posMillis() !in nextSegment.start.inWholeMilliseconds..nextSegment.end.inWholeMilliseconds) {
+                                // Player is not in the segment for some reason, maybe the user seeked in the meantime
+                                yield()
+                                continue
+                            }
+
+                            seek(nextSegment.end.inWholeMilliseconds)
+                        } while (ctx.isActive)
+                    }?.onFailure {
+                        it.printStackTrace()
+                    }
             }
         }
     }
