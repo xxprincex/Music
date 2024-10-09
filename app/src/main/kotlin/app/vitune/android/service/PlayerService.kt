@@ -112,6 +112,7 @@ import app.vitune.core.ui.utils.isAtLeastAndroid12
 import app.vitune.core.ui.utils.isAtLeastAndroid13
 import app.vitune.core.ui.utils.isAtLeastAndroid6
 import app.vitune.core.ui.utils.isAtLeastAndroid8
+import app.vitune.core.ui.utils.isAtLeastAndroid9
 import app.vitune.core.ui.utils.songBundle
 import app.vitune.core.ui.utils.streamVolumeFlow
 import app.vitune.providers.innertube.Innertube
@@ -364,8 +365,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
                 val min = when {
                     audioManager == null -> 0
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ->
-                        audioManager.getStreamMinVolume(stream)
+                    isAtLeastAndroid9 -> audioManager.getStreamMinVolume(stream)
 
                     else -> 0
                 }
