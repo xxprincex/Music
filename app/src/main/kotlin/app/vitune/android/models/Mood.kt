@@ -2,14 +2,15 @@ package app.vitune.android.models
 
 import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
-import app.vitune.core.ui.ParcelableColor
+import app.vitune.core.ui.ColorParceler
 import app.vitune.providers.innertube.Innertube
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.WriteWith
 
 @Parcelize
 data class Mood(
     val name: String,
-    val color: ParcelableColor,
+    val color: @WriteWith<ColorParceler> Color,
     val browseId: String?,
     val params: String?
 ) : Parcelable
