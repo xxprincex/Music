@@ -313,13 +313,13 @@
     <string name="skip_silence">跳过静音</string>
     <string name="skip_silence_description">在播放时跳过静音部分</string>
     <string name="minimum_silence_length">最短静音长度</string>
-    <string name="minimum_silence_length_description">音频必须静音的最短时间才能被跳过</string>
+    <string name="minimum_silence_length_description">要跳过的音频必须达到的最短静音时间</string>
     <string name="minimum_silence_length_warning">需要重新启动播放器才能使更改生效！</string>
     <string name="restart_service">重新启动服务</string>
     <string name="loudness_normalization">响度标准化</string>
     <string name="loudness_normalization_description">将音量调整到固定水平</string>
     <string name="loudness_base_gain">响度基础增益</string>
-    <string name="loudness_base_gain_description">响度标准化的“目标”增益</string>
+    <string name="loudness_base_gain_description">响度标准化的目标增益</string>
     <string name="loudness_normalization_extreme">检测到极端响度值 (%s)，将关闭此歌曲的响度标准化</string>
     <string name="bass_boost">低音增强</string>
     <string name="bass_boost_description">增强低频以提升听觉体验</string>
