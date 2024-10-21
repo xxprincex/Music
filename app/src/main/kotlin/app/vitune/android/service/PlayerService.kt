@@ -19,7 +19,6 @@ import android.media.audiofx.LoudnessEnhancer
 import android.media.audiofx.PresetReverb
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
-import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
 import android.text.format.DateUtils
@@ -492,7 +491,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     override fun onPlayerError(error: PlaybackException) {
         super.onPlayerError(error)
 
-        if (error.findCause<InvalidResponseCodeException>()?.responseCode == 416) {
+        if (
+            error.findCause<InvalidResponseCodeException>()?.responseCode == 416 ||
+            error.findCause<VideoIdMismatchException>() != null
+        ) {
             player.pause()
             player.prepare()
             player.play()
@@ -695,9 +697,14 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     .segments(videoId)
                     ?.map { segments -> segments.sortedBy { it.start.inWholeMilliseconds } }
                     ?.mapCatching { segments ->
-                        suspend fun posMillis() = withContext(Dispatchers.Main) { player.currentPosition }
-                        suspend fun speed() = withContext(Dispatchers.Main) { player.playbackParameters.speed }
-                        suspend fun seek(millis: Long) = withContext(Dispatchers.Main) { player.seekTo(millis) }
+                        suspend fun posMillis() =
+                            withContext(Dispatchers.Main) { player.currentPosition }
+
+                        suspend fun speed() =
+                            withContext(Dispatchers.Main) { player.playbackParameters.speed }
+
+                        suspend fun seek(millis: Long) =
+                            withContext(Dispatchers.Main) { player.seekTo(millis) }
 
                         val ctx = currentCoroutineContext()
                         val lastSegmentEnd =
