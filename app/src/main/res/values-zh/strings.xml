@@ -414,17 +414,14 @@
     <string name="reverb_plate">板式混响</string>
 
     <plurals name="format_reset_blacklist_description">
-    	<item quantity="one">从黑名单中移除 %1$s 首歌曲</item>
         <item quantity="other">从黑名单中移除所有 %1$s 首歌曲</item>
     </plurals>
 
     <plurals name="format_reset_quick_picks_amount">
-    	<item quantity="one">删除 %1$s 次播放事件</item>
         <item quantity="other">删除 %1$s 次播放事件</item>
     </plurals>
 
     <plurals name="song_count_plural">
-    	<item quantity="one">%1$d 首歌曲</item>
         <item quantity="other">%1$d 首歌曲</item>
     </plurals>
 </resources>
