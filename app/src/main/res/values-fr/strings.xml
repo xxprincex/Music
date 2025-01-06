@@ -419,15 +419,18 @@
     <plurals name="format_reset_blacklist_description">
         <item quantity="one">Supprimer le titre %1$s de la liste noire</item>
         <item quantity="many">Supprimer tous les titres %1$s de la liste noire</item>
+        <item quantity="other">Supprimer tous les titres %1$s de la liste noire</item>
     </plurals>
 
     <plurals name="format_reset_quick_picks_amount">
         <item quantity="one">Supprimer l\'événement de lecture %1$s</item>
         <item quantity="many">Supprimer %1$s événements de lecture</item>
+        <item quantity="other">Supprimer %1$s événements de lecture</item>
     </plurals>
 
     <plurals name="song_count_plural">
         <item quantity="one">%1$d titre</item>
         <item quantity="many">%1$d titres</item>
+        <item quantity="other">%1$d titres</item>
     </plurals>
 </resources>
