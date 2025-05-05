@@ -94,15 +94,10 @@ object Piped {
     suspend fun login(apiBaseUrl: Url, username: String, password: String) =
         runCatchingCancellable {
             apiBaseUrl authenticatedWith (
-                    client.post(apiBaseUrl / "login") {
-                        setBody(
-                            mapOf(
-                                "username" to username,
-                                "password" to password
-                            )
-                        )
-                    }.body<JsonElement>() / "token"
-                    ).jsonPrimitive.content
+                client.post(apiBaseUrl / "login") {
+                    setBody(mapOf("username" to username, "password" to password))
+                }.body<JsonElement>() / "token"
+                ).jsonPrimitive.content
         }
 
     val playlist = Playlists()
